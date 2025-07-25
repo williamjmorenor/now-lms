@@ -35,7 +35,7 @@ from sqlalchemy.exc import OperationalError
 # Recursos locales
 # ---------------------------------------------------------------------------------------
 from now_lms.auth import perfil_requerido, proteger_secreto
-from now_lms.cache import cache
+from now_lms.cache import cache, invalidate_all_cache
 from now_lms.config import DIRECTORIO_PLANTILLAS, images
 from now_lms.db import AdSense, Configuracion, MailConfig, PaypalConfig, Style, database
 from now_lms.db.tools import elimina_logo_perzonalizado
@@ -67,7 +67,12 @@ def personalizacion():
     form.style.choices = TEMPLATE_CHOICES
 
     if form.validate_on_submit() or request.method == "POST":  # pragma: no cover
-        config.theme = form.style.data
+        # Check if theme is changing
+        old_theme = config.theme
+        new_theme = form.style.data
+        theme_changed = old_theme != new_theme
+        
+        config.theme = new_theme
 
         if "logo" in request.files:
             try:
@@ -81,6 +86,12 @@ def personalizacion():
 
         try:
             database.session.commit()
+            
+            # Invalidate all cache if theme changed
+            if theme_changed:
+                invalidate_all_cache()
+                log.info(f"Theme changed from {old_theme} to {new_theme}, cache invalidated")
+            
             flash("Tema del sitio web actualizado exitosamente.", "success")
             return redirect(url_for("setting.personalizacion"))
         except OperationalError:  # pragma: no cover
