@@ -1,26 +1,51 @@
 # Theming System
 
-NOW LMS includes a powerful theming system that allows you to customize the appearance of your learning management system. This guide explains how to create and customize themes.
+NOW LMS includes a flexible theming system that allows you to customize the appearance and functionality of your learning management system. This guide explains how to create, customize, and extend themes.
 
 ## Overview
 
-The theming system is built using Jinja2 templates and provides a modular approach to styling different aspects of the application. Each theme consists of several components that control different parts of the user interface.
+The theming system is built using Jinja2 templates and provides a modular approach to styling different aspects of the application. Each theme consists of several components that control different parts of the user interface and can override specific page templates.
 
 ## Theme Structure
 
-Each theme is located in the `now_lms/templates/themes/` directory and follows this structure:
+Each theme is located in the `now_lms/templates/themes/` directory and follows this enhanced structure:
 
 ```
 now_lms/templates/themes/your_theme_name/
-├── base.j2           # Base template structure
-├── header.j2         # HTML head tags and metadata
-├── js.j2             # JavaScript libraries and scripts
-├── local_style.j2    # Theme-specific CSS styles
-├── navbar.j2         # Navigation bar component
-├── notify.j2         # Notification/alert components
-├── pagination.j2     # Pagination controls
-└── README.md         # Theme documentation
+├── base.j2              # Base template structure
+├── header.j2            # HTML head tags and metadata
+├── js.j2                # JavaScript libraries and scripts
+├── local_style.j2       # Theme-specific CSS styles (uses url_for)
+├── navbar.j2            # Navigation bar component
+├── notify.j2            # Notification/alert components
+├── pagination.j2        # Pagination controls
+├── overrides/           # Template overrides directory
+│   ├── home.j2          # Custom home page
+│   ├── course_list.j2   # Custom course listing page
+│   ├── course_view.j2   # Custom course view page
+│   ├── program_list.j2  # Custom program listing page
+│   └── program_view.j2  # Custom program view page
+├── custom_pages/        # Static custom pages directory
+│   ├── contacto.j2      # Example: contact page
+│   └── info.j2          # Example: info page
+└── README.md            # Theme documentation
 ```
+
+### Static Assets
+
+Each theme can include static assets in the `static/themes/` directory:
+
+```
+now_lms/static/themes/your_theme_name/
+├── theme.css            # Main theme stylesheet
+├── theme.min.css        # Minified version for performance
+├── images/              # Theme-specific images
+├── fonts/               # Custom fonts
+├── js/                  # Theme-specific JavaScript
+└── videos/              # Theme-specific videos
+```
+
+For more details on managing static assets, see the [Static Assets README](../static/themes/README.md).
 
 ## Available Themes
 
@@ -102,27 +127,147 @@ Define HTML head tags, meta information, and external resources:
 
 #### Local Styles (`local_style.j2`)
 
-Define your theme's CSS variables and custom styles:
+**Note:** For optimal performance, create external CSS files instead of inline styles.
+
+Create your theme CSS file in `static/themes/your_theme_name/theme.css`:
+
+```css
+/* Custom Theme Variables */
+:root {
+    --primary-color: #yourcolor;
+    --secondary-color: #yourcolor;
+    --accent-color: #yourcolor;
+    --background-color: #yourcolor;
+    --text-color: #yourcolor;
+    --success-color: #yourcolor;
+    --warning-color: #yourcolor;
+    --danger-color: #yourcolor;
+}
+
+/* Your custom CSS styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.navbar-custom {
+    background: var(--primary-color) !important;
+}
+
+/* Add more custom styles... */
+```
+
+Then create a minified version and update your `local_style.j2`:
 
 ```jinja2
 {% macro local_style() -%}
-<style>
-    /* Custom Theme Variables */
-    :root {
-        --primary-color: #yourcolor;
-        --secondary-color: #yourcolor;
-        --accent-color: #yourcolor;
-        --background-color: #yourcolor;
-        --text-color: #yourcolor;
-        --success-color: #yourcolor;
-        --warning-color: #yourcolor;
-        --danger-color: #yourcolor;
-    }
+<link rel="stylesheet" href="{{ url_for('static', filename='themes/your_theme_name/theme.min.css') }}">
+{% endmacro %}
+```
 
-    /* Your custom CSS styles */
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--background-color);
+## Template Overrides
+
+The theming system now supports complete page template overrides. You can customize specific pages by creating templates in the `overrides/` directory.
+
+### Supported Override Templates
+
+- **`home.j2`**: Custom home page template
+- **`course_list.j2`**: Custom course listing page
+- **`course_view.j2`**: Custom individual course page
+- **`program_list.j2`**: Custom program listing page
+- **`program_view.j2`**: Custom individual program page
+
+### Using the `get_home_template()` Function
+
+The system automatically uses the `get_home_template()` function to determine which template to use:
+
+```python
+def get_home_template() -> str:
+    """Returns the path to the home page template."""
+    THEME = get_current_theme()
+    HOME = Path(path.join(get_theme_path(), "overrides", "home.j2"))
+    
+    if HOME.exists():
+        return THEMES_DIRECTORY + str(THEME) + "/overrides/home.j2"
+    else:
+        return "inicio/home.html"  # Default template
+```
+
+### Template Override Functions
+
+The system includes several template override functions:
+
+- `get_home_template()` - Home page override
+- `get_course_list_template()` - Course listing override  
+- `get_program_list_template()` - Program listing override
+- `get_course_view_template()` - Course view override
+- `get_program_view_template()` - Program view override
+
+## Custom Pages
+
+Create static custom pages for your theme in the `custom_pages/` directory. These pages can be accessed via `/custom/<page_name>`.
+
+### Creating Custom Pages
+
+1. Create a template in `templates/themes/your_theme/custom_pages/`:
+
+```jinja2
+<!-- templates/themes/mytheme/custom_pages/contacto.j2 -->
+{% set current_theme = current_theme() %}
+<!doctype html>
+<html lang="es">
+<head>
+    {{ current_theme.headertags() }}
+    {{ current_theme.local_style() }}
+    <title>Contacto - {{ site_config.nombre }}</title>
+</head>
+<body>
+    {{ current_theme.navbar() }}
+    
+    <div class="container py-5">
+        <h1>Contacto</h1>
+        <p>Esta es una página personalizada del tema.</p>
+        <!-- Add your custom content here -->
+    </div>
+    
+    {{ current_theme.jslibs() }}
+</body>
+</html>
+```
+
+2. Access the page at: `/custom/contacto`
+
+### Custom Page Security
+
+- Page names are validated to contain only alphanumeric characters, underscores, and hyphens
+- Only authenticated themes can serve custom pages
+- Pages are cached for 180 seconds for performance
+
+## Static Assets Management
+
+### Using `url_for` for Theme Assets
+
+Reference theme-specific static assets using Flask's `url_for`:
+
+```jinja2
+<!-- Images -->
+<img src="{{ url_for('static', filename='themes/mytheme/images/logo.png') }}" alt="Logo">
+
+<!-- CSS (additional stylesheets) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='themes/mytheme/css/custom.css') }}">
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='themes/mytheme/js/theme.js') }}"></script>
+
+<!-- Fonts -->
+<link href="{{ url_for('static', filename='themes/mytheme/fonts/custom-font.woff2') }}" rel="preload" as="font" type="font/woff2" crossorigin>
+
+<!-- Videos -->
+<video src="{{ url_for('static', filename='themes/mytheme/videos/intro.mp4') }}" controls></video>
+```
+
+For complete examples and best practices, see the [Static Assets README](../static/themes/README.md).
         color: var(--text-color);
     }
 

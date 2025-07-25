@@ -401,3 +401,148 @@ def test_password_recovery_functionality(lms_application, request):
                 valid_token = generate_password_reset_token("testuser2@nowlms.com")
                 email = validate_password_reset_token(valid_token)
                 assert email == "testuser2@nowlms.com"  # Fresh token should work
+
+
+def test_theme_functionality_comprehensive(lms_application, request):
+    """Test comprehensive theme functionality including overrides and custom pages."""
+    if request.config.getoption("--use-cases") == "True":
+        from now_lms import database, initial_setup
+        from now_lms.db import Configuracion
+        from now_lms.themes import get_home_template, get_course_list_template, get_program_list_template, get_course_view_template, get_program_view_template
+        
+        with lms_application.app_context():
+            database.drop_all()
+            initial_setup(with_tests=False, with_examples=False)
+            
+            # Test default template returns
+            assert get_home_template() == "inicio/home.html"
+            assert get_course_list_template() == "inicio/cursos.html"
+            assert get_program_list_template() == "inicio/programas.html"
+            assert get_course_view_template() == "learning/curso/curso.html"
+            assert get_program_view_template() == "learning/programa.html"
+            
+            # Test theme configuration change
+            config = database.session.execute(database.select(Configuracion)).first()[0]
+            original_theme = config.tema
+            
+            # Change to Harvard theme
+            config.tema = "harvard"
+            database.session.commit()
+            
+            # Test template override detection
+            expected_harvard_home = "themes/harvard/overrides/home.j2"
+            expected_harvard_course_list = "themes/harvard/overrides/course_list.j2"
+            expected_harvard_program_list = "themes/harvard/overrides/program_list.j2"
+            expected_harvard_course_view = "themes/harvard/overrides/course_view.j2"
+            expected_harvard_program_view = "themes/harvard/overrides/program_view.j2"
+            
+            assert get_home_template() == expected_harvard_home
+            assert get_course_list_template() == expected_harvard_course_list
+            assert get_program_list_template() == expected_harvard_program_list
+            assert get_course_view_template() == expected_harvard_course_view
+            assert get_program_view_template() == expected_harvard_program_view
+            
+            # Test Cambridge theme
+            config.tema = "cambridge"
+            database.session.commit()
+            
+            assert get_home_template() == "themes/cambridge/overrides/home.j2"
+            assert get_course_list_template() == "themes/cambridge/overrides/course_list.j2"
+            
+            # Test Oxford theme
+            config.tema = "oxford"
+            database.session.commit()
+            
+            assert get_home_template() == "themes/oxford/overrides/home.j2"
+            assert get_course_view_template() == "themes/oxford/overrides/course_view.j2"
+            
+            # Test all other themes have override templates
+            themes_to_test = ["classic", "corporative", "finance", "ocean_blue", "rose_pink"]
+            
+            for theme in themes_to_test:
+                config.tema = theme
+                database.session.commit()
+                
+                # All themes should have override templates
+                assert get_home_template() == f"themes/{theme}/overrides/home.j2"
+                assert get_course_list_template() == f"themes/{theme}/overrides/course_list.j2"
+                assert get_program_list_template() == f"themes/{theme}/overrides/program_list.j2"
+                assert get_course_view_template() == f"themes/{theme}/overrides/course_view.j2"
+                assert get_program_view_template() == f"themes/{theme}/overrides/program_view.j2"
+            
+            # Restore original theme
+            config.tema = original_theme
+            database.session.commit()
+            
+        with lms_application.test_client() as client:
+            # Test custom pages functionality
+            
+            # Test valid custom page access with Harvard theme
+            with lms_application.app_context():
+                config = database.session.execute(database.select(Configuracion)).first()[0]
+                config.tema = "harvard"
+                database.session.commit()
+            
+            # Test invalid page name security
+            invalid_page_response = client.get("/custom/../../etc/passwd")
+            assert invalid_page_response.status_code == 302  # Should redirect to home
+            
+            # Test invalid characters in page name
+            invalid_chars_response = client.get("/custom/test$page")
+            assert invalid_chars_response.status_code == 302  # Should redirect to home
+            
+            # Test non-existent custom page
+            nonexistent_response = client.get("/custom/nonexistent")
+            assert nonexistent_response.status_code == 302  # Should redirect to home
+            
+            # Test theme access to home page with override
+            home_response = client.get("/")
+            assert home_response.status_code == 200
+            assert "Harvard Academic LMS" in home_response.data.decode('utf-8')
+            
+            # Test course listing with theme override
+            course_list_response = client.get("/course/explore")
+            assert course_list_response.status_code == 200
+            
+            # Test program listing with theme override
+            program_list_response = client.get("/program/explore")
+            assert program_list_response.status_code == 200
+            
+            # Test CSS file loading for Harvard theme
+            css_response = client.get("/static/themes/harvard/theme.min.css")
+            assert css_response.status_code == 200
+            assert "harvard-primary" in css_response.data.decode('utf-8')
+            
+            # Test other academic theme CSS files
+            cambridge_css = client.get("/static/themes/cambridge/theme.min.css")
+            assert cambridge_css.status_code == 200
+            assert "cambridge-primary" in cambridge_css.data.decode('utf-8')
+            
+            oxford_css = client.get("/static/themes/oxford/theme.min.css")
+            assert oxford_css.status_code == 200
+            assert "oxford" in oxford_css.data.decode('utf-8')
+            
+            # Test cache invalidation works with theme changes
+            # This should be handled by the cache invalidation system
+            
+            # Test theme switching functionality
+            with lms_application.app_context():
+                # Switch between themes and verify template resolution
+                themes = ["harvard", "cambridge", "oxford", "classic", "corporative"]
+                config = database.session.execute(database.select(Configuracion)).first()[0]
+                
+                for theme in themes:
+                    config.tema = theme
+                    database.session.commit()
+                    
+                    # Verify template resolution works
+                    home_template = get_home_template()
+                    assert theme in home_template
+                    assert "overrides/home.j2" in home_template
+                
+                # Restore original theme
+                config.tema = "now_lms"
+                database.session.commit()
+                
+                # Verify default templates are used when no override exists
+                assert get_home_template() == "inicio/home.html"
