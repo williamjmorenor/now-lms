@@ -213,7 +213,9 @@ class CursoRecursoSlides(CursoRecursoForm):
             ("simple", "Simple"),
             ("sky", "Sky"),
             ("solarized", "Solarized"),
-            ("white", "White"),
+            ("ocean_blue", "Ocean Blue"),
+            ("rose_pink", "Rose Pink"),
+            ("corporativo", "Corporativo"),
         ],
     )
 
@@ -398,6 +400,27 @@ class CheckMailForm(FlaskForm):
     """Formulario para crear un certificado en el sistema."""
 
     email = StringField(validators=[])
+
+
+class ChangePasswordForm(FlaskForm):
+    """Formulario para cambiar la contraseña del usuario."""
+
+    current_password = PasswordField("Contraseña Actual", validators=[DataRequired()])
+    new_password = PasswordField("Nueva Contraseña", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirmar Nueva Contraseña", validators=[DataRequired()])
+
+
+class ForgotPasswordForm(FlaskForm):
+    """Formulario para solicitar recuperación de contraseña."""
+
+    email = StringField("Correo Electrónico", validators=[DataRequired()])
+
+
+class ResetPasswordForm(FlaskForm):
+    """Formulario para restablecer contraseña con token."""
+
+    new_password = PasswordField("Nueva Contraseña", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirmar Nueva Contraseña", validators=[DataRequired()])
 
 
 class PagoForm(FlaskForm):

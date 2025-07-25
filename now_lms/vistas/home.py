@@ -13,7 +13,16 @@ from flask_login import current_user, login_required
 # ---------------------------------------------------------------------------------------
 from now_lms.cache import cache, no_guardar_en_cache_global
 from now_lms.config import DESARROLLO, DIRECTORIO_PLANTILLAS
-from now_lms.db import MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA, Certificacion, Curso, CursoRecurso, Usuario, database
+from now_lms.db import (
+    MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA,
+    Certificacion,
+    Curso,
+    CursoRecurso,
+    EstudianteCurso,
+    Usuario,
+    database,
+)
+from now_lms.logs import log
 from now_lms.themes import get_home_template
 
 home = Blueprint("home", __name__, template_folder=DIRECTORIO_PLANTILLAS)
@@ -50,11 +59,11 @@ def panel():
     if not current_user.is_authenticated:
         return redirect("/")
     elif current_user.tipo == "admin":
-        cursos_actuales = Curso.query.count()
-        usuarios_registrados = Usuario.query.count()
-        recursos_creados = CursoRecurso.query.count()
-        certificados_emitidos = Certificacion.query.count()
-        cursos_por_fecha = Curso.query.order_by(Curso.creado).limit(5).all()
+        cursos_actuales = database.session.query(Curso).count()
+        usuarios_registrados = database.session.query(Usuario).count()
+        recursos_creados = database.session.query(CursoRecurso).count()
+        certificados_emitidos = database.session.query(Certificacion).count()
+        cursos_por_fecha = database.session.query(Curso).order_by(Curso.creado).limit(5).all()
         return render_template(
             "inicio/panel_admin.html",
             cursos_actuales=cursos_actuales,
@@ -63,7 +72,23 @@ def panel():
             cursos_por_fecha=cursos_por_fecha,
             certificados_emitidos=certificados_emitidos,
         )
-    elif current_user.tipo == "user":
-        return render_template("inicio/panel_user.html")
+    elif current_user.tipo == "student":
+        cuenta_cursos = database.session.query(EstudianteCurso).filter(EstudianteCurso.usuario == current_user.usuario).count()
+        cuenta_certificados = (
+            database.session.query(Certificacion).filter(Certificacion.usuario == current_user.usuario).count()
+        )
+        mis_cursos = (
+            database.session.query(Curso)
+            .join(EstudianteCurso, EstudianteCurso.curso == Curso.codigo)
+            .filter(EstudianteCurso.usuario == current_user.usuario)
+            .all()
+        )
+        log.warning(mis_cursos)
+        return render_template(
+            "inicio/panel_user.html",
+            cuenta_cursos=cuenta_cursos,
+            cuenta_certificados=cuenta_certificados,
+            mis_cursos=mis_cursos,
+        )
     else:
         return redirect("/")
