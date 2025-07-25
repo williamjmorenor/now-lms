@@ -90,7 +90,7 @@ def personalizacion():
             # Invalidate all cache if theme changed
             if theme_changed:
                 invalidate_all_cache()
-                log.info(f"Theme changed from {old_theme} to {new_theme}, cache invalidated")
+                log.trace(f"Tema cambiado de {old_theme} a {new_theme}, cache invalidada")
             
             flash("Tema del sitio web actualizado exitosamente.", "success")
             return redirect(url_for("setting.personalizacion"))

@@ -80,7 +80,7 @@ def invalidate_all_cache():
     try:
         if CTYPE != "NullCache":
             cache.clear()
-            log.info("Cache invalidated due to theme change")
+            log.trace("Cache invalidada debido a cambio de tema")
         return True
     except Exception as e:
         log.error(f"Error invalidating cache: {e}")

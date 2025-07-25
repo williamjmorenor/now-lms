@@ -1,6 +1,6 @@
 # Theming System
 
-NOW LMS includes a flexible theming system that allows you to customize the appearance and functionality of your learning management system. This guide explains how to create, customize, and extend themes.
+NOW LMS includes a flexible theming system that allows you to customize the appearance of your learning management system. This guide explains how to create, customize, and extend themes.
 
 ## Overview
 
@@ -8,7 +8,7 @@ The theming system is built using Jinja2 templates and provides a modular approa
 
 ## Theme Structure
 
-Each theme is located in the `now_lms/templates/themes/` directory and follows this enhanced structure:
+Each theme is located in the `now_lms/templates/themes/` directory and follows this structure:
 
 ```
 now_lms/templates/themes/your_theme_name/
@@ -45,7 +45,7 @@ now_lms/static/themes/your_theme_name/
 └── videos/              # Theme-specific videos
 ```
 
-For more details on managing static assets, see the [Static Assets README](../static/themes/README.md).
+For more details on managing static assets, see the [Static Assets README](../now_lms/static/themes/README.md).
 
 ## Available Themes
 
@@ -375,10 +375,10 @@ def get_home_template() -> str:
     """Returns the path to the home page template."""
     THEME = get_current_theme()
     
-    HOME = Path(path.join(get_theme_path(), "home.j2"))
+    HOME = Path(path.join(get_theme_path(), "overrides", "home.j2"))
     
     if HOME.exists():
-        return THEMES_DIRECTORY + str(THEME) + "/home.j2"
+        return THEMES_DIRECTORY + str(THEME) + "/overrides/home.j2"
     else:
         return "inicio/home.html"
 ```
