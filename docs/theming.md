@@ -1,0 +1,321 @@
+# Theming System
+
+NOW LMS includes a powerful theming system that allows you to customize the appearance of your learning management system. This guide explains how to create and customize themes.
+
+## Overview
+
+The theming system is built using Jinja2 templates and provides a modular approach to styling different aspects of the application. Each theme consists of several components that control different parts of the user interface.
+
+## Theme Structure
+
+Each theme is located in the `now_lms/templates/themes/` directory and follows this structure:
+
+```
+now_lms/templates/themes/your_theme_name/
+├── base.j2           # Base template structure
+├── header.j2         # HTML head tags and metadata
+├── js.j2             # JavaScript libraries and scripts
+├── local_style.j2    # Theme-specific CSS styles
+├── navbar.j2         # Navigation bar component
+├── notify.j2         # Notification/alert components
+├── pagination.j2     # Pagination controls
+└── README.md         # Theme documentation
+```
+
+## Available Themes
+
+NOW LMS comes with several built-in themes:
+
+- **now_lms**: Default theme with modern design
+- **classic**: Minimalist white/gray design with clean typography
+- **corporative**: Professional blue theme for corporate environments
+- **finance**: Federal green theme inspired by financial institutions
+- **ocean_blue**: Ocean-inspired blue color scheme
+- **rose_pink**: Warm pink and rose color palette
+
+## Creating a Custom Theme
+
+### Step 1: Create Theme Directory
+
+Create a new directory in `now_lms/templates/themes/` with your theme name:
+
+```bash
+mkdir now_lms/templates/themes/my_custom_theme
+```
+
+### Step 2: Copy Base Files
+
+Start by copying files from an existing theme as a template:
+
+```bash
+cp -r now_lms/templates/themes/now_lms/* now_lms/templates/themes/my_custom_theme/
+```
+
+### Step 3: Customize Theme Components
+
+#### Header Component (`header.j2`)
+
+Define HTML head tags, meta information, and external resources:
+
+```jinja2
+{% macro headertags() -%}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="{{ site_config.descripcion }}" />
+<meta name="author" content="NOW LMS" />
+
+<!-- Bootstrap CSS -->
+<link href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet" />
+
+<!-- Custom Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Icons -->
+<link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css') }}" />
+{%- endmacro %}
+```
+
+#### Local Styles (`local_style.j2`)
+
+Define your theme's CSS variables and custom styles:
+
+```jinja2
+{% macro local_style() -%}
+<style>
+    /* Custom Theme Variables */
+    :root {
+        --primary-color: #yourcolor;
+        --secondary-color: #yourcolor;
+        --accent-color: #yourcolor;
+        --background-color: #yourcolor;
+        --text-color: #yourcolor;
+        --success-color: #yourcolor;
+        --warning-color: #yourcolor;
+        --danger-color: #yourcolor;
+    }
+
+    /* Your custom CSS styles */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+    }
+
+    /* Navigation styles */
+    .navbar-custom {
+        background-color: var(--primary-color);
+    }
+
+    /* Button styles */
+    .btn-custom-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+</style>
+{%- endmacro %}
+```
+
+#### Navigation Bar (`navbar.j2`)
+
+Customize the navigation structure and styling:
+
+```jinja2
+{% macro navbar() -%}
+<nav class="navbar navbar-expand-md navbar-custom" aria-label="Custom navbar">
+    <div class="container-fluid">
+        <!-- Logo and brand -->
+        <a href="{{ url_for('home.pagina_de_inicio') }}" class="navbar-brand">
+            {% if logo_perzonalizado() %}
+            <img height="30" src="{{ url_for('static', filename='/files/public/images/logotipo.jpg') }}" alt="LMS" />
+            {% else %}
+            <img height="30" src="{{ url_for('static', filename='/icons/logo/logo_white_large.png') }}" alt="NOW LMS" />
+            {% endif %}
+        </a>
+
+        <!-- Navigation links -->
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a href="{{ url_for('home.pagina_de_inicio') }}" class="nav-link">Home</a>
+                </li>
+                <!-- Add more navigation items -->
+            </ul>
+        </div>
+    </div>
+</nav>
+{%- endmacro %}
+```
+
+### Step 4: JavaScript Libraries (`js.j2`)
+
+Include JavaScript dependencies and custom scripts:
+
+```jinja2
+{% macro jslibs() -%}
+<script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- Custom JavaScript for your theme -->
+<script>
+    // Your custom JavaScript code
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme-specific initialization
+    });
+</script>
+{%- endmacro %}
+```
+
+### Step 5: Other Components
+
+- **`notify.j2`**: Customize notification and alert styling
+- **`pagination.j2`**: Define pagination controls appearance
+- **`base.j2`**: Set up the overall page structure
+
+## Theme Integration
+
+### Using Theme Functions in Templates
+
+All HTML templates should include the theme style call in the `<head>` section:
+
+```html
+<!doctype html>
+<html lang="es">
+{% set current_theme = current_theme() %}
+<head>
+    {{ current_theme.headertags() }}
+    {{ current_theme.local_style() }}
+    <title>Page Title</title>
+</head>
+<body>
+    {{ current_theme.navbar() }}
+    <!-- Page content -->
+    {{ current_theme.jslibs() }}
+</body>
+</html>
+```
+
+### Available Theme Functions
+
+- `current_theme.headertags()`: HTML head tags and metadata
+- `current_theme.local_style()`: Theme CSS styles
+- `current_theme.navbar()`: Navigation bar
+- `current_theme.notify()`: Notification components
+- `current_theme.jslibs()`: JavaScript libraries
+- `current_theme.rendizar_paginacion()`: Pagination controls
+
+## Color Scheme Guidelines
+
+### CSS Variables
+
+Use CSS custom properties (variables) for consistent theming:
+
+```css
+:root {
+    /* Primary colors */
+    --primary: #your-primary-color;
+    --secondary: #your-secondary-color;
+    --accent: #your-accent-color;
+    
+    /* Neutral colors */
+    --background: #your-background-color;
+    --surface: #your-surface-color;
+    --text: #your-text-color;
+    --text-secondary: #your-secondary-text-color;
+    
+    /* State colors */
+    --success: #your-success-color;
+    --warning: #your-warning-color;
+    --danger: #your-danger-color;
+    --info: #your-info-color;
+}
+```
+
+### Bootstrap Integration
+
+NOW LMS uses Bootstrap 5. You can override Bootstrap variables or use custom CSS classes:
+
+```css
+/* Override Bootstrap variables */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Custom button class */
+.btn-theme-custom {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+}
+```
+
+## Cache Management
+
+The theming system includes automatic cache invalidation. When you change the active theme:
+
+1. The system detects the theme change
+2. Automatically clears the cache if configured
+3. Ensures immediate theme updates for all users
+
+## Best Practices
+
+### 1. Consistent Design Language
+- Use a consistent color palette throughout your theme
+- Maintain proper contrast ratios for accessibility
+- Follow responsive design principles
+
+### 2. Performance Optimization
+- Minimize CSS and JavaScript file sizes
+- Use efficient selectors
+- Optimize images and assets
+
+### 3. Accessibility
+- Ensure sufficient color contrast (WCAG 2.1 AA standards)
+- Include proper ARIA labels
+- Test with screen readers
+
+### 4. Testing
+- Test your theme across different browsers
+- Verify responsive behavior on various screen sizes
+- Check all interactive elements
+
+## Troubleshooting
+
+### Theme Not Loading
+1. Verify theme directory structure
+2. Check file permissions
+3. Clear browser cache
+4. Restart the application if needed
+
+### Styling Issues
+1. Use browser developer tools to debug CSS
+2. Check for CSS conflicts with Bootstrap
+3. Verify CSS variable definitions
+
+### Cache Issues
+- Clear application cache: The system automatically handles this
+- Clear browser cache for development
+- Check cache configuration in `now_lms/cache.py`
+
+## Advanced Customization
+
+### Custom Components
+You can extend themes by adding custom components and including them in your templates.
+
+### Theme Inheritance
+Consider creating base themes and extending them for variations, though this requires more advanced template techniques.
+
+### Integration with Frontend Frameworks
+For advanced theming, you can integrate with modern frontend build tools and frameworks while maintaining compatibility with the Jinja2 template system.
+
+## Support
+
+For additional help with theming:
+
+1. Check the existing themes for examples
+2. Review the application documentation
+3. Contact the development team for complex customizations
+
+---
+
+*This documentation covers the essential aspects of the NOW LMS theming system. For specific implementation details, refer to the existing theme files and application code.*
