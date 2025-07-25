@@ -33,6 +33,31 @@ NOW LMS comes with several built-in themes:
 - **ocean_blue**: Ocean-inspired blue color scheme
 - **rose_pink**: Warm pink and rose color palette
 
+### Academic Themes
+
+Three prestigious academic themes inspired by world-renowned universities:
+
+- **harvard**: Burgundy theme (#A41034) inspired by Harvard University
+  - Classic academic design with traditional typography
+  - Merriweather/Playfair Display fonts for titles
+  - Source Sans Pro for body text
+  - Clean navbar without icons
+  - Academic highlights and "Veritas" branding
+
+- **cambridge**: Green patina theme (#4A7B6D) inspired by Cambridge University
+  - Historic architecture and scholarly heritage design
+  - Cormorant Garamond/EB Garamond fonts for titles
+  - Open Sans for body text
+  - Manuscript-inspired design elements
+  - Clean navbar without icons
+
+- **oxford**: Blue-gray theme (#5A5F68) inspired by Oxford University
+  - Aristocratic elegance and formal tradition
+  - Libre Baskerville fonts for titles
+  - Lato/Nunito for body text
+  - Sophisticated and refined components
+  - Clean navbar without icons
+
 ## Creating a Custom Theme
 
 ### Step 1: Create Theme Directory
@@ -192,6 +217,174 @@ All HTML templates should include the theme style call in the `<head>` section:
     {{ current_theme.jslibs() }}
 </body>
 </html>
+```
+
+### Custom Home Pages
+
+The theming system supports theme-specific home pages through the `get_home_template()` function. This allows you to completely override the default home page with a custom design for your theme.
+
+#### How it works:
+
+```python
+def get_home_template() -> str:
+    """Returns the path to the home page template."""
+    THEME = get_current_theme()
+    
+    HOME = Path(path.join(get_theme_path(), "home.j2"))
+    
+    if HOME.exists():
+        return THEMES_DIRECTORY + str(THEME) + "/home.j2"
+    else:
+        return "inicio/home.html"
+```
+
+If your theme directory contains a `home.j2` file, it will be used instead of the default home page. This gives you complete control over the home page design, layout, and content.
+
+#### Creating a Custom Home Page:
+
+1. Create a `home.j2` file in your theme directory
+2. Design your custom home page using your theme's styling
+3. Include all necessary theme functions and Bootstrap components
+4. The system will automatically use your custom home page when the theme is active
+
+#### Example Custom Home Page Structure:
+
+```html
+<!doctype html>
+<html lang="es">
+{% set current_theme = current_theme() %}
+<head>
+    {{ current_theme.headertags() }}
+    {{ current_theme.local_style() }}
+    <title>{{ site_config.nombre }} - Custom Home</title>
+</head>
+<body>
+    {{ current_theme.navbar() }}
+    
+    <!-- Your custom home page content -->
+    <section class="hero-section">
+        <!-- Custom hero content -->
+    </section>
+    
+    <section class="features-section">
+        <!-- Custom features content -->
+    </section>
+    
+    {{ current_theme.jslibs() }}
+</body>
+</html>
+```
+
+### Static Content and Assets
+
+#### Static Assets Directory
+
+Theme-specific static assets should be placed in the `static/themes/` directory. This allows you to include custom images, CSS files, JavaScript, fonts, and other media specific to your theme.
+
+##### Directory Structure:
+```
+static/themes/
+├── your_theme_name/
+│   ├── images/
+│   │   ├── logo.png
+│   │   ├── background.jpg
+│   │   └── hero-banner.png
+│   ├── css/
+│   │   └── additional.css
+│   ├── js/
+│   │   └── theme-animations.js
+│   ├── fonts/
+│   │   └── custom-font.woff2
+│   └── videos/
+│       └── intro.mp4
+```
+
+#### Using `url_for` for Static Assets
+
+Flask's `url_for` function is used to generate URLs for static assets. This ensures proper URL generation regardless of the application's configuration.
+
+##### Examples:
+
+**Images:**
+```html
+<!-- Theme logo -->
+<img src="{{ url_for('static', filename='themes/harvard/images/logo.png') }}" alt="Harvard Logo">
+
+<!-- Background image -->
+<div style="background-image: url('{{ url_for('static', filename='themes/harvard/images/campus-bg.jpg') }}');">
+    <!-- Content -->
+</div>
+
+<!-- Hero banner -->
+<img src="{{ url_for('static', filename='themes/cambridge/images/hero-banner.png') }}" 
+     class="img-fluid" alt="Cambridge Banner">
+```
+
+**CSS Files:**
+```html
+<!-- Additional theme-specific CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='themes/oxford/css/animations.css') }}">
+
+<!-- Font file -->
+<link rel="stylesheet" href="{{ url_for('static', filename='themes/oxford/css/fonts.css') }}">
+```
+
+**JavaScript Files:**
+```html
+<!-- Theme-specific JavaScript -->
+<script src="{{ url_for('static', filename='themes/harvard/js/interactive.js') }}"></script>
+
+<!-- Theme initialization -->
+<script src="{{ url_for('static', filename='themes/cambridge/js/cambridge-init.js') }}"></script>
+```
+
+**Fonts:**
+```css
+/* In your theme's CSS */
+@font-face {
+    font-family: 'CustomFont';
+    src: url('{{ url_for('static', filename='themes/oxford/fonts/oxford-font.woff2') }}') format('woff2');
+}
+```
+
+**Videos and Audio:**
+```html
+<!-- Video background -->
+<video autoplay muted loop class="bg-video">
+    <source src="{{ url_for('static', filename='themes/harvard/videos/campus-tour.mp4') }}" type="video/mp4">
+</video>
+
+<!-- Audio element -->
+<audio controls>
+    <source src="{{ url_for('static', filename='themes/cambridge/audio/bell-chime.mp3') }}" type="audio/mpeg">
+</audio>
+```
+
+#### Best Practices for Static Assets:
+
+1. **Organization**: Keep assets organized in logical subdirectories
+2. **Optimization**: Compress images and minify CSS/JS files
+3. **Responsive Images**: Provide multiple sizes for different screens
+4. **Accessibility**: Include proper alt text and ARIA labels
+5. **Performance**: Use appropriate image formats (WebP, SVG when possible)
+6. **Caching**: Static assets are automatically cached by Flask
+
+#### Asset Loading Examples:
+
+**Conditional Asset Loading:**
+```html
+{% if current_theme_name == 'harvard' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='themes/harvard/css/harvard-extras.css') }}">
+{% elif current_theme_name == 'cambridge' %}
+    <script src="{{ url_for('static', filename='themes/cambridge/js/manuscript-effects.js') }}"></script>
+{% endif %}
+```
+
+**Dynamic Asset References:**
+```html
+<!-- Dynamic theme assets -->
+<img src="{{ url_for('static', filename='themes/' + current_theme_name + '/images/logo.png') }}" 
+     alt="{{ current_theme_name|title }} Logo">
 ```
 
 ### Available Theme Functions
