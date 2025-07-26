@@ -1,18 +1,16 @@
-{% macro local_style() -%}
-<style>
-    /* Corporate Theme Custom Variables */
+    /* Corporative Theme Custom Variables - Soft Blue Scheme */
     :root {
-        --corporate-primary: #003366;
-        --corporate-secondary: #f8f9fa;
-        --corporate-accent: #1a365d;
-        --corporate-light: #e9ecef;
-        --corporate-dark: #2d3748;
-        --corporate-blue: #0066cc;
-        --corporate-gray: #6c757d;
-        --corporate-success: #28a745;
-        --corporate-warning: #ffc107;
-        --corporate-danger: #dc3545;
-        --corporate-white: #ffffff;
+        --corporate-primary: #a3c6e4; /* Azul Bruma Suave */
+        --corporate-secondary: #cfe1f1; /* Azul Niebla */
+        --corporate-accent: #7d9fb8; /* Azul Pizarra Claro */
+        --corporate-light: #f5f6f7; /* Gris Nube */
+        --corporate-dark: #3a3f45; /* Gris Carbón Suave */
+        --corporate-blue: #7d9fb8;
+        --corporate-gray: #c3c7cc; /* Gris Neblina */
+        --corporate-success: #a3c6e4;
+        --corporate-warning: #f6e4b0; /* Amarillo Crema */
+        --corporate-danger: #7d9fb8;
+        --corporate-white: #f5f6f7;
     }
 
     .bd-placeholder-img {
@@ -359,5 +357,3 @@
     .bg-corporate-secondary {
         background-color: var(--corporate-secondary) !important;
     }
-</style>
-{% endmacro %}
