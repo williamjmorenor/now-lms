@@ -395,3 +395,13 @@ body {
 .bg-corporate-secondary {
     background-color: var(--corporate-secondary) !important;
 }
+
+/* Corporate ticker animation */
+@keyframes corporateTicker {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
