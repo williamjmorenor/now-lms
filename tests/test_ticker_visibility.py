@@ -16,34 +16,49 @@ def test_stock_ticker_visibility():
     with open(template_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Find the ticker div
-    ticker_pattern = r'<!-- Stock ticker pattern overlay -->(.*?)</div>'
+    # Find the static ticker background bar
+    ticker_pattern = r'<!-- Static ticker background bar -->(.*?)<!-- Scrolling ticker text -->'
     ticker_match = re.search(ticker_pattern, content, re.DOTALL)
     
-    assert ticker_match, "Stock ticker element not found"
+    assert ticker_match, "Static ticker background bar not found"
     
-    ticker_content = ticker_match.group(1)
+    ticker_bg_content = ticker_match.group(1)
     
-    # Check for high contrast color (opacity should be >= 0.9 for good visibility)
-    color_pattern = r'color:\s*rgba\([^)]+,\s*([0-9.]+)\)'
-    color_match = re.search(color_pattern, ticker_content)
+    # Check that background has proper green color
+    assert 'background: #006647' in ticker_bg_content, "Ticker background should be green (#006647)"
     
-    assert color_match, "Color property not found in ticker"
+    # Find the scrolling ticker text
+    text_pattern = r'<!-- Scrolling ticker text -->(.*?)</div>'
+    text_match = re.search(text_pattern, content, re.DOTALL)
     
-    opacity = float(color_match.group(1))
-    assert opacity >= 0.9, f"Text opacity {opacity} is too low, should be >= 0.9 for good visibility"
+    assert text_match, "Scrolling ticker text element not found"
     
-    # Check that text shadow is present for better readability
-    assert 'text-shadow:' in ticker_content, "Text shadow should be present for better readability"
+    ticker_text_content = text_match.group(1)
+    
+    # Check for white color text (high contrast against green background)
+    assert 'color: white' in ticker_text_content, "Text color should be white for high contrast"
     
     # Check that font-weight is bold
-    assert 'font-weight: bold' in ticker_content, "Font should be bold for better visibility"
+    assert 'font-weight: bold' in ticker_text_content, "Font should be bold for better visibility"
     
-    # Check that the ticker text is present
-    assert 'NASDAQ' in ticker_content, "Ticker should contain NASDAQ text"
-    assert 'S&P500' in ticker_content, "Ticker should contain S&P500 text"
-    assert '📈' in ticker_content, "Ticker should contain chart emoji"
-    assert '📊' in ticker_content, "Ticker should contain bar chart emoji"
+    # Check that the ticker uses real LMS data
+    assert 'lms_info.courses_count' in ticker_text_content, "Ticker should display real course count"
+    assert 'lms_info.students_count' in ticker_text_content, "Ticker should display real student count"
+    assert 'lms_info.teachers_count' in ticker_text_content, "Ticker should display real teacher count"
+    assert 'lms_info.moderators_count' in ticker_text_content, "Ticker should display real moderator count"
+    
+    # Check for enhanced LMS data
+    assert 'lms_info.enrollments_count' in ticker_text_content, "Ticker should display enrollment count"
+    assert 'lms_info.certificates_count' in ticker_text_content, "Ticker should display certificate count"
+    assert 'lms_info.programs_count' in ticker_text_content, "Ticker should display program count"
+    
+    # Check that emojis are present for visual appeal
+    assert '📚' in ticker_text_content, "Ticker should contain books emoji"
+    assert '👥' in ticker_text_content, "Ticker should contain people emoji"
+    assert '👨‍🏫' in ticker_text_content, "Ticker should contain teacher emoji"
+    
+    # Check that the ticker has proper animation
+    assert 'ticker-scroll' in ticker_text_content, "Ticker should use ticker-scroll animation"
 
 
 if __name__ == "__main__":
