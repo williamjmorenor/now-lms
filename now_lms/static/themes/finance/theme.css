@@ -39,6 +39,7 @@
         font-family: "Times New Roman", Times, serif;
         color: var(--finance-dark);
         position: relative;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
     /* Subtle currency-like background pattern */
@@ -519,5 +520,15 @@
         }
         100% {
             transform: translateX(-100%);
+        }
+    }
+
+    /* Constrained ticker animation - keeps text within visible container boundaries */
+    @keyframes constrained-scroll {
+        0% {
+            left: 100%;
+        }
+        100% {
+            left: -100%;
         }
     }

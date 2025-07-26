@@ -36,7 +36,7 @@ def test_stock_ticker_visibility():
     ticker_text_content = text_match.group(1)
     
     # Check for white color text (high contrast against green background)
-    assert 'color: white' in ticker_text_content, "Text color should be white for high contrast"
+    assert 'color: #ffffff' in ticker_text_content, "Text color should be white (#ffffff) for high contrast"
     
     # Check that font-weight is bold
     assert 'font-weight: bold' in ticker_text_content, "Font should be bold for better visibility"
@@ -58,7 +58,7 @@ def test_stock_ticker_visibility():
     assert '👨‍🏫' in ticker_text_content, "Ticker should contain teacher emoji"
     
     # Check that the ticker has proper animation
-    assert 'ticker-scroll' in ticker_text_content, "Ticker should use ticker-scroll animation"
+    assert 'constrained-scroll' in ticker_text_content, "Ticker should use constrained-scroll animation"
 
 
 if __name__ == "__main__":
