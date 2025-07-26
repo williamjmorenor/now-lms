@@ -1,16 +1,19 @@
-    /* Finance Theme Custom Variables - Inspired by US Dollar Bills */
+    /* Finance Theme Custom Variables - Authentic $100 USD Bill Inspired */
     :root {
-        --finance-primary: #9bae94; /* Verde Federal */
-        --finance-secondary: #4a5e4d; /* Verde Oscuro */
-        --finance-accent: #365c8d; /* Azul Seguridad */
-        --finance-light: #f4f2e9; /* Marfil Claro */
-        --finance-dark: #1c1c1c; /* Negro Tinta */
-        --finance-success: #9bae94;
-        --finance-warning: #d5b87a; /* Oro Pálido */
-        --finance-danger: #4a5e4d;
-        --finance-info: #365c8d;
-        --finance-gray: #a5a5a5; /* Gris Acero */
-        --finance-silver: #f4f2e9;
+        --finance-primary: #006647; /* Federal Reserve Green */
+        --finance-secondary: #1e4d3a; /* Deep Treasury Green */
+        --finance-accent: #4a6fa5; /* Security Blue */
+        --finance-light: #f5f3ea; /* Currency Paper Cream */
+        --finance-dark: #1a1a1a; /* Federal Ink Black */
+        --finance-success: #006647;
+        --finance-warning: #b8860b; /* Federal Gold */
+        --finance-danger: #8b0000; /* Security Red */
+        --finance-info: #4a6fa5;
+        --finance-gray: #708090; /* Steel Gray */
+        --finance-silver: #f5f3ea;
+        --finance-watermark: rgba(0, 102, 71, 0.05); /* Subtle watermark green */
+        --finance-security: #2e5266; /* Security thread blue */
+        --finance-microprint: #556b2f; /* Microprint green */
     }
 
     .bd-placeholder-img {
@@ -27,33 +30,146 @@
         }
     }
 
-    /* Finance Theme Styles */
+    /* Finance Theme Styles - $100 Bill Inspired */
     body {
-        background: linear-gradient(135deg, #f8faf8 0%, #f0f2f0 100%);
+        background: 
+            radial-gradient(circle at 20% 80%, var(--finance-watermark) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, var(--finance-watermark) 0%, transparent 50%),
+            linear-gradient(135deg, var(--finance-light) 0%, #faf8f0 100%);
         font-family: "Times New Roman", Times, serif;
         color: var(--finance-dark);
+        position: relative;
     }
 
-    /* Custom Navbar Styling */
+    /* Subtle currency-like background pattern */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 100px,
+                var(--finance-watermark) 100px,
+                var(--finance-watermark) 101px
+            ),
+            repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 100px,
+                var(--finance-watermark) 100px,
+                var(--finance-watermark) 101px
+            );
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    /* Custom Navbar Styling - $100 Bill Inspired Design */
     .navbar-finance {
-        background: linear-gradient(90deg, var(--finance-primary) 0%, var(--finance-secondary) 100%) !important;
-        box-shadow: 0 3px 6px rgba(0, 103, 71, 0.2);
-        border-bottom: 2px solid var(--finance-accent);
+        background: 
+            linear-gradient(90deg, var(--finance-primary) 0%, var(--finance-secondary) 50%, var(--finance-security) 100%),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                rgba(255, 255, 255, 0.1) 1px,
+                transparent 2px,
+                transparent 20px
+            ) !important;
+        box-shadow: 
+            0 4px 8px rgba(0, 102, 71, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        border-bottom: 3px solid var(--finance-warning);
+        border-top: 1px solid var(--finance-microprint);
+        position: relative;
+        padding: 0.8rem 0;
+    }
+
+    /* Security strip effect */
+    .navbar-finance::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: repeating-linear-gradient(
+            90deg,
+            var(--finance-warning) 0px,
+            var(--finance-warning) 4px,
+            var(--finance-security) 4px,
+            var(--finance-security) 8px
+        );
+    }
+
+    /* Federal Reserve style micro-text effect */
+    .navbar-finance::after {
+        content: "FEDERAL LEARNING MANAGEMENT SYSTEM • FEDERAL LEARNING MANAGEMENT SYSTEM • ";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        font-size: 3px;
+        color: var(--finance-microprint);
+        white-space: nowrap;
+        overflow: hidden;
+        opacity: 0.6;
+        animation: scroll-microprint 20s linear infinite;
+    }
+
+    @keyframes scroll-microprint {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
     }
 
     .navbar-finance .navbar-brand,
     .navbar-finance .nav-link {
         color: white !important;
-        font-weight: 600;
+        font-weight: 700;
         transition: all 0.3s ease;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.5),
+            0 0 4px rgba(0, 102, 71, 0.3);
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        letter-spacing: 0.5px;
+        position: relative;
+    }
+
+    /* Federal seal-like styling for nav links */
+    .navbar-finance .nav-link::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        background: var(--finance-warning);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .navbar-finance .nav-link:hover::before {
+        opacity: 1;
     }
 
     .navbar-finance .nav-link:hover {
-        color: var(--finance-light) !important;
-        background-color: rgba(255, 255, 255, 0.15);
-        border-radius: 5px;
+        color: var(--finance-warning) !important;
+        background: 
+            linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(184, 134, 11, 0.1));
+        border-radius: 6px;
         transform: translateY(-1px);
+        box-shadow: 
+            0 2px 4px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(184, 134, 11, 0.3);
     }
 
     .navbar-finance .navbar-toggler {

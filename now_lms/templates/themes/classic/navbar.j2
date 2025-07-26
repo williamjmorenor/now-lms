@@ -36,21 +36,21 @@
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 {% if not current_user.is_authenticated %}
                 <li>
-                    <a href="{{ url_for('home.pagina_de_inicio') }}" class="nav-link px-2">Inicio</a>
+                    <a href="{{ url_for('home.pagina_de_inicio') }}" class="nav-link px-2">🎓 Academia</a>
                 </li>
                 {% else %}
                 <li>
-                    <a href="{{ url_for('home.panel') }}" class="nav-link px-2">Inicio</a>
+                    <a href="{{ url_for('home.panel') }}" class="nav-link px-2">🎓 Mi Academia</a>
                 </li>
                 {% endif %}
                 <li>
-                    <a href="{{ url_for('course.lista_cursos', page=1) }}" class="nav-link px-2">Cursos</a>
+                    <a href="{{ url_for('course.lista_cursos', page=1) }}" class="nav-link px-2">📚 Cursos</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('program.lista_programas', page=1) }}" class="nav-link px-2">Programas</a>
+                    <a href="{{ url_for('program.lista_programas', page=1) }}" class="nav-link px-2">📋 Programas</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('resource.lista_de_recursos', page=1) }}" class="nav-link px-2">Recursos</a>
+                    <a href="{{ url_for('resource.lista_de_recursos', page=1) }}" class="nav-link px-2">📖 Recursos</a>
                 </li>
                 {% if current_user.is_authenticated %} {% if current_user.tipo == "moderator" or current_user.tipo ==
                 "instructor" or current_user.tipo == "admin" %}
@@ -79,7 +79,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a
-                            class="text-decoration-none text-white"
+                            class="text-decoration-none text-dark"
                             href="#"
                             role="button"
                             data-bs-toggle="dropdown"
