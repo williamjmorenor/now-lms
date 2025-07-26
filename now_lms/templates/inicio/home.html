@@ -26,7 +26,7 @@
             {% if cursos.total > 0 %}
             <div class="album py-5 bg-light">
                 <div class="container">
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                    <div class="row row-cols-1 row-cols-sm-2 g-3">
                         {% for curso in cursos.items %}
                         <div class="col">
                             <div class="card shadow-sm">
@@ -55,44 +55,47 @@
                                 {% endif %}
 
                                 <div class="card-body">
-                                    <div class="d-flex d-flex justify-content-between">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
                                         <strong>{{ curso.nombre }}</strong>
-
-                                        {% if curso.nivel == 0 %}
-                                        <img
-                                            src="{{ url_for('static', filename='/icons/curso-level0.svg') }}"
-                                            alt="{{ curso.nombre }}"
-                                            width="20"
-                                            height="20"
-                                            alt="Nivel Introductorio"
-                                        />
-                                        {% elif curso.nivel == 1 %}
-                                        <img
-                                            src="{{ url_for('static', filename='/icons/curso-level1.svg') }}"
-                                            alt="{{ curso.nombre }}"
-                                            width="20"
-                                            height="20"
-                                            alt="Nivel Principiante"
-                                        />
-                                        {% elif curso.nivel == 2 %}
-                                        <img
-                                            src="{{ url_for('static', filename='/icons/curso-level2.svg') }}"
-                                            alt="{{ curso.nombre }}"
-                                            width="20"
-                                            height="20"
-                                            alt="Nivel Intermedio"
-                                        />
-                                        {% elif curso.nivel == 3 %}
-                                        <img
-                                            src="{{ url_for('static', filename='/icons/curso-level3.svg') }}"
-                                            alt="{{ curso.nombre }}"
-                                            width="20"
-                                            height="20"
-                                            alt="Nivel Avanzado"
-                                        />
-                                        {% endif %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if not curso.precio %}
+                                            <span class="badge bg-success">Gratis</span>
+                                            {% endif %} {% if curso.nivel == 0 %}
+                                            <img
+                                                src="{{ url_for('static', filename='/icons/curso-level0.svg') }}"
+                                                alt="Nivel Introductorio"
+                                                width="20"
+                                                height="20"
+                                                title="Nivel Introductorio"
+                                            />
+                                            {% elif curso.nivel == 1 %}
+                                            <img
+                                                src="{{ url_for('static', filename='/icons/curso-level1.svg') }}"
+                                                alt="Nivel Principiante"
+                                                width="20"
+                                                height="20"
+                                                title="Nivel Principiante"
+                                            />
+                                            {% elif curso.nivel == 2 %}
+                                            <img
+                                                src="{{ url_for('static', filename='/icons/curso-level2.svg') }}"
+                                                alt="Nivel Intermedio"
+                                                width="20"
+                                                height="20"
+                                                title="Nivel Intermedio"
+                                            />
+                                            {% elif curso.nivel == 3 %}
+                                            <img
+                                                src="{{ url_for('static', filename='/icons/curso-level3.svg') }}"
+                                                alt="Nivel Avanzado"
+                                                width="20"
+                                                height="20"
+                                                title="Nivel Avanzado"
+                                            />
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                    {{ curso.descripcion_corta | truncate(120) }}
+                                    <p class="card-text">{{ curso.descripcion_corta | truncate(120) }}</p>
 
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group">
@@ -100,18 +103,17 @@
                                                 href="{{ url_for('course.curso', course_code=curso.codigo ) }}"
                                                 class="btn btn-sm btn-outline-secondary"
                                                 role="button"
-                                                aria-disabled="true"
                                             >
                                                 Ver Curso
                                             </a>
                                         </div>
-                                        {% if curso.duracion %}
-                                        <small class="text-muted">{{ curso.duracion }} mins</small>
-                                        {% endif %} {% if curso.precio %}
-                                        <small>{{ curso.precio | float }} {{ config.moneda }} </small>
-                                        {% else %}
-                                        <small>Gratis</small>
-                                        {% endif %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if curso.duracion %}
+                                            <small class="text-muted">{{ curso.duracion }} mins</small>
+                                            {% endif %} {% if curso.precio %}
+                                            <small class="fw-bold">{{ curso.precio | float }} {{ config.moneda }}</small>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

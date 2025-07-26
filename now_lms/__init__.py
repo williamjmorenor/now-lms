@@ -192,7 +192,7 @@ def no_autorizado():
 # Carga configuración del sitio web desde la base de datos.
 # ---------------------------------------------------------------------------------------
 @cache.cached(timeout=60, key_prefix="site_config")
-def carga_configuracion_del_sitio_web_desde_db():  # pragma: no cover
+def config():  # pragma: no cover
     """Obtiene configuración del sitio web desde la base de datos."""
 
     with lms_app.app_context():
@@ -220,7 +220,7 @@ def define_variables_globales_jinja2(lms_app: Flask):
     log.trace("Definiendo variables globales de Jinja2.")
     lms_app.jinja_env.globals["adsense_code"] = get_addsense_code
     lms_app.jinja_env.globals["adsense_meta"] = get_addsense_meta
-    lms_app.jinja_env.globals["config"] = carga_configuracion_del_sitio_web_desde_db
+    lms_app.jinja_env.globals["config"] = config
     lms_app.jinja_env.globals["course_info"] = course_info
     lms_app.jinja_env.globals["course_logo"] = get_current_course_logo
     lms_app.jinja_env.globals["cuenta_cursos_programa"] = cuenta_cursos_por_programa

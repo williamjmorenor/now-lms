@@ -41,7 +41,7 @@
 
     .navbar-classic .navbar-brand,
     .navbar-classic .nav-link {
-        color: white !important;
+        color: var(--classic-dark) !important;
         font-weight: 500;
         transition: all 0.2s ease;
     }

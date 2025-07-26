@@ -190,6 +190,138 @@
             </div>
         </section>
 
+        <!-- Featured Courses Section - Oxford Academic Themed -->
+        {% if cursos and cursos.total > 0 %}
+        <section class="py-5" style="background: #f8f9fa; border-top: 3px solid #003f5c">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center mb-5">
+                        <h2 class="display-6 fw-bold mb-4" style="color: #003f5c">🏰 Oxford Academic Excellence</h2>
+                        <p class="lead" style="color: #2c3e50">
+                            Cursos con la tradición y prestigio de más de 900 años de historia académica.
+                        </p>
+                    </div>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 g-4">
+                    {% for curso in cursos.items[:4] %}
+                    <div class="col">
+                        <div
+                            class="card h-100"
+                            style="
+                                border: 2px solid #003f5c;
+                                border-radius: 12px;
+                                box-shadow: 0 8px 25px rgba(0, 63, 92, 0.1);
+                                background: #ffffff;
+                            "
+                        >
+                            {% if curso.portada and course_logo(curso.codigo) %}
+                            <img
+                                src="{{ url_for('static', filename='/files/public/images/' + curso.codigo + '/' + course_logo(curso.codigo)) }}"
+                                alt="{{ curso.nombre }}"
+                                class="card-img-top"
+                                style="height: 200px; object-fit: cover; border-radius: 10px 10px 0 0"
+                            />
+                            {% else %}
+                            <div
+                                class="card-img-top d-flex align-items-center justify-content-center text-white"
+                                style="
+                                    height: 200px;
+                                    background: linear-gradient(135deg, #003f5c 0%, #bc6c25 100%);
+                                    border-radius: 10px 10px 0 0;
+                                "
+                            >
+                                <div class="text-center">
+                                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem">📜</div>
+                                    <div style="font-size: 1rem; font-weight: 600">{{ curso.nombre }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="card-body d-flex flex-column" style="background: #ffffff">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5
+                                        class="card-title mb-0"
+                                        style="
+                                            color: #003f5c;
+                                            font-weight: 700;
+                                            font-family: &quot;Times New Roman&quot;, serif;
+                                        "
+                                    >
+                                        {{ curso.nombre }}
+                                    </h5>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if not curso.precio %}
+                                        <span class="badge" style="background: #bc6c25; color: white">Bursary</span>
+                                        {% endif %} {% if curso.nivel == 0 %}
+                                        <span class="badge bg-light text-dark border" title="Nivel Introductorio"
+                                            >First Year</span
+                                        >
+                                        {% elif curso.nivel == 1 %}
+                                        <span class="badge" style="background: #003f5c" title="Nivel Principiante"
+                                            >Second Year</span
+                                        >
+                                        {% elif curso.nivel == 2 %}
+                                        <span class="badge" style="background: #bc6c25" title="Nivel Intermedio"
+                                            >Final Year</span
+                                        >
+                                        {% elif curso.nivel == 3 %}
+                                        <span class="badge bg-dark" title="Nivel Avanzado">Postgraduate</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <p
+                                    class="card-text flex-grow-1"
+                                    style="color: #6c757d; font-family: &quot;Times New Roman&quot;, serif; font-style: italic"
+                                >
+                                    {{ curso.descripcion_corta | truncate(100) }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a
+                                        href="{{ url_for('course.curso', course_code=curso.codigo) }}"
+                                        class="btn btn-sm"
+                                        style="
+                                            background: #003f5c;
+                                            color: white;
+                                            border: none;
+                                            font-family: &quot;Times New Roman&quot;, serif;
+                                        "
+                                        >📚 Matriculate</a
+                                    >
+                                    <div class="text-end">
+                                        {% if curso.duracion %}
+                                        <small class="text-muted d-block">📖 {{ curso.duracion }} minutes</small>
+                                        {% endif %} {% if curso.precio %}
+                                        <small
+                                            class="fw-bold"
+                                            style="color: #bc6c25; font-family: &quot;Times New Roman&quot;, serif"
+                                            >£{{ curso.precio | float }}</small
+                                        >
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-4">
+                    <a
+                        href="{{ url_for('course.lista_cursos', page=1) }}"
+                        class="btn btn-lg px-4 py-2"
+                        style="
+                            background: #003f5c;
+                            color: white;
+                            border: none;
+                            font-family: &quot;Times New Roman&quot;, serif;
+                        "
+                    >
+                        🏰 Browse Complete Oxford Curriculum
+                    </a>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
         <!-- Call to Action Section -->
         <section class="py-5" style="background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%)">
             <div class="container">
