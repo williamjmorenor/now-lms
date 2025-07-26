@@ -94,20 +94,20 @@
 
     /* Rose Pink Buttons */
     .btn-rose-primary {
-        background: linear-gradient(45deg, var(--rose-primary), var(--rose-secondary));
+        background: linear-gradient(45deg, var(--rose-dark), var(--rose-accent));
         border: none;
         color: white;
         font-weight: 500;
         border-radius: 25px;
         padding: 10px 20px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 8px rgba(233, 30, 99, 0.2);
+        box-shadow: 0 4px 8px rgba(136, 14, 79, 0.3);
     }
 
     .btn-rose-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(233, 30, 99, 0.3);
-        background: linear-gradient(45deg, var(--rose-secondary), var(--rose-primary));
+        box-shadow: 0 6px 12px rgba(136, 14, 79, 0.4);
+        background: linear-gradient(45deg, var(--rose-accent), var(--rose-dark));
         color: white;
     }
 

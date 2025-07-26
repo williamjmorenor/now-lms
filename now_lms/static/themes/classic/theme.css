@@ -1,7 +1,7 @@
     /* Classic Theme Custom Variables - Minimalist Design */
     :root {
-        --classic-primary: #ffffff; /* Blanco Puro */
-        --classic-secondary: #f5f5f5; /* Gris Niebla */
+        --classic-primary: #2e2e2e; /* Gris Carbón - Changed for better button visibility */
+        --classic-secondary: #444444; /* Gris Medianoche - Changed for better contrast */
         --classic-accent: #dadada; /* Gris Ceniza Claro */
         --classic-light: #f5f5f5; /* Gris Niebla */
         --classic-dark: #2e2e2e; /* Gris Carbón */
@@ -35,7 +35,7 @@
 
     /* Custom Navbar Styling */
     .navbar-classic {
-        background: var(--classic-primary) !important;
+        background: #ffffff !important; /* Keep navbar white */
         box-shadow: 0 2px 4px rgba(15, 108, 191, 0.1);
     }
 
@@ -91,11 +91,11 @@
     }
 
     .btn-classic-secondary:hover {
-        background-color: #e55722;
-        border-color: #e55722;
+        background-color: #666666;
+        border-color: #666666;
         color: white;
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(255, 112, 67, 0.2);
+        box-shadow: 0 4px 8px rgba(102, 102, 102, 0.2);
     }
 
     /* Card Enhancements */
@@ -184,7 +184,7 @@
     /* Table Enhancements */
     .table-striped > tbody > tr:nth-of-type(odd) > td,
     .table-striped > tbody > tr:nth-of-type(odd) > th {
-        background-color: rgba(15, 108, 191, 0.03);
+        background-color: rgba(46, 46, 46, 0.03);
     }
 
     .table th {

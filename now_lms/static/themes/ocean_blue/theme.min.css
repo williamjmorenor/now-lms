@@ -93,20 +93,20 @@
 
     /* Ocean Blue Buttons */
     .btn-ocean-primary {
-        background: linear-gradient(45deg, var(--ocean-primary), var(--ocean-secondary));
+        background: linear-gradient(45deg, var(--ocean-dark), var(--ocean-accent));
         border: none;
         color: white;
         font-weight: 500;
         border-radius: 25px;
         padding: 10px 20px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0, 119, 190, 0.2);
+        box-shadow: 0 4px 8px rgba(0, 61, 92, 0.3);
     }
 
     .btn-ocean-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 119, 190, 0.3);
-        background: linear-gradient(45deg, var(--ocean-secondary), var(--ocean-primary));
+        box-shadow: 0 6px 12px rgba(0, 61, 92, 0.4);
+        background: linear-gradient(45deg, var(--ocean-accent), var(--ocean-dark));
         color: white;
     }
 
