@@ -1,16 +1,19 @@
-    /* Corporative Theme Custom Variables - Soft Blue Scheme */
+    /* Corporative Theme Custom Variables - SAP Inspired Professional */
     :root {
-        --corporate-primary: #a3c6e4; /* Azul Bruma Suave */
-        --corporate-secondary: #cfe1f1; /* Azul Niebla */
-        --corporate-accent: #7d9fb8; /* Azul Pizarra Claro */
-        --corporate-light: #f5f6f7; /* Gris Nube */
-        --corporate-dark: #3a3f45; /* Gris Carbón Suave */
-        --corporate-blue: #7d9fb8;
-        --corporate-gray: #c3c7cc; /* Gris Neblina */
-        --corporate-success: #a3c6e4;
-        --corporate-warning: #f6e4b0; /* Amarillo Crema */
-        --corporate-danger: #7d9fb8;
-        --corporate-white: #f5f6f7;
+        --corporate-primary: #0f7ba3; /* SAP Blue */
+        --corporate-secondary: #5bbadc; /* SAP Light Blue */
+        --corporate-accent: #1c4e80; /* SAP Dark Blue */
+        --corporate-light: #f8f9fa; /* Professional White */
+        --corporate-dark: #2c3e50; /* Corporate Dark Gray */
+        --corporate-blue: #0f7ba3;
+        --corporate-gray: #6c757d; /* Professional Gray */
+        --corporate-success: #28a745; /* SAP Green */
+        --corporate-warning: #ffc107; /* SAP Orange */
+        --corporate-danger: #dc3545; /* SAP Red */
+        --corporate-white: #ffffff;
+        --corporate-border: #dee2e6; /* Subtle Border Gray */
+        --corporate-text: #495057; /* Professional Text */
+        --corporate-shadow: rgba(15, 123, 163, 0.15); /* SAP Blue Shadow */
     }
 
     .bd-placeholder-img {
@@ -27,59 +30,98 @@
         }
     }
 
-    /* Corporate Theme Base Styles */
+    /* Corporate Theme Base Styles - SAP Inspired */
     body {
         background: var(--corporate-white);
-        font-family:
-            "Segoe UI",
-            -apple-system,
-            BlinkMacSystemFont,
-            "Roboto",
-            "Oxygen",
-            "Ubuntu",
-            "Cantarell",
-            sans-serif;
-        color: var(--corporate-dark);
-        line-height: 1.6;
+        font-family: "72", "72 Light", "Arial", "Helvetica", sans-serif; /* SAP 72 font fallback */
+        color: var(--corporate-text);
+        line-height: 1.5;
+        font-size: 14px; /* SAP standard font size */
     }
 
-    /* Professional Navbar Styling */
+    /* SAP-Inspired Professional Navbar */
     .navbar-corporate {
-        background: var(--corporate-primary) !important;
-        box-shadow: 0 2px 4px rgba(0, 51, 102, 0.1);
-        border-bottom: 1px solid var(--corporate-accent);
-        padding: 0.75rem 0;
+        background: 
+            linear-gradient(180deg, var(--corporate-primary) 0%, var(--corporate-accent) 100%) !important;
+        box-shadow: 
+            0 2px 8px var(--corporate-shadow),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border-bottom: 3px solid var(--corporate-secondary);
+        min-height: 56px; /* SAP standard header height */
+        padding: 0;
+    }
+
+    /* SAP-style clean separation */
+    .navbar-corporate::after {
+        content: "";
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            var(--corporate-secondary) 50%, 
+            transparent 100%);
     }
 
     .navbar-corporate .navbar-brand,
     .navbar-corporate .nav-link {
-        color: var(--corporate-white) !important;
-        font-weight: 500;
-        transition: color 0.2s ease;
-        letter-spacing: 0.5px;
+        color: white !important;
+        font-weight: 500; /* SAP standard weight */
+        transition: all 0.2s ease;
+        letter-spacing: 0.3px;
+        font-size: 14px;
+        padding: 0.8rem 1rem;
+        border-radius: 0; /* SAP clean edges */
+        position: relative;
+    }
+
+    /* SAP-style active indicator */
+    .navbar-corporate .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 3px;
+        background: var(--corporate-secondary);
+        transition: width 0.3s ease;
+    }
+
+    .navbar-corporate .nav-link:hover::after {
+        width: 80%;
     }
 
     .navbar-corporate .nav-link:hover {
-        color: var(--corporate-light) !important;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+        color: white !important;
+        background: rgba(255, 255, 255, 0.08);
+        transform: none; /* SAP doesn't use transforms */
     }
 
     .navbar-corporate .navbar-toggler {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px; /* SAP minimal radius */
     }
 
-    /* Professional Corporate Buttons */
+    .navbar-corporate .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    /* SAP-Inspired Professional Buttons */
     .btn-corporate-primary {
-        background-color: var(--corporate-blue);
-        border: 1px solid var(--corporate-blue);
-        color: var(--corporate-white);
+        background: var(--corporate-primary);
+        border: 1px solid var(--corporate-primary);
+        color: white;
         font-weight: 500;
-        border-radius: 4px;
-        padding: 8px 16px;
+        border-radius: 2px; /* SAP minimal border radius */
+        padding: 0.6rem 1.2rem;
         transition: all 0.2s ease;
         letter-spacing: 0.3px;
+        font-size: 14px;
+        text-transform: none; /* SAP doesn't use text transform */
     }
 
     .btn-corporate-primary:hover {

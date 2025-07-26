@@ -30,11 +30,40 @@
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Custom Navbar Styling */
+    /* Custom Rose Garden Navbar Styling */
     .navbar-rose {
-        background: linear-gradient(90deg, var(--rose-primary) 0%, var(--rose-secondary) 100%) !important;
-        box-shadow: 0 4px 6px rgba(233, 30, 99, 0.1);
+        background: 
+            linear-gradient(90deg, var(--rose-primary) 0%, var(--rose-secondary) 100%),
+            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 10%, transparent 30%),
+            radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.05) 15%, transparent 35%) !important;
+        box-shadow: 
+            0 4px 6px rgba(233, 30, 99, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         border-bottom: 3px solid var(--rose-accent);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Subtle floral pattern overlay */
+    .navbar-rose::before {
+        content: "🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺🌸🌺";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        font-size: 6px;
+        opacity: 0.1;
+        pointer-events: none;
+        letter-spacing: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        animation: floral-float 20s linear infinite;
+    }
+
+    @keyframes floral-float {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
     }
 
     .navbar-rose .navbar-brand,
@@ -42,12 +71,21 @@
         color: white !important;
         font-weight: 500;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .navbar-rose .nav-link:hover {
         color: var(--rose-light) !important;
         transform: translateY(-1px);
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        text-shadow: 
+            0 2px 4px rgba(0, 0, 0, 0.3),
+            0 0 8px rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 0.5rem 1rem;
+        box-shadow: 0 2px 8px rgba(233, 30, 99, 0.3);
     }
 
     .navbar-rose .navbar-toggler {
