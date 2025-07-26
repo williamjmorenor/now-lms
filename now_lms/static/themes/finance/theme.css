@@ -511,3 +511,13 @@
             transform: translateX(-100%);
         }
     }
+
+    /* Simple ticker animation - moves text from right edge to left edge */
+    @keyframes simple-scroll {
+        0% {
+            transform: translateX(100%);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
+    }
