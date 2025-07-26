@@ -6,7 +6,7 @@
         --finance-light: #f5f3ea; /* Currency Paper Cream */
         --finance-dark: #1a1a1a; /* Federal Ink Black */
         --finance-success: #006647;
-        --finance-warning: #b8860b; /* Federal Gold */
+        --finance-warning: #806020; /* Softer, more muted gold */
         --finance-danger: #8b0000; /* Security Red */
         --finance-info: #4a6fa5;
         --finance-gray: #708090; /* Steel Gray */
@@ -90,21 +90,22 @@
         padding: 0.8rem 0;
     }
 
-    /* Security strip effect */
+    /* Security strip effect - softer appearance */
     .navbar-finance::before {
         content: "";
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 2px;
+        height: 1px;
         background: repeating-linear-gradient(
             90deg,
-            var(--finance-warning) 0px,
-            var(--finance-warning) 4px,
+            rgba(128, 96, 32, 0.3) 0px,
+            rgba(128, 96, 32, 0.3) 4px,
             var(--finance-security) 4px,
             var(--finance-security) 8px
         );
+        opacity: 0.6;
     }
 
     /* Federal Reserve style micro-text effect */
@@ -163,13 +164,13 @@
     .navbar-finance .nav-link:hover {
         color: var(--finance-warning) !important;
         background: 
-            linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(184, 134, 11, 0.1));
+            linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(128, 96, 32, 0.1));
         border-radius: 6px;
         transform: translateY(-1px);
         box-shadow: 
             0 2px 4px rgba(0, 0, 0, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(184, 134, 11, 0.3);
+        border: 1px solid rgba(128, 96, 32, 0.2);
     }
 
     .navbar-finance .navbar-toggler {
@@ -489,4 +490,14 @@
     /* Professional Shadows */
     .professional-shadow {
         box-shadow: 0 8px 16px rgba(0, 103, 71, 0.15);
+    }
+
+    /* Stock ticker animation */
+    @keyframes ticker {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
     }

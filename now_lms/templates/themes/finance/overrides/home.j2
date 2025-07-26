@@ -8,45 +8,66 @@
     <body>
         {{ current_theme.navbar() }}
 
-        <!-- Hero Section -->
+        <!-- Hero Section - Stock Market Inspired -->
         <section
             class="hero-section py-5"
             style="
-                background: linear-gradient(135deg, #9bae94 0%, #365c8d 100%);
+                background: linear-gradient(135deg, #006647 0%, #1e4d3a 50%, #4a6fa5 100%);
                 min-height: 60vh;
                 display: flex;
                 align-items: center;
+                position: relative;
+                overflow: hidden;
             "
         >
+            <!-- Stock ticker pattern overlay -->
+            <div style="
+                position: absolute;
+                top: 20px;
+                left: -100%;
+                width: 200%;
+                height: 30px;
+                background: rgba(255, 255, 255, 0.1);
+                animation: ticker 20s linear infinite;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.6);
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+            ">
+                📈 NASDAQ +2.5% • S&P500 +1.8% • DOW +2.1% • EDUCATION INDEX +15.3% • LEARNING FUTURES +8.7% • KNOWLEDGE BONDS +4.2% • 📊
+            </div>
+            
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-8 text-white">
                         <div class="hero-content">
-                            <h1 class="display-4 fw-bold mb-4">Bienvenido a {{ site_config.nombre }}</h1>
+                            <h1 class="display-4 fw-bold mb-4">💰 Inversión en Conocimiento Financiero</h1>
                             <p class="lead mb-4" style="font-size: 1.3rem; line-height: 1.6">
-                                Educación financiera de vanguardia para profesionales y empresas del sector. Nuestra plataforma
-                                está diseñada para brindar una experiencia de aprendizaje excepcional.
+                                📊 Maximiza tus retornos educativos con nuestra plataforma de aprendizaje financiero de alto rendimiento. 
+                                Diversifica tu portafolio de conocimientos con cursos premium del mercado educativo.
                             </p>
                             <div class="d-flex gap-3 flex-wrap">
                                 {% if not current_user.is_authenticated %}
                                 <a href="{{ url_for('user.crear_cuenta') }}" class="btn btn-light btn-lg px-4 py-2">
-                                    <strong>Comenzar Ahora</strong>
+                                    <strong>💎 Invertir Ahora</strong>
                                 </a>
                                 <a
                                     href="{{ url_for('course.lista_cursos', page=1) }}"
                                     class="btn btn-outline-light btn-lg px-4 py-2"
                                 >
-                                    Explorar Cursos
+                                    📈 Ver Oportunidades
                                 </a>
                                 {% else %}
                                 <a href="{{ url_for('home.panel') }}" class="btn btn-light btn-lg px-4 py-2">
-                                    <strong>Mi Panel</strong>
+                                    <strong>💼 Mi Portafolio</strong>
                                 </a>
                                 <a
                                     href="{{ url_for('course.lista_cursos', page=1) }}"
                                     class="btn btn-outline-light btn-lg px-4 py-2"
                                 >
-                                    Ver Cursos
+                                    📊 Explorar Mercado
                                 </a>
                                 {% endif %}
                             </div>
@@ -66,12 +87,32 @@
                                     align-items: center;
                                     justify-content: center;
                                     border: 4px solid rgba(255, 255, 255, 0.3);
+                                    position: relative;
+                                    overflow: hidden;
                                 "
                             >
+                                <!-- Stock chart background pattern -->
+                                <div style="
+                                    position: absolute;
+                                    bottom: 20px;
+                                    left: 20px;
+                                    right: 20px;
+                                    height: 60px;
+                                    opacity: 0.3;
+                                ">
+                                    <svg viewBox="0 0 200 60" style="width: 100%; height: 100%;">
+                                        <polyline
+                                            points="10,50 30,40 50,45 70,30 90,35 110,20 130,25 150,15 170,20 190,10"
+                                            stroke="rgba(255,255,255,0.8)"
+                                            stroke-width="2"
+                                            fill="none"
+                                        />
+                                    </svg>
+                                </div>
                                 <div class="text-center text-white">
-                                    <div style="font-size: 3rem; margin-bottom: 0.5rem">📚</div>
-                                    <div style="font-size: 1.2rem; font-weight: 600">Aprendizaje</div>
-                                    <div style="font-size: 0.9rem; opacity: 0.8">Digital</div>
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem">📈</div>
+                                    <div style="font-size: 1.2rem; font-weight: 600">Educación</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8">Financiera</div>
                                 </div>
                             </div>
                         </div>
@@ -80,14 +121,14 @@
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)">
+        <!-- Features Section - Investment Focused -->
+        <section class="py-5" style="background: linear-gradient(135deg, #f5f3ea 0%, #faf8f0 100%)">
             <div class="container">
                 <div class="row">
                     <div class="col-12 text-center mb-5">
-                        <h2 class="display-5 fw-bold mb-4">Aprende con Nosotros</h2>
-                        <p class="lead">
-                            Descubre una nueva forma de aprender con nuestra plataforma educativa moderna y eficiente.
+                        <h2 class="display-5 fw-bold mb-4" style="color: #006647;">💼 Invierte en tu Futuro Financiero</h2>
+                        <p class="lead" style="color: #1e4d3a;">
+                            Diversifica tu portafolio de conocimientos con nuestros activos educativos de alto rendimiento y bajo riesgo.
                         </p>
                     </div>
                 </div>
@@ -99,14 +140,15 @@
                                 background: white;
                                 border-radius: 15px;
                                 padding: 2rem;
-                                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-                                border-top: 4px solid #9bae94;
+                                box-shadow: 0 8px 16px rgba(0, 102, 71, 0.1);
+                                border-top: 4px solid #006647;
+                                border-left: 2px solid rgba(184, 134, 11, 0.3);
                             "
                         >
                             <div
                                 class="feature-icon mb-3"
                                 style="
-                                    background: #9bae94;
+                                    background: #006647;
                                     width: 60px;
                                     height: 60px;
                                     border-radius: 50%;
@@ -115,11 +157,11 @@
                                     justify-content: center;
                                 "
                             >
-                                <span style="color: white; font-size: 1.5rem">🎯</span>
+                                <span style="color: white; font-size: 1.5rem">💎</span>
                             </div>
-                            <h4 class="mb-3">Cursos Especializados</h4>
-                            <p style="line-height: 1.6">
-                                Accede a una amplia variedad de cursos diseñados por expertos en cada área de conocimiento.
+                            <h4 class="mb-3" style="color: #006647;">Activos Premium</h4>
+                            <p style="line-height: 1.6; color: #1e4d3a;">
+                                Cursos de alto valor diseñados por analistas financieros y expertos en inversión para maximizar tu ROI educativo.
                             </p>
                         </div>
                     </div>
@@ -130,14 +172,15 @@
                                 background: white;
                                 border-radius: 15px;
                                 padding: 2rem;
-                                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-                                border-top: 4px solid #365c8d;
+                                box-shadow: 0 8px 16px rgba(0, 102, 71, 0.1);
+                                border-top: 4px solid #4a6fa5;
+                                border-left: 2px solid rgba(184, 134, 11, 0.3);
                             "
                         >
                             <div
                                 class="feature-icon mb-3"
                                 style="
-                                    background: #365c8d;
+                                    background: #4a6fa5;
                                     width: 60px;
                                     height: 60px;
                                     border-radius: 50%;
@@ -146,11 +189,11 @@
                                     justify-content: center;
                                 "
                             >
-                                <span style="color: white; font-size: 1.5rem">👥</span>
+                                <span style="color: white; font-size: 1.5rem">📊</span>
                             </div>
-                            <h4 class="mb-3">Comunidad Activa</h4>
-                            <p style="line-height: 1.6">
-                                Únete a una comunidad de estudiantes y profesionales que comparten tus intereses y objetivos.
+                            <h4 class="mb-3" style="color: #4a6fa5;">Red de Inversores</h4>
+                            <p style="line-height: 1.6; color: #1e4d3a;">
+                                Conecta con traders, analistas y gestores de fondos en nuestra exclusiva red de profesionales del sector financiero.
                             </p>
                         </div>
                     </div>
@@ -161,14 +204,15 @@
                                 background: white;
                                 border-radius: 15px;
                                 padding: 2rem;
-                                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-                                border-top: 4px solid #28a745;
+                                box-shadow: 0 8px 16px rgba(0, 102, 71, 0.1);
+                                border-top: 4px solid #806020;
+                                border-left: 2px solid rgba(184, 134, 11, 0.3);
                             "
                         >
                             <div
                                 class="feature-icon mb-3"
                                 style="
-                                    background: #28a745;
+                                    background: #806020;
                                     width: 60px;
                                     height: 60px;
                                     border-radius: 50%;
@@ -177,12 +221,11 @@
                                     justify-content: center;
                                 "
                             >
-                                <span style="color: white; font-size: 1.5rem">🏆</span>
+                                <span style="color: white; font-size: 1.5rem">🏅</span>
                             </div>
-                            <h4 class="mb-3">Certificaciones</h4>
-                            <p style="line-height: 1.6">
-                                Obtén certificaciones reconocidas que validen tu conocimiento y impulsen tu carrera
-                                profesional.
+                            <h4 class="mb-3" style="color: #806020;">Certificaciones Oro</h4>
+                            <p style="line-height: 1.6; color: #1e4d3a;">
+                                Credenciales de oro que acreditan tu expertise financiero ante instituciones y empleadores del sector bursátil.
                             </p>
                         </div>
                     </div>
