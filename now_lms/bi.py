@@ -15,7 +15,7 @@
 # Contributors:
 # - William José Moreno Reyes
 
-"""Logica del "negocio"."""
+"""Business logic implementation."""
 
 # pylint: disable=E1101
 

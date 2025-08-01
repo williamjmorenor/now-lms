@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Contributors:
-# - William José Moreno Reyes
 
-"""Codigo para crear cursos iniciales."""
+
+"""Code to create initial test courses and data."""
 
 # ---------------------------------------------------------------------------------------
 # Libreria estandar

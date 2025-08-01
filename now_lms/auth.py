@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Contributors:
-# - William José Moreno Reyes
 
 
-"""Control de acceso a la aplicacion."""
+"""Access control for the application."""
 
 # ---------------------------------------------------------------------------------------
 # Libreria estandar
