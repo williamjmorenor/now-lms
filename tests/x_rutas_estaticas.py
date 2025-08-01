@@ -1461,48 +1461,45 @@ rutas_estaticas = [
     # <---------------------------------------------------------------------> #
     # Admin announcements routes
     # <---------------------------------------------------------------------> #
-    # Note: Commented out temporarily - these routes redirect and need more investigation
-    # Ruta(
-    #     ruta="/admin/announcements",
-    #     no_session=302,
-    #     admin=302,  # Redirects for admin too, likely to a login-required area
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
-    # Ruta(
-    #     ruta="/admin/announcements/new",
-    #     no_session=302,
-    #     admin=302,  # Redirects for admin too
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
-    # Note: These routes with IDs would need actual announcement IDs in test data
-    # Commenting out for now as they would require dynamic test data
-    # Ruta(
-    #     ruta="/admin/announcements/1/edit",
-    #     no_session=302,
-    #     admin=200,
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
+    Ruta(
+        ruta="/admin/announcements",
+        no_session=302,
+        admin=200,  # Admin should access without redirect
+        user=403,
+        moderator=403,
+        instructor=403,
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
+    Ruta(
+        ruta="/admin/announcements/new",
+        no_session=302,
+        admin=200,  # Admin should access without redirect
+        user=403,
+        moderator=403,
+        instructor=403,
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
+    Ruta(
+        ruta="/admin/announcements/1/edit",
+        no_session=302,
+        admin=200,  # Admin should access existing announcement
+        user=403,
+        moderator=403,
+        instructor=403,
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
     # Ruta(
     #     ruta="/admin/announcements/1/delete",
     #     no_session=302,
@@ -1519,46 +1516,45 @@ rutas_estaticas = [
     # <---------------------------------------------------------------------> #
     # Admin blog management routes
     # <---------------------------------------------------------------------> #
-    # Note: Commented out temporarily - these routes redirect and need more investigation  
-    # Ruta(
-    #     ruta="/admin/blog",
-    #     no_session=302,
-    #     admin=200,
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
-    # Ruta(
-    #     ruta="/admin/blog/posts/new",
-    #     no_session=302,
-    #     admin=200,
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
-    # Ruta(
-    #     ruta="/admin/blog/tags",
-    #     no_session=302,
-    #     admin=200,
-    #     user=403,
-    #     moderator=403,
-    #     instructor=403,
-    #     texto=[],
-    #     como_user=[],
-    #     como_moderador=[],
-    #     como_instructor=[],
-    #     como_admin=[],
-    # ),
+    Ruta(
+        ruta="/admin/blog",
+        no_session=302,
+        admin=200,  # Admin should access without errors
+        user=403,
+        moderator=403,
+        instructor=403,
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
+    Ruta(
+        ruta="/admin/blog/posts/new",
+        no_session=302,
+        admin=200,  # Admin should access without errors
+        user=403,
+        moderator=403,
+        instructor=200,  # Instructors can also create posts
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
+    Ruta(
+        ruta="/admin/blog/tags",
+        no_session=302,
+        admin=200,  # Admin should access without errors
+        user=403,
+        moderator=403,
+        instructor=403,
+        texto=[],
+        como_user=[],
+        como_moderador=[],
+        como_instructor=[],
+        como_admin=[],
+    ),
     # Ruta(
     #     ruta="/admin/flagged-messages",
     #     no_session=302,
