@@ -222,39 +222,6 @@
             </div>
         </section>
         {% endif %}
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <a
-                                        href="{{ url_for('course.curso', course_code=curso.codigo) }}"
-                                        class="btn btn-sm"
-                                        style="background: #003f5c; color: white; border: none"
-                                        >🎓 Enroll Now</a
-                                    >
-                                    <div class="text-end">
-                                        {% if curso.duracion %}
-                                        <small class="text-muted d-block">📚 {{ curso.duracion }} minutes</small>
-                                        {% endif %} {% if curso.precio %}
-                                        <small class="fw-bold" style="color: #bc6c25">£{{ curso.precio | float }}</small>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="text-center mt-4">
-                    <a
-                        href="{{ url_for('course.lista_cursos', page=1) }}"
-                        class="btn btn-lg px-4 py-2"
-                        style="background: #003f5c; color: white; border: none"
-                    >
-                        🏛️ View Complete Academic Catalogue
-                    </a>
-                </div>
-            </div>
-        </section>
-        {% endif %}
 
         <!-- Call to Action Section -->
         <section class="py-5" style="background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%)">
