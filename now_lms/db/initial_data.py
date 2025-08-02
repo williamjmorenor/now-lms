@@ -54,6 +54,9 @@ from now_lms.db import (
 from now_lms.logs import log
 from now_lms.version import MAYOR, MENOR, VERSION
 
+# User constants
+ADMIN_USER = environ.get("ADMIN_USER", None) or "lms-admin"
+
 if TYPE_CHECKING:
     from flask import Flask
 
@@ -913,7 +916,7 @@ def crear_recurso_descargable():
         logo=True,
         file_name="R001.pdf",
         tipo="ebook",
-        usuario=environ.get("ADMIN_USER", None) or "lms-admin",
+        usuario=ADMIN_USER,
     )
     recurso2 = Recurso(
         nombre="Alice's Adventures in Wonderland",
@@ -924,7 +927,7 @@ def crear_recurso_descargable():
         logo=True,
         file_name="R002.pdf",
         tipo="ebook",
-        usuario=environ.get("ADMIN_USER", None) or "lms-admin",
+        usuario=ADMIN_USER,
     )
     recurso3 = Recurso(
         nombre="Dracula",
@@ -935,7 +938,7 @@ def crear_recurso_descargable():
         logo=True,
         file_name="R003.pdf",
         tipo="ebook",
-        usuario=environ.get("ADMIN_USER", None) or "lms-admin",
+        usuario=ADMIN_USER,
     )
     recurso4 = Recurso(
         nombre="The War of the Worlds",
@@ -946,7 +949,7 @@ def crear_recurso_descargable():
         logo=True,
         file_name="R004.pdf",
         tipo="ebook",
-        usuario=environ.get("ADMIN_USER", None) or "lms-admin",
+        usuario=ADMIN_USER,
     )
     recurso4 = Recurso(
         nombre="Think Python",
@@ -957,7 +960,7 @@ def crear_recurso_descargable():
         logo=True,
         file_name="R005.pdf",
         tipo="ebook",
-        usuario=environ.get("ADMIN_USER", None) or "lms-admin",
+        usuario=ADMIN_USER,
     )
     for i in recurso1, recurso2, recurso3, recurso4:
         database.session.add(i)
