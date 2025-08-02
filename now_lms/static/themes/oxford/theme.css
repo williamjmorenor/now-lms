@@ -13,6 +13,9 @@
         --oxford-text-light: #FFFFFF; /* White Text */
     }
 
+    /* Import medieval-style fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+
     .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -27,12 +30,75 @@
         }
     }
 
-    /* Oxford Theme Styles */
+    /* Oxford Medieval Manuscript Theme Styles */
     body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        font-family: "Georgia", "Times New Roman", serif;
+        background: linear-gradient(135deg, #f4f1eb 0%, #e8dcc8 100%);
+        font-family: "Cardo", "Georgia", "Times New Roman", serif;
         color: var(--oxford-text);
         line-height: 1.6;
+    }
+
+    /* Medieval manuscript elements */
+    .oxford-hero {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .oxford-manuscript {
+        position: relative;
+        z-index: 2;
+    }
+
+    .oxford-dropcap {
+        position: relative;
+        text-shadow: 3px 3px 6px rgba(139, 0, 0, 0.5);
+    }
+
+    .oxford-dropcap::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        background: radial-gradient(circle, rgba(197, 179, 88, 0.3), transparent);
+        z-index: -1;
+        border-radius: 50%;
+    }
+
+    .oxford-folio {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .oxford-folio:hover {
+        transform: translateY(-3px) rotate(0.5deg);
+        box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .oxford-marginalia {
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .oxford-marginalia:hover {
+        opacity: 1;
+        transform: rotate(0deg) scale(1.1);
+    }
+
+    /* Responsive improvements for medieval theme */
+    @media (max-width: 768px) {
+        .oxford-marginalia {
+            display: none;
+        }
+        
+        .oxford-dropcap {
+            float: none;
+            font-size: 4rem;
+            margin: 0;
+            display: block;
+            text-align: center;
+        }
     }
 
     /* Custom Oxford Navbar Styling */
