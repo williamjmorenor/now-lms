@@ -56,6 +56,7 @@ from now_lms.version import MAYOR, MENOR, VERSION
 
 # User constants
 ADMIN_USER = environ.get("ADMIN_USER", None) or "lms-admin"
+ADMIN_USER_WITH_FALLBACK = environ.get("ADMIN_USER") or environ.get("LMS_USER") or "lms-admin"
 
 if TYPE_CHECKING:
     from flask import Flask
@@ -508,7 +509,7 @@ def crear_certificados():
 def crear_certificacion():
     certificacion = Certificacion(
         id="01JS2NK7NJ74DBSHD83MGRH5HE",
-        usuario=environ.get("ADMIN_USER") or environ.get("LMS_USER") or "lms-admin",
+        usuario=ADMIN_USER_WITH_FALLBACK,
         curso="now",
         certificado="demo",
     )
@@ -717,7 +718,7 @@ def crear_usuarios_predeterminados():
     """Crea en la base de datos los usuarios iniciales."""
     log.info("Creando usuario administrador.")
     administrador = Usuario(
-        usuario=environ.get("ADMIN_USER") or environ.get("LMS_USER") or "lms-admin",
+        usuario=ADMIN_USER_WITH_FALLBACK,
         acceso=proteger_passwd(environ.get("ADMIN_PSWD") or environ.get("LMS_PSWD") or "lms-admin"),
         nombre="System",
         apellido="Administrator",
