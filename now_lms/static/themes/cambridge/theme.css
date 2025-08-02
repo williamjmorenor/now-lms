@@ -42,6 +42,10 @@
         line-height: 1.6;
     }
 
+    .cambridge-lab-bg {
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="%23f3f1e7"/><path d="M0,10 L20,10 M10,0 L10,20" stroke="%23a8a39b" stroke-width="0.5" opacity="0.3"/></svg>');
+    }
+
     /* Typography - Academic publication style */
     h1, h2, h3, h4, h5, h6 {
         font-family: "Cambria", "Cormorant Garamond", "EB Garamond", Georgia, serif;

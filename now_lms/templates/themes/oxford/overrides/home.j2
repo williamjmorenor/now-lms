@@ -9,7 +9,7 @@
         {{ current_theme.navbar() }}
 
         <!-- Oxford Medieval Manuscript Hero Section -->
-        <section class="oxford-hero" style="background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f4f1eb\"/><path d=\"M10,10 L90,10 L90,90 L10,90 Z\" fill=\"none\" stroke=\"%23C5B358\" stroke-width=\"2\"/></svg>'); background-size: cover; padding: 5rem 0; border-top: 15px solid #C5B358; border-bottom: 15px solid #C5B358;">
+        <section class="oxford-hero oxford-manuscript-bg">
             <div class="container">
                 <div class="oxford-manuscript" style="max-width: 900px; margin: 0 auto; position: relative;">
                     <!-- Decoración marginal -->
@@ -21,10 +21,8 @@
                     <!-- Contenido principal -->
                     <div class="text-center">
                         <h1 style="font-family: 'UnifrakturMaguntia', cursive, serif; font-size: 4rem; color: #002147; margin-bottom: 1rem; position: relative;">
-                            <span class="oxford-dropcap" style="font-size: 6rem; line-height: 5rem; float: left; margin-right: 1rem; color: #8B0000; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{{ site_config.nombre[0] if site_config.nombre else 'N' }}</span>
-                            {{ site_config.nombre[1:] if site_config.nombre else 'OW-LMS' }}
+                            {{ site_config.nombre if site_config.nombre else 'NOW-LMS' }}
                         </h1>
-                        <div style="clear: both;"></div>
                         <p class="lead" style="font-family: 'Cardo', serif; font-size: 1.5rem; max-width: 80%; margin: 0 auto; border-top: 1px solid #C5B358; border-bottom: 1px solid #C5B358; padding: 1rem 0;">
                             <em>Dominus illuminatio mea</em>
                         </p>
@@ -177,7 +175,7 @@
                     {% for curso in cursos.items[:4] %}
                     <div class="col">
                         <!-- Tarjeta "Folio" Oxford Medieval style -->
-                        <div class="oxford-folio" style="background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\" viewBox=\"0 0 200 200\"><rect width=\"200\" height=\"200\" fill=\"%23f9f7f5\"/><path d=\"M20,20 L180,20 L180,180 L20,180 Z\" fill=\"none\" stroke=\"%23C5B358\" stroke-width=\"1\" opacity=\"0.3\"/></svg>'); padding: 2rem; border: 1px solid #C5B358; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); position: relative; margin-bottom: 3rem;">
+                        <div class="oxford-folio oxford-folio-bg">
                             <!-- Sello de certificación -->
                             <div class="oxford-seal" style="position: absolute; right: -20px; top: -20px; width: 80px; height: 80px; background: radial-gradient(circle, #C5B358, #002147); border-radius: 50%; transform: rotate(15deg); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; text-align: center; font-family: 'Cardo', serif;">
                                 <div>
