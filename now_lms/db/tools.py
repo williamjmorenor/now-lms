@@ -647,6 +647,17 @@ def generate_cource_choices():
     return choices
 
 
+def generate_masterclass_choices():
+    """Generate choices for master class selection."""
+    from now_lms.db import MasterClass
+    
+    master_classes = database.session.execute(database.select(MasterClass)).all()
+    choices = []
+    for mc in master_classes:
+        choices.append((mc[0].id, mc[0].title))
+    return choices
+
+
 def generate_template_choices():
 
     templates = database.session.execute(database.select(Certificado)).all()

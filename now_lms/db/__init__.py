@@ -555,10 +555,30 @@ class Certificacion(database.Model, BaseTabla):
     """Una certificación generada a un estudiante."""
 
     usuario = database.Column(database.String(26), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
-    curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
+    curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=True, index=True)
+    master_class_id = database.Column(database.String(26), database.ForeignKey("master_classes.id"), nullable=True, index=True)
     certificado = database.Column(database.String(26), database.ForeignKey("certificado.code"), nullable=False, index=True)
     fecha = database.Column(database.Date, default=database.func.date(database.func.now()), nullable=False)
     nota = database.Column(database.Numeric())
+    
+    # Relationships
+    master_class_rel = database.relationship("MasterClass", foreign_keys=[master_class_id])
+    
+    def get_content_info(self):
+        """Get the course or master class information for this certificate."""
+        if self.curso:
+            return database.session.execute(database.select(Curso).filter_by(codigo=self.curso)).first()[0]
+        elif self.master_class_id:
+            return database.session.execute(database.select(MasterClass).filter_by(id=self.master_class_id)).first()[0]
+        return None
+    
+    def get_content_type(self):
+        """Return 'course' or 'masterclass' depending on the content type."""
+        if self.curso:
+            return 'course'
+        elif self.master_class_id:
+            return 'masterclass'
+        return None
 
 
 class Mensaje(database.Model, BaseTabla):

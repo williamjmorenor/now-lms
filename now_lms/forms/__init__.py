@@ -515,8 +515,17 @@ class EmitCertificateForm(FlaskForm):
         "Usuario",
     )
 
+    content_type = SelectField(
+        "Tipo de Contenido",
+        choices=[("course", "Curso"), ("masterclass", "Clase Magistral")]
+    )
+
     curso = SelectField(
         "Curso",
+    )
+    
+    master_class = SelectField(
+        "Clase Magistral",
     )
 
     template = SelectField(

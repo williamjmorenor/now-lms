@@ -208,3 +208,152 @@ class TestMasterClassBasic(TestCase):
 
         # Test that effective price is always 0
         assert master_class.get_effective_price() == 0
+
+
+class TestMasterClassCertificates(TestCase):
+    """Tests for Master Class certificate functionality."""
+
+    def setUp(self):
+        from now_lms import app
+
+        self.app = app
+        self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        self.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+        self.app.app_context().push()
+        
+        # Create tables
+        database.create_all()
+
+    def tearDown(self):
+        database.session.remove()
+        database.drop_all()
+
+    def test_certificacion_model_supports_master_class(self):
+        """Test that Certificacion model can reference master classes."""
+        from now_lms.db import Certificacion, Certificado
+        
+        # Create test user
+        user = Usuario(
+            usuario="test_user",
+            acceso=b"test_password",
+            nombre="Test",
+            apellido="User",
+            correo_electronico="test@test.com",
+            tipo="estudiante",
+            activo=True
+        )
+        database.session.add(user)
+        
+        # Create instructor
+        instructor = Usuario(
+            usuario="instructor",
+            acceso=b"test_password",
+            nombre="Test",
+            apellido="Instructor",
+            correo_electronico="instructor@test.com",
+            tipo="instructor",
+            activo=True
+        )
+        database.session.add(instructor)
+        
+        # Create certificate template
+        cert_template = Certificado(
+            titulo="Test Certificate",
+            descripcion="Test certificate template"
+        )
+        database.session.add(cert_template)
+        
+        # Create master class
+        future_date = date.today() + timedelta(days=1)
+        master_class = MasterClass(
+            title="Test Master Class",
+            slug="test-master-class",
+            description_public="Test description",
+            date=future_date,
+            start_time=time(10, 0),
+            end_time=time(12, 0),
+            is_paid=False,
+            platform_name="Zoom",
+            platform_url="https://zoom.us/j/test",
+            instructor_id=instructor.usuario,
+            is_certificate=True,
+            diploma_template_id=cert_template.code
+        )
+        database.session.add(master_class)
+        database.session.commit()
+        
+        # Create certificate for master class
+        certificacion = Certificacion(
+            usuario=user.usuario,
+            curso=None,  # No course
+            master_class_id=master_class.id,  # Master class instead
+            certificado=cert_template.code,
+            nota=95.0
+        )
+        database.session.add(certificacion)
+        database.session.commit()
+        
+        # Test the certificate
+        assert certificacion.id is not None
+        assert certificacion.master_class_id == master_class.id
+        assert certificacion.curso is None
+        assert certificacion.get_content_type() == 'masterclass'
+        
+        # Test get_content_info method
+        content = certificacion.get_content_info()
+        assert content is not None
+        assert content.title == "Test Master Class"
+
+    def test_certificacion_model_supports_course(self):
+        """Test that Certificacion model still works with courses."""
+        from now_lms.db import Certificacion, Certificado, Curso
+        
+        # Create test user
+        user = Usuario(
+            usuario="test_user",
+            acceso=b"test_password",
+            nombre="Test",
+            apellido="User",
+            correo_electronico="test@test.com",
+            tipo="estudiante",
+            activo=True
+        )
+        database.session.add(user)
+        
+        # Create certificate template
+        cert_template = Certificado(
+            titulo="Test Certificate",
+            descripcion="Test certificate template"
+        )
+        database.session.add(cert_template)
+        
+        # Create course
+        course = Curso(
+            nombre="Test Course",
+            codigo="test-course",
+            descripcion_corta="Test description"
+        )
+        database.session.add(course)
+        database.session.commit()
+        
+        # Create certificate for course
+        certificacion = Certificacion(
+            usuario=user.usuario,
+            curso=course.codigo,  # Course
+            master_class_id=None,  # No master class
+            certificado=cert_template.code,
+            nota=85.0
+        )
+        database.session.add(certificacion)
+        database.session.commit()
+        
+        # Test the certificate
+        assert certificacion.id is not None
+        assert certificacion.curso == course.codigo
+        assert certificacion.master_class_id is None
+        assert certificacion.get_content_type() == 'course'
+        
+        # Test get_content_info method
+        content = certificacion.get_content_info()
+        assert content is not None
+        assert content.nombre == "Test Course"
