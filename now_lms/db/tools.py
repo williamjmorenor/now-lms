@@ -117,6 +117,11 @@ def crear_configuracion_predeterminada():
         descripcion="Sistema de aprendizaje en linea.",
         moneda="C$",
         r=urandom(16),
+        website_name="NOW LMS",
+        slogan="Sistema de aprendizaje en línea",
+        enable_programs=True,
+        enable_masterclass=True,
+        enable_resources=True,
     )
     mail_config = MailConfig(
         MAIL_USE_TLS=False,
@@ -665,3 +670,40 @@ def generate_template_choices():
     for template in templates:
         choices.append((template[0].code, template[0].titulo))
     return choices
+
+
+# Navigation configuration helpers
+@cache.cached(timeout=300, key_prefix="nav_programs_enabled")
+def is_programs_enabled():
+    """Check if programs are enabled in navigation."""
+    try:
+        config = database.session.execute(database.select(Configuracion)).first()
+        if config:
+            return config[0].enable_programs
+        return True  # Default to enabled if no config found
+    except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, AttributeError):
+        return True
+
+
+@cache.cached(timeout=300, key_prefix="nav_masterclass_enabled") 
+def is_masterclass_enabled():
+    """Check if master class is enabled in navigation."""
+    try:
+        config = database.session.execute(database.select(Configuracion)).first()
+        if config:
+            return config[0].enable_masterclass
+        return True  # Default to enabled if no config found
+    except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, AttributeError):
+        return True
+
+
+@cache.cached(timeout=300, key_prefix="nav_resources_enabled")
+def is_resources_enabled():
+    """Check if resources are enabled in navigation."""
+    try:
+        config = database.session.execute(database.select(Configuracion)).first()
+        if config:
+            return config[0].enable_resources
+        return True  # Default to enabled if no config found
+    except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, AttributeError):
+        return True

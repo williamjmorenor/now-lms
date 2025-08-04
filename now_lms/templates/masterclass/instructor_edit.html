@@ -28,6 +28,12 @@
 
                         <h1>{{ title }}</h1>
 
+                        {% if not is_masterclass_enabled() %}
+                        <div class="alert alert-warning" role="alert">
+                            <strong>⚠️ Aviso:</strong> Las clases magistrales están deshabilitadas en la configuración principal del sitio. Los usuarios no verán esta clase magistral en el menú de navegación hasta que se habilite la opción "Habilitar Master Class" en la configuración general.
+                        </div>
+                        {% endif %}
+
                         <form method="POST" novalidate>
                             {{ form.hidden_tag() }}
 
