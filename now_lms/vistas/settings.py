@@ -115,8 +115,6 @@ def configuracion():
         descripcion=config.descripcion,
         moneda=config.moneda,
         verify_user_by_email=config.verify_user_by_email,
-        website_name=config.website_name,
-        slogan=config.slogan,
         enable_programs=config.enable_programs,
         enable_masterclass=config.enable_masterclass,
         enable_resources=config.enable_resources,
@@ -126,8 +124,6 @@ def configuracion():
         config.descripcion = form.descripcion.data
         config.moneda = form.moneda.data
         config.verify_user_by_email = form.verify_user_by_email.data
-        config.website_name = form.website_name.data
-        config.slogan = form.slogan.data
         config.enable_programs = form.enable_programs.data
         config.enable_masterclass = form.enable_masterclass.data
         config.enable_resources = form.enable_resources.data

@@ -54,19 +54,6 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-sm-6">
-                            <label for="website_name" class="form-label">Nombre del sitio web</label>
-                            {{ form.website_name(class="form-control", id="website_name", value=config.website_name or '') }}
-                            <div class="form-text">Nombre personalizado para mostrar en la aplicación.</div>
-                        </div>
-                        <div class="col-sm-6">
-                            <label for="slogan" class="form-label">Slogan</label>
-                            {{ form.slogan(class="form-control", id="slogan", value=config.slogan or '') }}
-                            <div class="form-text">Frase descriptiva del sitio web.</div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
                         <div class="col-sm-4">
                             <div class="form-check">
                                 {{ form.enable_programs(class="form-check-input", id="enable_programs", checked=config.enable_programs) }}

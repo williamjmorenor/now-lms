@@ -117,11 +117,9 @@ def crear_configuracion_predeterminada():
         descripcion="Sistema de aprendizaje en linea.",
         moneda="C$",
         r=urandom(16),
-        website_name="NOW LMS",
-        slogan="Sistema de aprendizaje en línea",
-        enable_programs=True,
-        enable_masterclass=True,
-        enable_resources=True,
+        enable_programs=False,
+        enable_masterclass=False,
+        enable_resources=False,
     )
     mail_config = MailConfig(
         MAIL_USE_TLS=False,

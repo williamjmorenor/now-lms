@@ -433,11 +433,9 @@ class Configuracion(database.Model, BaseTabla):
     r = database.Column(database.LargeBinary())
     
     # Navigation configuration options
-    website_name = database.Column(database.String(200), nullable=True)
-    slogan = database.Column(database.String(300), nullable=True)
-    enable_programs = database.Column(database.Boolean(), default=True, nullable=False)
-    enable_masterclass = database.Column(database.Boolean(), default=True, nullable=False)
-    enable_resources = database.Column(database.Boolean(), default=True, nullable=False)
+    enable_programs = database.Column(database.Boolean(), default=False, nullable=False)
+    enable_masterclass = database.Column(database.Boolean(), default=False, nullable=False)
+    enable_resources = database.Column(database.Boolean(), default=False, nullable=False)
 
 
 class Style(database.Model, BaseTabla):

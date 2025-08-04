@@ -114,11 +114,9 @@ class ConfigForm(FlaskForm):
     verify_user_by_email = BooleanField(validators=[])
     
     # Navigation configuration
-    website_name = StringField("Nombre del sitio web", validators=[])
-    slogan = StringField("Slogan", validators=[])
-    enable_programs = BooleanField("Habilitar Programas", default=True, validators=[])
-    enable_masterclass = BooleanField("Habilitar Master Class", default=True, validators=[])
-    enable_resources = BooleanField("Habilitar Recursos descargables", default=True, validators=[])
+    enable_programs = BooleanField("Habilitar Programas", default=False, validators=[])
+    enable_masterclass = BooleanField("Habilitar Master Class", default=False, validators=[])
+    enable_resources = BooleanField("Habilitar Recursos descargables", default=False, validators=[])
 
 
 class ThemeForm(FlaskForm):
