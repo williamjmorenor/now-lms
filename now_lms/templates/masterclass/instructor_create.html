@@ -163,62 +163,6 @@
 
                             <div class="card mt-3">
                                 <div class="card-header">
-                                    <h5>Configuración de Pago</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3 form-check">
-                                        {{ form.is_paid(class="form-check-input") }}
-                                        {{ form.is_paid.label(class="form-check-label") }}
-                                    </div>
-
-                                    <div id="payment-fields" style="display: none;">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="mb-3">
-                                                    {{ form.price.label(class="form-label") }}
-                                                    {{ form.price(class="form-control") }}
-                                                    {% if form.price.errors %}
-                                                        <div class="text-danger">
-                                                            {% for error in form.price.errors %}
-                                                                <small>{{ error }}</small>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="mb-3">
-                                                    {{ form.early_discount.label(class="form-label") }}
-                                                    {{ form.early_discount(class="form-control") }}
-                                                    {% if form.early_discount.errors %}
-                                                        <div class="text-danger">
-                                                            {% for error in form.early_discount.errors %}
-                                                                <small>{{ error }}</small>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="mb-3">
-                                                    {{ form.discount_deadline.label(class="form-label") }}
-                                                    {{ form.discount_deadline(class="form-control") }}
-                                                    {% if form.discount_deadline.errors %}
-                                                        <div class="text-danger">
-                                                            {% for error in form.discount_deadline.errors %}
-                                                                <small>{{ error }}</small>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card mt-3">
-                                <div class="card-header">
                                     <h5>Certificación</h5>
                                 </div>
                                 <div class="card-body">
@@ -277,12 +221,6 @@
         {{ current_theme.js() }}
 
         <script>
-            // Toggle payment fields
-            document.getElementById('is_paid').addEventListener('change', function() {
-                const paymentFields = document.getElementById('payment-fields');
-                paymentFields.style.display = this.checked ? 'block' : 'none';
-            });
-
             // Toggle certificate fields
             document.getElementById('is_certificate').addEventListener('change', function() {
                 const certificateFields = document.getElementById('certificate-fields');
@@ -291,12 +229,7 @@
 
             // Initialize visibility on page load
             document.addEventListener('DOMContentLoaded', function() {
-                const isPaidCheckbox = document.getElementById('is_paid');
                 const isCertificateCheckbox = document.getElementById('is_certificate');
-                
-                if (isPaidCheckbox.checked) {
-                    document.getElementById('payment-fields').style.display = 'block';
-                }
                 
                 if (isCertificateCheckbox.checked) {
                     document.getElementById('certificate-fields').style.display = 'block';

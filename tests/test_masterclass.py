@@ -176,3 +176,35 @@ class TestMasterClassBasic(TestCase):
         assert enrollment.master_class_id == master_class.id
         assert enrollment.user_id == student.usuario
         assert enrollment.is_access_granted() is True
+
+    def test_master_class_always_free(self):
+        """Test that Master Classes are always free (effective price is 0)."""
+        # Create instructor
+        instructor = Usuario(
+            usuario="instructor",
+            acceso=b"hashed_password",
+            tipo="instructor"
+        )
+        database.session.add(instructor)
+        database.session.commit()
+
+        # Create Master Class with pricing data (should be ignored)
+        future_date = (datetime.now() + timedelta(days=1)).date()
+        master_class = MasterClass(
+            title="Paid Test Master Class",
+            slug="paid-test-master-class",
+            description_public="This should still be free",
+            date=future_date,
+            start_time=time(14, 0),
+            end_time=time(16, 0),
+            is_paid=True,  # This should be ignored
+            price=99.99,   # This should be ignored
+            platform_name="Zoom",
+            platform_url="https://zoom.us/j/test",
+            instructor_id=instructor.usuario
+        )
+        database.session.add(master_class)
+        database.session.commit()
+
+        # Test that effective price is always 0
+        assert master_class.get_effective_price() == 0

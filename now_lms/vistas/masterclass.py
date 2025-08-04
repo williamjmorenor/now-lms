@@ -99,7 +99,8 @@ def enroll(slug):
         enrollment = MasterClassEnrollment(
             master_class_id=master_class.id,
             user_id=current_user.usuario,
-            is_confirmed=True  # For now, assume immediate confirmation
+            is_confirmed=True,  # Always confirmed since it's free
+            payment_id=None  # No payment required
         )
         
         database.session.add(enrollment)
@@ -166,10 +167,10 @@ def instructor_create():
             date=form.date.data,
             start_time=form.start_time.data,
             end_time=form.end_time.data,
-            is_paid=form.is_paid.data,
-            price=form.price.data if form.is_paid.data else None,
-            early_discount=form.early_discount.data,
-            discount_deadline=form.discount_deadline.data,
+            is_paid=False,  # Always free for marketing purposes
+            price=None,
+            early_discount=None,
+            discount_deadline=None,
             platform_name=form.platform_name.data,
             platform_url=form.platform_url.data,
             is_certificate=form.is_certificate.data,
@@ -224,12 +225,13 @@ def instructor_edit(id):
         
         form.populate_obj(master_class)
         
-        # Handle conditional fields
-        if not master_class.is_paid:
-            master_class.price = None
-            master_class.early_discount = None
-            master_class.discount_deadline = None
+        # Ensure payment fields are always disabled
+        master_class.is_paid = False
+        master_class.price = None
+        master_class.early_discount = None
+        master_class.discount_deadline = None
         
+        # Handle conditional fields
         if not master_class.is_certificate:
             master_class.diploma_template_id = None
         

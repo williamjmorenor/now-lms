@@ -1003,16 +1003,8 @@ class MasterClass(database.Model, BaseTabla):
 
     def get_effective_price(self):
         """Get the current effective price considering early discount."""
-        if not self.is_paid or not self.price:
-            return 0
-        
-        if self.early_discount and self.discount_deadline:
-            from datetime import datetime
-            if datetime.now() <= self.discount_deadline:
-                discount_amount = float(self.price) * (float(self.early_discount) / 100)
-                return float(self.price) - discount_amount
-        
-        return float(self.price)
+        # Master Classes are now always free for marketing purposes
+        return 0
 
 
 class MasterClassEnrollment(database.Model, BaseTabla):
@@ -1043,9 +1035,8 @@ class MasterClassEnrollment(database.Model, BaseTabla):
 
     def is_access_granted(self):
         """Check if user has access to private content."""
-        if not self.master_class.is_paid:
-            return self.is_confirmed
-        return self.is_confirmed and self.payment_id is not None
+        # Since Master Classes are now free, just check if confirmed
+        return self.is_confirmed
 
 
 # Blog feature models

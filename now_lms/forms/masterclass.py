@@ -94,34 +94,6 @@ class MasterClassForm(FlaskForm):
         render_kw={"placeholder": "https://zoom.us/j/123456789"}
     )
     
-    is_paid = BooleanField("Clase Pagada")
-    
-    price = DecimalField(
-        "Precio",
-        validators=[
-            Optional(),
-            NumberRange(min=0, message="El precio debe ser mayor o igual a 0")
-        ],
-        places=2,
-        render_kw={"placeholder": "0.00", "step": "0.01"}
-    )
-    
-    early_discount = DecimalField(
-        "Descuento Temprano (%)",
-        validators=[
-            Optional(),
-            NumberRange(min=0, max=100, message="El descuento debe estar entre 0 y 100%")
-        ],
-        places=2,
-        render_kw={"placeholder": "0.00", "step": "0.01"}
-    )
-    
-    discount_deadline = DateTimeField(
-        "Fecha Límite de Descuento",
-        validators=[Optional()],
-        format='%Y-%m-%d %H:%M'
-    )
-    
     is_certificate = BooleanField("Otorga Certificación")
     
     diploma_template_id = SelectField(
@@ -159,18 +131,6 @@ class MasterClassForm(FlaskForm):
         """Validate that date is not in the past."""
         if field.data and field.data < date.today():
             raise ValidationError("La fecha del evento no puede ser en el pasado")
-
-    def validate_price(self, field):
-        """Validate price when is_paid is True."""
-        if self.is_paid.data and (not field.data or field.data <= 0):
-            raise ValidationError("El precio es requerido para clases pagadas")
-
-    def validate_discount_deadline(self, field):
-        """Validate discount deadline."""
-        if field.data and self.date.data:
-            event_datetime = datetime.combine(self.date.data, self.start_time.data or time(0, 0))
-            if field.data >= event_datetime:
-                raise ValidationError("La fecha límite de descuento debe ser anterior al evento")
 
     def validate_diploma_template_id(self, field):
         """Validate diploma template when is_certificate is True."""

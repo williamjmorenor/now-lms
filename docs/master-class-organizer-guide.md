@@ -16,13 +16,14 @@ A comprehensive guide for instructors to create, manage, and deliver successful 
 
 ## What is a Master Class?
 
-A **Master Class** in NOW LMS is a scheduled live session that can optionally offer certification and may require payment. It's designed for real-time learning experiences using external platforms like Zoom, Google Meet, or Microsoft Teams.
+A **Master Class** in NOW LMS is a scheduled live session that serves as a powerful marketing tool to attract new users to your platform while delivering valuable educational content. It's designed for real-time learning experiences using external platforms like Zoom, Google Meet, or Microsoft Teams.
 
 ### Key Features
 
 - **Live Sessions**: Real-time interaction with students
 - **External Platform Integration**: Works with popular video conferencing tools
-- **Payment Support**: Optional paid access with early bird discounts
+- **Free Access**: Completely free to attract and register new users
+- **Marketing Tool**: Ideal for lead generation and platform awareness
 - **Certification**: Award certificates using existing diploma templates
 - **Access Control**: Private content for enrolled students only
 - **Recording Support**: Share session recordings post-event
@@ -65,24 +66,14 @@ A **Master Class** in NOW LMS is a scheduled live session that can optionally of
 
 🔗 **Tip**: Generate your meeting link in advance and ensure it's set for the correct date/time.
 
-### Step 4: Payment Configuration (Optional)
-
-If you want to charge for your Master Class:
-
-- Enable **"Paid Class"**
-- Set the **Price**
-- Configure **Early Discount** (optional):
-  - Discount percentage (e.g., 20%)
-  - Deadline for discount (must be before event date)
-
-### Step 5: Certification (Optional)
+### Step 4: Certification (Optional)
 
 If offering certificates:
 
 - Enable **"Offers Certification"**
 - Select a **Diploma Template** from available options
 
-### Step 6: Recording (Optional)
+### Step 5: Recording (Optional)
 
 - **Recording URL**: Add this after the event to provide replay access
 
@@ -91,21 +82,14 @@ If offering certificates:
 ### Pricing Options
 
 #### Free Master Classes
-- Set **"Paid Class"** to unchecked
-- Students can enroll immediately after email confirmation
-
-#### Paid Master Classes
-- Check **"Paid Class"**
-- Set base price
-- Optional early bird discount with deadline
-- Payment processing integrates with existing LMS payment system
-
 ### Access Control
+
+Master Classes are completely free and designed to attract new users to your platform.
 
 #### Public Information (Always Visible)
 - Master Class title and public description
 - Date, time, and instructor information
-- Price information
+- Free access information
 
 #### Private Information (Enrolled Students Only)
 - Private description with detailed instructions
@@ -125,13 +109,11 @@ If offering certificates:
 
 1. Go to **"My Master Classes"**
 2. Click the **"Students"** button (👥) for any Master Class
-3. View enrollment status and payment information
+3. View enrollment status
 
 ### Enrollment Status Types
 
 - **Confirmed**: User is enrolled and has access
-- **Pending**: Awaiting email confirmation or payment
-- **Paid**: Payment completed (for paid classes)
 
 ### Student Communication
 
@@ -245,10 +227,10 @@ Consider providing additional value:
    - Use action-oriented language
    - Include what students will learn
 
-2. **Pricing Strategy**
-   - Research similar offerings
-   - Consider early bird discounts
-   - Factor in your expertise level
+2. **Marketing Strategy**
+   - Focus on lead generation and user acquisition
+   - Emphasize the value of free access
+   - Promote as a taste of premium content available on the platform
 
 3. **Timing Considerations**
    - Consider your target audience's time zones
@@ -282,8 +264,8 @@ Consider providing additional value:
 
 **Solutions**:
 1. Verify student's enrollment is confirmed
-2. Check if Master Class is paid and payment is complete
-3. Ensure student is logged in when viewing
+2. Ensure student is logged in when viewing
+3. Check if there are any browser issues
 
 #### Platform Meeting Not Working
 
@@ -295,15 +277,15 @@ Consider providing additional value:
 3. Test link yourself before event
 4. Have backup meeting ready
 
-#### Payment Issues
+#### Enrollment Issues
 
-**Problem**: Students having trouble with payment process.
+**Problem**: Students having trouble enrolling.
 
 **Solutions**:
-1. Verify PayPal integration is working
-2. Check if early discount deadline has passed
-3. Direct students to general payment support
-4. Consider manual enrollment for urgent cases
+1. Verify they have a user account
+2. Check if enrollment form is working correctly
+3. Ensure users are confirming their registration
+4. Check for any browser compatibility issues
 
 #### Certificate Problems
 
@@ -320,9 +302,8 @@ Consider providing additional value:
 If you encounter issues not covered in this guide:
 
 1. **Technical Issues**: Contact your LMS administrator
-2. **Payment Problems**: Check PayPal integration documentation
-3. **Platform Issues**: Consult your video platform's support
-4. **General Questions**: Refer to the main NOW LMS documentation
+2. **Platform Issues**: Consult your video platform's support
+3. **General Questions**: Refer to the main NOW LMS documentation
 
 ---
 
@@ -356,7 +337,6 @@ If you encounter issues not covered in this guide:
 ### Quick Links
 
 - [Course Creator Documentation](../course-creator/index.md)
-- [Payment Setup](../paypal_integration.md)
 - [Certificate Configuration](../course-creator/certificate-customization.md)
 - [Technical Support](../faq.md)
 
