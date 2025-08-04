@@ -18,6 +18,8 @@ A comprehensive guide for instructors to create, manage, and deliver successful 
 
 A **Master Class** in NOW LMS is a scheduled live session that serves as a powerful marketing tool to attract new users to your platform while delivering valuable educational content. It's designed for real-time learning experiences using external platforms like Zoom, Google Meet, or Microsoft Teams.
 
+**🎯 Primary Purpose**: Master Classes are specifically designed as a **free marketing tool** to showcase your platform's value, attract potential students, and encourage them to register for paid courses and programs.
+
 ### Key Features
 
 - **Live Sessions**: Real-time interaction with students
