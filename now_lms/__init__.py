@@ -123,6 +123,7 @@ from now_lms.vistas.resources import resource_d
 from now_lms.vistas.settings import setting
 from now_lms.vistas.tags import tag
 from now_lms.vistas.users import user
+from now_lms.vistas.masterclass import masterclass
 from now_lms.vistas.web_error_codes import web_error
 
 # ---------------------------------------------------------------------------------------
@@ -180,6 +181,7 @@ def registrar_modulos_en_la_aplicacion_principal(flask_app: Flask):
         flask_app.register_blueprint(setting)
         flask_app.register_blueprint(tag)
         flask_app.register_blueprint(user)
+        flask_app.register_blueprint(masterclass)
         flask_app.register_blueprint(paypal)
         # User profiles
         flask_app.register_blueprint(admin_profile)
