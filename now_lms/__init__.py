@@ -37,7 +37,7 @@ from platform import python_version
 # ---------------------------------------------------------------------------------------
 # Third-party libraries
 # ---------------------------------------------------------------------------------------
-from flask import Flask, flash, render_template, request
+from flask import Flask, flash, g, render_template, request
 from flask_alembic import Alembic
 from flask_babel import Babel
 from flask_login import LoginManager, current_user

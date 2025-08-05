@@ -149,10 +149,6 @@ def crear_configuracion_predeterminada():
     database.session.add(paypal_config)
     database.session.add(theme)
     database.session.commit()
-    
-    # Invalidate configuration cache after creating new configuration
-    from now_lms.i18n import invalidate_configuracion_cache
-    invalidate_configuracion_cache()
 
 
 def verificar_avance_recurso(recurso: str, usuario: str) -> int:
