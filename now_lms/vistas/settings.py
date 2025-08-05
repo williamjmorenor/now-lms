@@ -147,6 +147,9 @@ def configuracion():
             from now_lms.vistas.paypal import get_site_currency
 
             cache.delete_memoized(get_site_currency)
+            # Invalidate configuration cache for i18n
+            from now_lms.i18n import invalidate_configuracion_cache
+            invalidate_configuracion_cache()
             flash("Sitio web actualizado exitosamente.", "success")
             return redirect(url_for("setting.configuracion"))
         except OperationalError:  # pragma: no cover
