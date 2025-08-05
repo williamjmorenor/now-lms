@@ -11,23 +11,23 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
-                <h1>{{ site_config.nombre[:2] if site_config.nombre|length >= 2 else "LM" }}</h1>
-                <p>Aprendizaje Corporativo</p>
+                <h1>Bienvenido a {{ site_config.nombre }}</h1>
+                <p>Capacitación que impulsa tu negocio.</p>
                 
                 <div class="d-flex gap-3 flex-wrap justify-content-center">
                     {% if not current_user.is_authenticated %}
                     <a href="{{ url_for('user.crear_cuenta') }}" class="btn btn-light btn-lg">
-                        <strong>Comenzar Ahora</strong>
+                        <strong>ACCEDER</strong>
                     </a>
                     <a href="{{ url_for('course.lista_cursos', page=1) }}" class="btn btn-outline-light btn-lg">
-                        Explorar Cursos
+                        VER CURSOS
                     </a>
                     {% else %}
                     <a href="{{ url_for('home.panel') }}" class="btn btn-light btn-lg">
-                        <strong>Mi Panel</strong>
+                        <strong>MI PANEL</strong>
                     </a>
                     <a href="{{ url_for('course.lista_cursos', page=1) }}" class="btn btn-outline-light btn-lg">
-                        Ver Cursos
+                        VER CURSOS
                     </a>
                     {% endif %}
                 </div>

@@ -399,7 +399,7 @@ body {
 /* Hero Section with Animated Bars */
 .hero {
     position: relative;
-    min-height: 70vh;
+    min-height: 50vh;
     background: linear-gradient(135deg, var(--corporate-primary) 0%, var(--corporate-accent) 100%);
     display: flex;
     align-items: center;
@@ -408,21 +408,20 @@ body {
 }
 
 .hero h1 {
-    font-size: 8rem;
-    font-weight: 900;
+    font-size: 3.5rem;
+    font-weight: 700;
     color: white;
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: -2px;
+    letter-spacing: -1px;
 }
 
 .hero p {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     color: white;
-    margin: 0.5rem 0 0 0;
+    margin: 1rem 0 0 0;
     font-weight: 300;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .bars {
@@ -541,12 +540,18 @@ body {
 
 /* Responsive Design for Hero */
 @media (max-width: 768px) {
+    .hero {
+        min-height: 40vh;
+    }
+    
     .hero h1 {
-        font-size: 4rem;
+        font-size: 2.5rem;
+        line-height: 1.2;
     }
     
     .hero p {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
+        margin: 0.8rem 0 0 0;
     }
     
     .bars {
