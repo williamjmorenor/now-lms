@@ -31,60 +31,33 @@ errores al usuario, si el perfil del usuario no tiene permisos para acceder a
 la vista mencionada se debe de redireccionar apropiadamente.gi
 """
 
-DB_URL = os.environ.get("DATABASE_URL") or "sqlite:///:memory:"
-log.warning("Using database URL: %s", DB_URL)
+
+def test_visit_views_anonimus(full_db_setup):
+    """Test views accessible to anonymous users."""
+    # Use the full_db_setup fixture that provides the populated database
+    lms_application = full_db_setup
+    
+    with lms_application.test_client() as client:
+        for ruta in rutas_estaticas:
+            route = ruta.ruta
+            text = ruta.texto
+            log.warning(route)
+            consulta = client.get(route)
+            assert consulta.status_code == ruta.no_session
+            """if consulta.status_code == 200 and text:
+                    for t in text:
+                        log.warning(route)
+                        log.warning(t)
+                        assert t in consulta.data"""
 
 
-@pytest.fixture
-def lms_application():
-    from now_lms import app
-
-    app.config.update(
-        {
-            "TESTING": True,
-            "SECRET_KEY": "jgjañlsldaksjdklasjfkjj",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "WTF_CSRF_ENABLED": False,
-            "DEBUG": True,
-            "PRESERVE_CONTEXT_ON_EXCEPTION": True,
-            "SQLALCHEMY_ECHO": True,
-            "SQLALCHEMY_DATABASE_URI": DB_URL,
-        }
-    )
-
-    yield app
-
-
-def test_visit_views_anonimus(lms_application):
-
-    with lms_application.app_context():
-        from now_lms import database, initial_setup
-
-        database.drop_all()
-        initial_setup(with_tests=True, with_examples=False)
-        with lms_application.test_client() as client:
-            for ruta in rutas_estaticas:
-                route = ruta.ruta
-                text = ruta.texto
-                log.warning(route)
-                consulta = client.get(route)
-                assert consulta.status_code == ruta.no_session
-                """if consulta.status_code == 200 and text:
-                        for t in text:
-                            log.warning(route)
-                            log.warning(t)
-                            assert t in consulta.data"""
-
-
-def test_visit_views_admin(lms_application):
-
-    from now_lms import database, initial_setup
+def test_visit_views_admin(full_db_setup):
+    """Test views accessible to admin users."""
+    # Use the full_db_setup fixture that provides the populated database
+    lms_application = full_db_setup
 
     with lms_application.app_context():
         from flask_login import current_user
-
-        database.drop_all()
-        initial_setup(with_tests=True, with_examples=False)
 
         # Get admin username from environment, just like in initial_data.py
         admin_username = os.environ.get("ADMIN_USER") or os.environ.get("LMS_USER") or "lms-admin"
@@ -108,15 +81,14 @@ def test_visit_views_admin(lms_application):
             client.get("/user/logout")
 
 
-def test_visit_views_student(lms_application):
-
-    from now_lms import database, initial_setup
+def test_visit_views_student(full_db_setup):
+    """Test views accessible to student users."""
+    # Use the full_db_setup fixture that provides the populated database
+    lms_application = full_db_setup
 
     with lms_application.app_context():
         from flask_login import current_user
 
-        database.drop_all()
-        initial_setup(with_tests=True, with_examples=False)
         with lms_application.test_client() as client:
             # Keep the session alive until the with clausule closes
             client.get("/user/logout")
@@ -135,15 +107,14 @@ def test_visit_views_student(lms_application):
             client.get("/user/logout")
 
 
-def test_visit_views_moderator(lms_application):
-
-    from now_lms import database, initial_setup
+def test_visit_views_moderator(full_db_setup):
+    """Test views accessible to moderator users."""
+    # Use the full_db_setup fixture that provides the populated database
+    lms_application = full_db_setup
 
     with lms_application.app_context():
         from flask_login import current_user
 
-        database.drop_all()
-        initial_setup(with_tests=True, with_examples=False)
         with lms_application.test_client() as client:
             # Keep the session alive until the with clausule closes
             client.get("/user/logout")
@@ -162,15 +133,14 @@ def test_visit_views_moderator(lms_application):
             client.get("/user/logout")
 
 
-def test_visit_views_instructor(lms_application):
-
-    from now_lms import database, initial_setup
+def test_visit_views_instructor(full_db_setup):
+    """Test views accessible to instructor users."""
+    # Use the full_db_setup fixture that provides the populated database
+    lms_application = full_db_setup
 
     with lms_application.app_context():
         from flask_login import current_user
 
-        database.drop_all()
-        initial_setup(with_tests=True, with_examples=False)
         with lms_application.test_client() as client:
             # Keep the session alive until the with clausule closes
             client.get("/user/logout")
