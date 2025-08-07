@@ -79,8 +79,8 @@ def crear_certificado_prueba():
     """Crea certificado de prueba"""
 
     certificado = Certificado(
-        id="01HNP0TTQNTR03J7ZQHR09YMKK", 
-        titulo="Certficado Test", 
+        id="01HNP0TTQNTR03J7ZQHR09YMKK",
+        titulo="Certficado Test",
         descripcion="Certificado Test",
         code="test"
     )
