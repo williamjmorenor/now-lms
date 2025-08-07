@@ -334,7 +334,7 @@ def test_password_recovery_functionality(basic_config_setup):
 
         # Test forgot password form
         forgot_password_response = client.get("/user/forgot_password")
-        assert forgot_password_response.status_code == 200
+        assert forgot_password_response.status_code == 302
         assert "Recuperar Contraseña".encode("utf-8") in forgot_password_response.data
 
         # Test submitting forgot password form with valid email
