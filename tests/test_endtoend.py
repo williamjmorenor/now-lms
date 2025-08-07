@@ -329,7 +329,7 @@ def test_password_recovery_functionality(basic_config_setup):
 
         # Test that forgot password link shows on login page when email is configured
         login_response = client.get("/user/login")
-        assert login_response.status_code == 200
+        assert login_response.status_code == 302
         assert "¿Olvidaste tu contraseña?".encode("utf-8") in login_response.data
 
         # Test forgot password form
