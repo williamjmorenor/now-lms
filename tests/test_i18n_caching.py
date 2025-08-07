@@ -23,7 +23,7 @@ from unittest import mock
 def test_i18n_configuration_caching(basic_config_setup):
     """Test that Flask-Babel configuration is cached and doesn't cause excessive database queries."""
     lms_application = basic_config_setup
-    
+
     with lms_application.app_context():
         from now_lms.i18n import get_configuracion, invalidate_configuracion_cache
         from now_lms.cache import cache
@@ -59,7 +59,7 @@ def test_i18n_configuration_caching(basic_config_setup):
 def test_multiple_view_requests_use_cached_configuration(basic_config_setup):
     """Test that multiple requests to different views use cached configuration in g."""
     lms_application = basic_config_setup
-    
+
     with lms_application.app_context():
         from now_lms.cache import cache
 
@@ -85,7 +85,7 @@ def test_multiple_view_requests_use_cached_configuration(basic_config_setup):
 def test_babel_selectors_use_g_configuration(basic_config_setup):
     """Test that Flask-Babel locale and timezone selectors use configuration from g."""
     lms_application = basic_config_setup
-    
+
     with lms_application.app_context():
         from now_lms.i18n import get_locale, get_timezone
         from flask import g
@@ -121,7 +121,7 @@ def test_babel_selectors_use_g_configuration(basic_config_setup):
 def test_request_level_configuration_loading(basic_config_setup):
     """Test that configuration is loaded into g once per request."""
     lms_application = basic_config_setup
-    
+
     with lms_application.app_context():
         from now_lms.cache import cache
 
@@ -145,7 +145,7 @@ def test_request_level_configuration_loading(basic_config_setup):
 def test_configuration_fallback_when_no_config_exists(minimal_db_setup):
     """Test that the system handles missing configuration gracefully."""
     lms_application = minimal_db_setup
-    
+
     with lms_application.app_context():
         from now_lms.i18n import get_configuracion, get_locale, get_timezone
         from now_lms.cache import cache

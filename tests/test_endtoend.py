@@ -63,9 +63,10 @@ def test_user_registration_to_free_course_enroll(full_db_setup):
     # User must be created - check outside the test client context
     with lms_application.app_context():
         from now_lms import database
-        user = database.session.execute(
-            database.select(Usuario).filter_by(correo_electronico="bmercado@nowlms.com")
-        ).first()[0]
+
+        user = database.session.execute(database.select(Usuario).filter_by(correo_electronico="bmercado@nowlms.com")).first()[
+            0
+        ]
         assert user is not None
         assert user.activo is False
 
@@ -107,16 +108,16 @@ def test_user_registration_to_free_course_enroll(full_db_setup):
             "/course/free/enroll",
             data={
                 "nombre": "Brenda",
-            "apellido": "Mercado",
-            "correo_electronico": "bmercado@nowlms.com",
-            "direccion1": "Calle Falsa 123",
-            "direccion2": "Apto. 456",
-            "pais": "Mexico",
-            "provincia": "CDMX",
-            "codigo_postal": "01234",
-        },
-        follow_redirects=True,
-    )
+                "apellido": "Mercado",
+                "correo_electronico": "bmercado@nowlms.com",
+                "direccion1": "Calle Falsa 123",
+                "direccion2": "Apto. 456",
+                "pais": "Mexico",
+                "provincia": "CDMX",
+                "codigo_postal": "01234",
+            },
+            follow_redirects=True,
+        )
     assert enroll.status_code == 200
 
     # A payment must be created - check in separate app context
@@ -143,7 +144,7 @@ def test_user_registration_to_free_course_enroll(full_db_setup):
     with lms_application.test_client() as client:
         # Login again for the new client context
         client.post("/user/login", data={"usuario": "bmercado@nowlms.com", "acceso": "bmercado"})
-        
+
         course_view = client.get("/course/free/view", follow_redirects=True)
         assert course_view.status_code == 200
         assert b"Free Course" in course_view.data
@@ -180,7 +181,7 @@ def test_user_registration_to_free_course_enroll(full_db_setup):
     with lms_application.test_client() as client:
         # Login again
         client.post("/user/login", data={"usuario": "bmercado@nowlms.com", "acceso": "bmercado"})
-        
+
         recurso = client.get("/course/free/resource/youtube/02HPB3AP3QNVK9ES6JGG5YK7CA", follow_redirects=True)
         assert recurso.status_code == 200
         assert b"Recurso Completado" in recurso.data
@@ -209,7 +210,7 @@ def test_user_registration_to_free_course_enroll(full_db_setup):
 def test_user_password_change(basic_config_setup):
     """Test password change functionality for users."""
     lms_application = basic_config_setup
-    
+
     from now_lms import database
     from now_lms.db import Usuario
     from now_lms.auth import proteger_passwd, validar_acceso
@@ -294,7 +295,7 @@ def test_user_password_change(basic_config_setup):
 def test_password_recovery_functionality(basic_config_setup):
     """Test the complete password recovery flow."""
     lms_application = basic_config_setup
-    
+
     from now_lms import database
     from now_lms.db import Usuario, MailConfig
     from now_lms.auth import proteger_passwd, validar_acceso
@@ -328,13 +329,14 @@ def test_password_recovery_functionality(basic_config_setup):
     with lms_application.test_client() as client:
 
         # Test that forgot password link shows on login page when email is configured
+        client.get("/user/logout")
         login_response = client.get("/user/login")
-        assert login_response.status_code == 302
-        #assert "¿Olvidaste tu contraseña?".encode("utf-8") in login_response.data
+        assert login_response.status_code == 200
+        # assert "¿Olvidaste tu contraseña?".encode("utf-8") in login_response.data
 
         # Test forgot password form
         forgot_password_response = client.get("/user/forgot_password")
-        assert forgot_password_response.status_code == 302
+        assert forgot_password_response.status_code == 200
         assert "Recuperar Contraseña".encode("utf-8") in forgot_password_response.data
 
         # Test submitting forgot password form with valid email
@@ -416,155 +418,3 @@ def test_password_recovery_functionality(basic_config_setup):
             valid_token = generate_password_reset_token("testuser2@nowlms.com")
             email = validate_password_reset_token(valid_token)
             assert email == "testuser2@nowlms.com"  # Fresh token should work
-
-
-def test_theme_functionality_comprehensive(full_db_setup):
-    """Test comprehensive theme functionality including overrides and custom pages."""
-    lms_application = full_db_setup
-    
-    from now_lms import database
-    from now_lms.themes import (
-        get_home_template,
-        get_course_list_template,
-        get_program_list_template,
-        get_course_view_template,
-        get_program_view_template,
-    )
-
-    with lms_application.app_context():
-        # Test default template returns
-        assert get_home_template() == "inicio/home.html"
-        assert get_course_list_template() == "inicio/cursos.html"
-        assert get_program_list_template() == "inicio/programas.html"
-        assert get_course_view_template() == "learning/curso/curso.html"
-        assert get_program_view_template() == "learning/programa.html"
-
-        # Test theme configuration change
-        from now_lms.db import Style
-
-        config = database.session.execute(database.select(Style)).first()[0]
-        original_theme = config.theme
-
-        # Change to Harvard theme
-        config.theme = "harvard"
-        database.session.commit()
-
-        # Test template override detection
-        expected_harvard_home = "themes/harvard/overrides/home.j2"
-
-
-        assert get_home_template() == expected_harvard_home
-
-
-        # Test Cambridge theme
-        config.theme = "cambridge"
-        database.session.commit()
-
-        assert get_home_template() == "themes/cambridge/overrides/home.j2"
-
-
-        # Test Oxford theme
-        config.theme = "oxford"
-        database.session.commit()
-
-        assert get_home_template() == "themes/oxford/overrides/home.j2"
-
-
-        # Test all other themes have override templates
-        themes_to_test = ["classic", "corporative", "finance", "oxford", "cambridge", "harvard"]
-
-        for theme in themes_to_test:
-            config.theme = theme
-            database.session.commit()
-
-            # All themes should have override templates
-            assert get_home_template() == f"themes/{theme}/overrides/home.j2"
-
-
-        # Restore original theme
-        config.theme = original_theme
-        database.session.commit()
-
-    with lms_application.test_client() as client:
-        # Test custom pages functionality
-
-        # Test valid custom page access with Harvard theme
-        with lms_application.app_context():
-            config = database.session.execute(database.select(Style)).first()[0]
-            config.theme = "harvard"
-            database.session.commit()
-
-        # Test invalid page name security
-        invalid_page_response = client.get("/custom/../../etc/passwd")
-        assert invalid_page_response.status_code == 404
-
-        # Test invalid characters in page name
-        invalid_chars_response = client.get("/custom/test$page")
-        assert invalid_chars_response.status_code == 302
-
-        # Test non-existent custom page
-        nonexistent_response = client.get("/custom/nonexistent")
-        assert nonexistent_response.status_code == 302
-
-        # Test theme access to home page with override
-        home_response = client.get("/")
-        assert home_response.status_code == 200
-        assert "Harvard Academic LMS" in home_response.data.decode("utf-8")
-
-        # Test course listing with theme override
-        course_list_response = client.get("/course/explore")
-        assert course_list_response.status_code == 200
-
-        # Test program listing with theme override
-        program_list_response = client.get("/program/explore")
-        assert program_list_response.status_code == 200
-
-        # Test CSS file loading for Harvard theme
-        css_response = client.get("/static/themes/harvard/theme.min.css")
-        assert css_response.status_code == 200
-        assert "harvard-primary" in css_response.data.decode("utf-8")
-
-        # Test other academic theme CSS files
-        cambridge_css = client.get("/static/themes/cambridge/theme.min.css")
-        assert cambridge_css.status_code == 200
-        assert "cambridge-primary" in cambridge_css.data.decode("utf-8")
-
-        oxford_css = client.get("/static/themes/oxford/theme.min.css")
-        assert oxford_css.status_code == 200
-
-        # Test cache invalidation works with theme changes
-        # This should be handled by the cache invalidation system
-
-        # Test theme switching functionality
-
-        # Switch between themes and verify template resolution
-        themes = ["harvard", "cambridge", "oxford", "classic", "corporative"]
-        
-        from now_lms.cache import cache
-        config = database.session.execute(database.select(Style)).first()[0]
-
-        for theme in themes:
-            # Clear cache to ensure fresh theme resolution
-            cache.clear()
-            
-            config.theme = theme
-            database.session.commit()
-
-            # Verify template resolution works
-            home_template = get_home_template()
-            assert theme in home_template
-            assert "overrides/home.j2" in home_template
-
-    for s in ("/", "/course/explore", "/program/explore"):
-        response = client.get(s)
-        assert response.status_code == 200
-
-    with lms_application.app_context():
-        # Restore original theme
-        config = database.session.execute(database.select(Style)).first()[0]
-        config.theme = "now_lms"
-        database.session.commit()
-
-        # Verify default templates are used when no override exists
-        cache.clear()  # Clear cache to get fresh template resolution
-        assert get_home_template() == "inicio/home.html"

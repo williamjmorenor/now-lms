@@ -36,7 +36,7 @@ def test_visit_views_anonimus(full_db_setup):
     """Test views accessible to anonymous users."""
     # Use the full_db_setup fixture that provides the populated database
     lms_application = full_db_setup
-    
+
     with lms_application.test_client() as client:
         for ruta in rutas_estaticas:
             route = ruta.ruta
