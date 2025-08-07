@@ -43,18 +43,14 @@ def lms_application():
     yield app
 
 
-"""
-def test_fill_all_forms(lms_application, request):
-
+def test_fill_all_forms(full_db_setup, request):
+    """Test form filling with full database setup."""
+    lms_application = full_db_setup
+    
     if request.config.getoption("--slow") == "True":
-
-        from now_lms import database, initial_setup
 
         with lms_application.app_context():
             from flask_login import current_user
-
-            database.drop_all()
-            initial_setup(with_tests=True, with_examples=False)
 
             with lms_application.test_client() as client:
                 # Keep the session alive until the with clausule closes
@@ -82,4 +78,3 @@ def test_fill_all_forms(lms_application, request):
                 client.get("/user/logout")
     else:
         pytest.skip("Not running slow test.")
-"""
