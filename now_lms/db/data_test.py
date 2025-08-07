@@ -78,7 +78,12 @@ def crear_categoria_prueba():
 def crear_certificado_prueba():
     """Crea certificado de prueba"""
 
-    certificado = Certificado(id="01HNP0TTQNTR03J7ZQHR09YMKK", titulo="Certficado Test", descripcion="Certificado Test")
+    certificado = Certificado(
+        id="01HNP0TTQNTR03J7ZQHR09YMKK", 
+        titulo="Certficado Test", 
+        descripcion="Certificado Test",
+        code="test"
+    )
     database.session.add(certificado)
     database.session.commit()
 
@@ -103,7 +108,7 @@ def crear_masterclass_prueba():
         platform_name="Zoom",
         platform_url="https://zoom.us/j/1234567890",
         is_certificate=True,
-        diploma_template_id="01HNP0TTQNTR03J7ZQHR09YMKK",  # Reference to test certificate
+        diploma_template_id="test",  # Reference to test certificate code
         instructor_id="admin",  # Admin user as instructor
     )
 
@@ -119,7 +124,7 @@ def crear_masterclass_prueba():
 
     # Create a certificate for the admin user
     certificacion = Certificacion(
-        usuario="admin", curso=None, master_class_id=masterclass.id, certificado="01HNP0TTQNTR03J7ZQHR09YMKK", nota=95.0
+        usuario="admin", curso=None, master_class_id=masterclass.id, certificado="test", nota=95.0
     )
 
     database.session.add(certificacion)
