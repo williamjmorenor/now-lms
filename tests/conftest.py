@@ -17,7 +17,7 @@
 
 import os
 import pytest
-from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy.exc import OperationalError, ProgrammingError, IntegrityError
 from pg8000.dbapi import ProgrammingError as PGProgrammingError
 from pg8000.exceptions import DatabaseError
 
@@ -76,7 +76,7 @@ def minimal_db_setup(lms_application):
             # Only create schema, don't populate with full data
             database.create_all()
             log.debug("Minimal database schema created.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Database setup error (continuing): {e}")
 
     yield lms_application  # Return the application with minimal database setup
@@ -84,14 +84,14 @@ def minimal_db_setup(lms_application):
     # Clean up after test
     with lms_application.app_context():
         try:
-            # For PostgreSQL, handle potential rollback issues
+            # For PostgreSQL and MySQL, handle potential rollback issues
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
             eliminar_base_de_datos_segura()
             log.debug("Minimal database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Database cleanup warning: {e}")
 
 
@@ -110,9 +110,9 @@ def full_db_setup(lms_application):
 
     with lms_application.app_context():
         try:
-            # For PostgreSQL, ensure clean state before setup
+            # For PostgreSQL and MySQL, ensure clean state before setup
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 try:
                     database.session.rollback()
                     database.session.close()
@@ -123,7 +123,7 @@ def full_db_setup(lms_application):
             eliminar_base_de_datos_segura()
             initial_setup(with_tests=True, with_examples=False)
             log.debug("Full database setup completed.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Full database setup error (continuing): {e}")
 
     yield lms_application  # Return the application with the full database setup
@@ -131,14 +131,14 @@ def full_db_setup(lms_application):
     # Clean up after test
     with lms_application.app_context():
         try:
-            # For PostgreSQL, handle potential rollback issues
+            # For PostgreSQL and MySQL, handle potential rollback issues
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
             eliminar_base_de_datos_segura()
             log.debug("Full database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Database cleanup warning: {e}")
 
 
@@ -157,9 +157,9 @@ def full_db_setup_with_examples(lms_application):
 
     with lms_application.app_context():
         try:
-            # For PostgreSQL, ensure clean state before setup
+            # For PostgreSQL and MySQL, ensure clean state before setup
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 try:
                     database.session.rollback()
                     database.session.close()
@@ -170,7 +170,7 @@ def full_db_setup_with_examples(lms_application):
             eliminar_base_de_datos_segura()
             initial_setup(with_tests=True, with_examples=True)
             log.debug("Full database setup completed.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Full database setup error (continuing): {e}")
 
     yield lms_application  # Return the application with the full database setup
@@ -178,14 +178,14 @@ def full_db_setup_with_examples(lms_application):
     # Clean up after test
     with lms_application.app_context():
         try:
-            # For PostgreSQL, handle potential rollback issues
+            # For PostgreSQL and MySQL, handle potential rollback issues
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
             eliminar_base_de_datos_segura()
             log.debug("Full database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Database cleanup warning: {e}")
 
 
@@ -205,7 +205,7 @@ def basic_config_setup(lms_application):
             database.create_all()
             crear_configuracion_predeterminada()
             log.debug("Basic configuration setup completed.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Basic config setup error (continuing): {e}")
 
     yield lms_application  # Return the application with basic configuration
@@ -213,12 +213,12 @@ def basic_config_setup(lms_application):
     # Clean up after test
     with lms_application.app_context():
         try:
-            # For PostgreSQL, handle potential rollback issues
+            # For PostgreSQL and MySQL, handle potential rollback issues
             db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower():
+            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
             eliminar_base_de_datos_segura()
             log.debug("Basic configuration cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
+        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Database cleanup warning: {e}")

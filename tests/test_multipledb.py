@@ -102,9 +102,22 @@ def test_mysql_mysqldb(database_url, request):
 
         with app.app_context():
             try:
+                # MySQL-specific session handling
+                try:
+                    database.session.rollback()
+                    database.session.close()
+                except:
+                    pass
+
                 eliminar_base_de_datos_segura()
                 initial_setup(with_tests=True, with_examples=True)
             except (OperationalError, IntegrityError) as e:
                 pytest.skip(f"MySQL test skipped due to database error: {e}")
+            finally:
+                try:
+                    database.session.rollback()
+                    database.session.close()
+                except:
+                    pass
     else:
         pytest.skip("Not mysql driver configured in environ.")
