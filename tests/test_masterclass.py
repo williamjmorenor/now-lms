@@ -26,7 +26,7 @@ class TestMasterClassBasic(TestCase):
 
     def setUp(self):
         from now_lms import app
-from now_lms.db import eliminar_base_de_datos_segura
+        from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -208,7 +208,7 @@ class TestMasterClassCertificates(TestCase):
 
     def setUp(self):
         from now_lms import app
-from now_lms.db import eliminar_base_de_datos_segura
+        from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
