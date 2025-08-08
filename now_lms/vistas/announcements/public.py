@@ -78,11 +78,11 @@ def course_announcements(course_id):
     # (Administradores e instructores pueden ver todos los anuncios)
     if current_user.tipo not in ["admin", "instructor"]:
         # Verificar si es estudiante del curso
-        enrollment = (
-            database.session.query(EstudianteCurso)
-            .filter(EstudianteCurso.usuario == current_user.usuario, EstudianteCurso.curso == course_id)
-            .first()
-        )
+        enrollment = database.session.execute(
+            database.select(EstudianteCurso).filter(
+                EstudianteCurso.usuario == current_user.usuario, EstudianteCurso.curso == course_id
+            )
+        ).scalar_one_or_none()
 
         if not enrollment:
             flash("No tienes acceso a los anuncios de este curso.", "error")
