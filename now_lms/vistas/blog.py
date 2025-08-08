@@ -26,7 +26,7 @@ from datetime import datetime
 # ---------------------------------------------------------------------------------------
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 
 # ---------------------------------------------------------------------------------------
 # Local resources
@@ -57,11 +57,11 @@ def ensure_unique_slug(title, post_id=None):
     counter = 1
 
     while True:
-        query = database.session.query(BlogPost).filter(BlogPost.slug == slug)
+        query = database.select(BlogPost).filter(BlogPost.slug == slug)
         if post_id:
             query = query.filter(BlogPost.id != post_id)
 
-        if not query.first():
+        if not database.session.execute(query).scalars().first():
             break
 
         slug = f"{base_slug}-{counter}"
@@ -98,7 +98,7 @@ def blog_index():
     )
 
     # Get all tags for filter
-    tags = database.session.query(BlogTag).order_by(BlogTag.name).all()
+    tags = database.session.execute(database.select(BlogTag).order_by(BlogTag.name)).scalars().all()
 
     return render_template(
         "blog/public_index.html",
@@ -113,14 +113,15 @@ def blog_index():
 @blog.route("/blog/<slug>")
 def blog_post(slug):
     """Display a single blog post."""
-    post = database.session.query(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published")).first_or_404()
+    post = database.session.execute(database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))).scalar_one_or_none()
+    if not post:
+        abort(404)
 
     # Get comments for this post
     comments = (
-        database.session.query(BlogComment)
+        database.session.execute(database.select(BlogComment)
         .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
-        .order_by(BlogComment.timestamp)
-        .all()
+        .order_by(BlogComment.timestamp)).scalars().all()
     )
 
     # Comment form
@@ -133,7 +134,9 @@ def blog_post(slug):
 @login_required
 def add_comment(slug):
     """Add a comment to a blog post."""
-    post = database.session.query(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published")).first_or_404()
+    post = database.session.execute(database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))).scalar_one_or_none()
+    if not post:
+        abort(404)
 
     if not post.allow_comments:
         flash("Los comentarios están deshabilitados para esta entrada.", "warning")
@@ -146,9 +149,8 @@ def add_comment(slug):
 
         # Update comment count
         post.comment_count = (
-            database.session.query(BlogComment)
-            .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
-            .count()
+            database.session.execute(database.select(func.count(BlogComment.id))
+            .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))).scalar()
             + 1
         )
 
