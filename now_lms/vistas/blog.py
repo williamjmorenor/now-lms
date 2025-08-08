@@ -33,7 +33,7 @@ from sqlalchemy import and_, or_
 # ---------------------------------------------------------------------------------------
 from now_lms.auth import perfil_requerido
 from now_lms.config import DIRECTORIO_PLANTILLAS
-from now_lms.db import MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA, BlogComment, BlogPost, BlogTag, database
+from now_lms.db import MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA, BlogComment, BlogPost, BlogTag, database, select
 from now_lms.forms import BlogCommentForm, BlogPostForm, BlogTagForm
 
 # Route constants
@@ -78,10 +78,10 @@ def blog_index():
     tag_slug = request.args.get("tag")
     author_id = request.args.get("author")
 
-    query = database.session.query(BlogPost).filter(BlogPost.status == "published")
+    query = select(BlogPost).filter(BlogPost.status == "published")
 
     if tag_slug:
-        tag = database.session.query(BlogTag).filter(BlogTag.slug == tag_slug).first()
+        tag = database.session.execute(select(BlogTag).filter(BlogTag.slug == tag_slug)).scalar_one_or_none()
         if tag:
             query = query.filter(BlogPost.tags.contains(tag))
 
@@ -184,7 +184,7 @@ def admin_blog_index():
     page = request.args.get("page", 1, type=int)
     status_filter = request.args.get("status", "all")
 
-    query = database.session.query(BlogPost)
+    query = select(BlogPost)
 
     if status_filter != "all":
         query = query.filter(BlogPost.status == status_filter)
@@ -492,9 +492,9 @@ def instructor_blog_index():
     page = request.args.get("page", 1, type=int)
 
     if current_user.tipo == "admin":
-        query = database.session.query(BlogPost)
+        query = select(BlogPost)
     else:
-        query = database.session.query(BlogPost).filter(BlogPost.author_id == current_user.usuario)
+        query = select(BlogPost).filter(BlogPost.author_id == current_user.usuario)
 
     query = query.order_by(BlogPost.timestamp.desc())
 

@@ -26,6 +26,7 @@
 from cuid2 import Cuid
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_, func, select
 
 # ---------------------------------------------------------------------------------------
 # Local resources
