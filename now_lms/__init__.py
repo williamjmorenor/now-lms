@@ -230,7 +230,7 @@ def config():  # pragma: no cover
 
     with lms_app.app_context():
         try:
-            CONFIG = database.session.execute(database.select(Configuracion)).scalar_one_or_none()
+            CONFIG = database.session.execute(database.select(Configuracion)).scalars().first()
         # Si no existe una entrada en la tabla de configuración uno de los siguientes errores puede ocurrir
         # en dependencia del motor de base de datos utilizado.
         except OperationalError:
