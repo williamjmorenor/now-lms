@@ -111,7 +111,7 @@ def crear_masterclass_prueba():
         platform_url="https://zoom.us/j/1234567890",
         is_certificate=True,
         diploma_template_id="lala",  # Reference to test certificate code
-        instructor_id="admin",  # Admin user as instructor
+        instructor_id=USUARIO_ADMINISTRADOR,  # Admin user as instructor
     )
 
     database.session.add(masterclass)
@@ -119,14 +119,14 @@ def crear_masterclass_prueba():
     database.session.refresh(masterclass)
 
     # Enroll admin user in the master class
-    enrollment = MasterClassEnrollment(master_class_id=masterclass.id, user_id="admin", is_confirmed=True, payment_id=None)
+    enrollment = MasterClassEnrollment(master_class_id=masterclass.id, user_id=USUARIO_ADMINISTRADOR, is_confirmed=True, payment_id=None)
 
     database.session.add(enrollment)
     database.session.commit()
 
     # Create a certificate for the admin user
     certificacion = Certificacion(
-        usuario="admin", curso=None, master_class_id=masterclass.id, certificado="lala", nota=95.0
+        usuario=USUARIO_ADMINISTRADOR, curso=None, master_class_id=masterclass.id, certificado="lala", nota=95.0
     )
 
     database.session.add(certificacion)
