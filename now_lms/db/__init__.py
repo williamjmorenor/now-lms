@@ -673,7 +673,7 @@ class ForoMensaje(database.Model, BaseTabla):
     @classmethod
     def close_all_for_course(cls, curso_codigo):
         """Cierra todos los mensajes del foro cuando un curso se finaliza."""
-        mensajes = database.session.query(cls).filter_by(curso_id=curso_codigo).all()
+        mensajes = database.session.execute(database.select(cls).filter_by(curso_id=curso_codigo)).scalars().all()
         for mensaje in mensajes:
             mensaje.estado = "cerrado"
         database.session.commit()

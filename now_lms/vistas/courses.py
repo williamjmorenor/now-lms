@@ -122,7 +122,7 @@ course = Blueprint("course", __name__, template_folder=DIRECTORIO_PLANTILLAS)
 def curso(course_code):
     """Pagina principal del curso."""
 
-    _curso = database.session.query(Curso).filter_by(codigo=course_code).first()
+    _curso = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalar_one_or_none()
 
     if current_user.is_authenticated and request.args.get("inspect"):
         if current_user.tipo == "admin":
@@ -145,8 +145,8 @@ def curso(course_code):
         return render_template(
             get_course_view_template(),
             curso=_curso,
-            secciones=database.session.query(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice).all(),
-            recursos=database.session.query(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice).all(),
+            secciones=database.session.execute(database.select(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice)).scalars().all(),
+            recursos=database.session.execute(database.select(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice)).scalars().all(),
             descargas=database.session.execute(
                 database.select(Recurso).join(CursoRecursoDescargable).filter(CursoRecursoDescargable.curso == course_code)
             ).all(),  # El join devuelve una tuple.
@@ -191,8 +191,8 @@ def course_enroll(course_code):
     from now_lms.db import EstudianteCurso
     from now_lms.forms import PagoForm
 
-    _curso = database.session.query(Curso).filter_by(codigo=course_code).first()
-    _usuario = database.session.query(Usuario).filter_by(usuario=current_user.usuario).first()
+    _curso = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalar_one_or_none()
+    _usuario = database.session.execute(database.select(Usuario).filter_by(usuario=current_user.usuario)).scalar_one_or_none()
 
     _modo = request.args.get("modo", "") or request.form.get("modo", "")
 
@@ -353,12 +353,12 @@ def tomar_curso(course_code):
         reopen_requests = database.session.query(EvaluationReopenRequest).filter_by(user_id=current_user.usuario).all()
 
         # Check if user has paid for course (for paid courses)
-        curso_obj = database.session.query(Curso).filter_by(codigo=course_code).first()
+        curso_obj = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalar_one_or_none()
         user_has_paid = True  # Default for free courses
         if curso_obj and curso_obj.pagado:
-            enrollment = (
-                database.session.query(EstudianteCurso).filter_by(curso=course_code, usuario=current_user.usuario).first()
-            )
+            enrollment = database.session.execute(
+                database.select(EstudianteCurso).filter_by(curso=course_code, usuario=current_user.usuario)
+            ).scalar_one_or_none()
             user_has_paid = enrollment and enrollment.pago
 
         # Check if user has a certificate for this course
