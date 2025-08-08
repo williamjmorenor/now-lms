@@ -21,36 +21,16 @@ Casos de uso mas comunes.
 """
 
 
-@pytest.fixture
-def lms_application():
-    from now_lms import app
-
-    app.config.update(
-        {
-            "TESTING": True,
-            "SECRET_KEY": "jgjañlsldaksjdklasjfkjj",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "WTF_CSRF_ENABLED": False,
-            "DEBUG": True,
-            "PRESERVE_CONTEXT_ON_EXCEPTION": True,
-            "SQLALCHEMY_ECHO": True,
-            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-            "MAIL_SUPPRESS_SEND": True,
-        }
-    )
-
-    yield app
-
-
-def test_user_registration_to_free_course_enroll(lms_application):
+def test_user_registration_to_free_course_enroll(basic_config_setup):
 
     from now_lms import database, initial_setup
     from now_lms.db import Usuario
 
-    with lms_application.app_context():
+    with basic_config_setup.app_context():
+        # This test needs a specific setup, so we recreate the database
         database.drop_all()
         initial_setup(with_tests=False, with_examples=False)
-        with lms_application.test_client() as client:
+        with basic_config_setup.test_client() as client:
             post = client.post(
                 "/user/logon",
                 data={
@@ -191,14 +171,14 @@ def test_user_registration_to_free_course_enroll(lms_application):
             assert certificate.certificado == "horizontal"
 
 
-def test_user_password_change(lms_application):
+def test_user_password_change(basic_config_setup):
     """Test password change functionality for users."""
 
     from now_lms import database, initial_setup
     from now_lms.db import Usuario
     from now_lms.auth import proteger_passwd, validar_acceso
 
-    with lms_application.app_context():
+    with basic_config_setup.app_context():
         database.drop_all()
         initial_setup(with_tests=False, with_examples=False)
 
@@ -216,7 +196,7 @@ def test_user_password_change(lms_application):
         database.session.add(test_user)
         database.session.commit()
 
-        with lms_application.test_client() as client:
+        with basic_config_setup.test_client() as client:
             # User logs in with old password
             login = client.post("/user/login", data={"usuario": "testuser@nowlms.com", "acceso": "oldpassword"})
             assert login.status_code == 302  # Redirect after successful login
@@ -278,14 +258,14 @@ def test_user_password_change(lms_application):
             assert new_login.status_code == 302  # Successful login redirect
 
 
-def test_password_recovery_functionality(lms_application):
+def test_password_recovery_functionality(basic_config_setup):
     """Test the complete password recovery flow."""
 
     from now_lms import database, initial_setup
     from now_lms.db import Usuario, MailConfig
     from now_lms.auth import proteger_passwd, validar_acceso
 
-    with lms_application.app_context():
+    with basic_config_setup.app_context():
         database.drop_all()
         initial_setup(with_tests=False, with_examples=False)
 
@@ -314,7 +294,7 @@ def test_password_recovery_functionality(lms_application):
         database.session.add(test_user)
         database.session.commit()
 
-    with lms_application.test_client() as client:
+    with basic_config_setup.test_client() as client:
 
         # Test that forgot password link shows on login page when email is configured
         login_response = client.get("/user/login")
@@ -337,7 +317,7 @@ def test_password_recovery_functionality(lms_application):
             mock_send_mail.assert_called_once()
 
         # Test submitting forgot password form with unverified email
-        with lms_application.app_context():
+        with basic_config_setup.app_context():
             unverified_user = Usuario(
                 usuario="unverified",
                 correo_electronico="unverified@nowlms.com",
@@ -360,7 +340,7 @@ def test_password_recovery_functionality(lms_application):
         assert "Se ha enviado un correo".encode("utf-8") in forgot_unverified.data
 
         # Test password reset with valid token
-        with lms_application.app_context():
+        with basic_config_setup.app_context():
             from now_lms.auth import generate_password_reset_token
 
             reset_token = generate_password_reset_token("testuser2@nowlms.com")
@@ -387,7 +367,7 @@ def test_password_recovery_functionality(lms_application):
         assert "Contraseña actualizada exitosamente".encode("utf-8") in reset_success.data
 
         # Verify password was actually changed
-        with lms_application.app_context():
+        with basic_config_setup.app_context():
             updated_user = database.session.execute(
                 database.select(Usuario).filter_by(correo_electronico="testuser2@nowlms.com")
             ).first()[0]
@@ -399,7 +379,7 @@ def test_password_recovery_functionality(lms_application):
         assert invalid_token_response.status_code == 302  # Redirect to login
 
         # Test that token validation works
-        with lms_application.app_context():
+        with basic_config_setup.app_context():
             from now_lms.auth import validate_password_reset_token, generate_password_reset_token
 
             valid_token = generate_password_reset_token("testuser2@nowlms.com")
@@ -407,7 +387,7 @@ def test_password_recovery_functionality(lms_application):
             assert email == "testuser2@nowlms.com"  # Fresh token should work
 
 
-def test_theme_functionality_comprehensive(lms_application):
+def test_theme_functionality_comprehensive(basic_config_setup):
     """Test comprehensive theme functionality including overrides and custom pages."""
 
     from now_lms import database, initial_setup
@@ -419,7 +399,7 @@ def test_theme_functionality_comprehensive(lms_application):
         get_program_view_template,
     )
 
-    with lms_application.app_context():
+    with basic_config_setup.app_context():
         try:
             initial_setup(with_tests=False, with_examples=False) # Do not need a freesh database for this test
         except:
@@ -478,11 +458,11 @@ def test_theme_functionality_comprehensive(lms_application):
         config.theme = original_theme
         database.session.commit()
 
-    with lms_application.test_client() as client:
+    with basic_config_setup.test_client() as client:
         # Test custom pages functionality
 
         # Test valid custom page access with Harvard theme
-        with lms_application.app_context():
+        with basic_config_setup.app_context():
             config = database.session.execute(database.select(Style)).first()[0]
             config.theme = "harvard"
             database.session.commit()

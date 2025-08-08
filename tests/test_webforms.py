@@ -23,28 +23,8 @@ import pytest
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 
-@pytest.fixture
-def lms_application():
-    from now_lms import app
-
-    app.config.update(
-        {
-            "TESTING": True,
-            "SECRET_KEY": "jgjañlsldaksjdklasjfkjj",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "WTF_CSRF_ENABLED": False,
-            "DEBUG": True,
-            "PRESERVE_CONTEXT_ON_EXCEPTION": True,
-            "SQLALCHEMY_ECHO": True,
-            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-        }
-    )
-
-    yield app
-
-
 """
-def test_fill_all_forms(lms_application, request):
+def test_fill_all_forms(full_db_setup, request):
 
     if request.config.getoption("--slow") == "True":
 
