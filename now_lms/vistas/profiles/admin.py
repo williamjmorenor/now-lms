@@ -31,7 +31,9 @@ admin_profile = Blueprint("admin_profile", __name__, template_folder=DIRECTORIO_
 def pagina_admin():
     """Perfil de usuario administrador."""
     return render_template(
-        "perfiles/admin.html", inactivos=database.session.execute(database.select(func.count(Usuario.id)).filter_by(activo=False)).scalar() or 0
+        "perfiles/admin.html",
+        inactivos=database.session.execute(database.select(func.count(Usuario.id)).filter_by(activo=False)).scalar()
+        or 0,
     )
 
 

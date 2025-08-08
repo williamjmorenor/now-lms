@@ -19,7 +19,7 @@ from datetime import datetime
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
 from flask_login import current_user, login_required
 from slugify import slugify
-from sqlalchemy import and_, func
+from sqlalchemy import and_
 
 from now_lms.db import (
     MasterClass,
@@ -44,9 +44,9 @@ def list_public():
         select(MasterClass)
         .filter(MasterClass.date >= datetime.now().date())
         .order_by(MasterClass.date.asc(), MasterClass.start_time.asc()),
-        page=page, 
-        per_page=per_page, 
-        error_out=False
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
     return render_template("masterclass/list_public.html", master_classes=master_classes, title="Clases Magistrales")
@@ -63,9 +63,11 @@ def detail_public(slug):
     enrollment = None
     if current_user.is_authenticated:
         enrollment = (
-            database.session.execute(select(MasterClassEnrollment)
-            .filter_by(master_class_id=master_class.id, user_id=current_user.usuario))
-            .scalars().first()
+            database.session.execute(
+                select(MasterClassEnrollment).filter_by(master_class_id=master_class.id, user_id=current_user.usuario)
+            )
+            .scalars()
+            .first()
         )
 
     return render_template(
@@ -83,9 +85,11 @@ def enroll(slug):
 
     # Check if already enrolled
     existing_enrollment = (
-        database.session.execute(select(MasterClassEnrollment)
-        .filter_by(master_class_id=master_class.id, user_id=current_user.usuario))
-        .scalars().first()
+        database.session.execute(
+            select(MasterClassEnrollment).filter_by(master_class_id=master_class.id, user_id=current_user.usuario)
+        )
+        .scalars()
+        .first()
     )
 
     if existing_enrollment:
@@ -124,15 +128,15 @@ def instructor_list():
     per_page = 10
 
     master_classes = database.paginate(
-        select(MasterClass)
-        .filter_by(instructor_id=current_user.usuario)
-        .order_by(MasterClass.date.desc()),
-        page=page, 
-        per_page=per_page, 
-        error_out=False
+        select(MasterClass).filter_by(instructor_id=current_user.usuario).order_by(MasterClass.date.desc()),
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
-    return render_template("masterclass/instructor_list.html", master_classes=master_classes, title="Mis Clases Magistrales")
+    return render_template(
+        "masterclass/instructor_list.html", master_classes=master_classes, title="Mis Clases Magistrales"
+    )
 
 
 @masterclass.route("/instructor/create", methods=["GET", "POST"])
@@ -204,12 +208,22 @@ def instructor_edit(id):
             slug = slugify(form.title.data)
             counter = 1
             original_slug = slug
-            existing = database.session.execute(select(MasterClass).filter(and_(MasterClass.slug == slug, MasterClass.id != id))).scalars().first()
+            existing = (
+                database.session.execute(
+                    select(MasterClass).filter(and_(MasterClass.slug == slug, MasterClass.id != id))
+                )
+                .scalars()
+                .first()
+            )
             while existing:
                 slug = f"{original_slug}-{counter}"
                 counter += 1
                 existing = (
-                    database.session.execute(select(MasterClass).filter(and_(MasterClass.slug == slug, MasterClass.id != id))).scalars().first()
+                    database.session.execute(
+                        select(MasterClass).filter(and_(MasterClass.slug == slug, MasterClass.id != id))
+                    )
+                    .scalars()
+                    .first()
                 )
             master_class.slug = slug
 
@@ -258,9 +272,9 @@ def instructor_students(id):
         .filter_by(master_class_id=id)
         .join(Usuario, MasterClassEnrollment.user_id == Usuario.usuario)
         .order_by(MasterClassEnrollment.enrolled_at.desc()),
-        page=page, 
-        per_page=per_page, 
-        error_out=False
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
     return render_template(
@@ -283,9 +297,9 @@ def my_enrollments():
         .filter_by(user_id=current_user.usuario)
         .join(MasterClass)
         .order_by(MasterClass.date.desc()),
-        page=page, 
-        per_page=per_page, 
-        error_out=False
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
     return render_template("masterclass/my_enrollments.html", enrollments=enrollments, title="Mis Clases Magistrales")
@@ -305,9 +319,9 @@ def admin_list():
         select(MasterClass)
         .join(Usuario, MasterClass.instructor_id == Usuario.usuario)
         .order_by(MasterClass.date.desc()),
-        page=page, 
-        per_page=per_page, 
-        error_out=False
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
     return render_template(

@@ -813,10 +813,18 @@ def crear_curso_demo3():
 def asignar_cursos_a_etiquetas():
     """Asigna cursos a Categorias."""
     log.trace("Assigning tags to courses.")
-    etiqueta_python = database.session.execute(database.select(Etiqueta).filter(Etiqueta.nombre == "Python")).scalar_one_or_none()
-    etiqueta_postgresql = database.session.execute(database.select(Etiqueta).filter(Etiqueta.nombre == "Postgresql")).scalar_one_or_none()
-    etiqueta_html = database.session.execute(database.select(Etiqueta).filter(Etiqueta.nombre == "HTML")).scalar_one_or_none()
-    etiqueta_learning = database.session.execute(database.select(Etiqueta).filter(Etiqueta.nombre == "Learning")).scalar_one_or_none()
+    etiqueta_python = database.session.execute(
+        database.select(Etiqueta).filter(Etiqueta.nombre == "Python")
+    ).scalar_one_or_none()
+    etiqueta_postgresql = database.session.execute(
+        database.select(Etiqueta).filter(Etiqueta.nombre == "Postgresql")
+    ).scalar_one_or_none()
+    etiqueta_html = database.session.execute(
+        database.select(Etiqueta).filter(Etiqueta.nombre == "HTML")
+    ).scalar_one_or_none()
+    etiqueta_learning = database.session.execute(
+        database.select(Etiqueta).filter(Etiqueta.nombre == "Learning")
+    ).scalar_one_or_none()
 
     registro1 = EtiquetaCurso(curso="postgresql", etiqueta=etiqueta_postgresql.id)
     registro2 = EtiquetaCurso(curso="python", etiqueta=etiqueta_python.id)
@@ -834,8 +842,12 @@ def asignar_cursos_a_etiquetas():
 
 def asignar_cursos_a_categoria():
     """Asigna cursos a Categorias."""
-    categoria_learning = database.session.execute(database.select(Categoria).filter(Categoria.nombre == "Learning")).scalar_one_or_none()
-    categoria_programing = database.session.execute(database.select(Categoria).filter(Categoria.nombre == "Programing")).scalar_one_or_none()
+    categoria_learning = database.session.execute(
+        database.select(Categoria).filter(Categoria.nombre == "Learning")
+    ).scalar_one_or_none()
+    categoria_programing = database.session.execute(
+        database.select(Categoria).filter(Categoria.nombre == "Programing")
+    ).scalar_one_or_none()
 
     registro1 = CategoriaCurso(curso="postgresql", categoria=categoria_programing.id)
     registro2 = CategoriaCurso(curso="python", categoria=categoria_programing.id)
@@ -894,7 +906,9 @@ def crear_programa():
     database.session.commit()
 
     # Asigna cursos a programa
-    programa = database.session.execute(database.select(Programa).filter(Programa.codigo == "P001")).scalar_one_or_none()
+    programa = database.session.execute(
+        database.select(Programa).filter(Programa.codigo == "P001")
+    ).scalar_one_or_none()
     for curso in ["postgresql", "python", "html"]:
         curso = database.session.execute(database.select(Curso).filter(Curso.codigo == curso)).scalar_one_or_none()
         registro = ProgramaCurso(

@@ -58,7 +58,9 @@ class MasterClassForm(FlaskForm):
         "Hora de Inicio", validators=[DataRequired(message="La hora de inicio es requerida")], format="%H:%M"
     )
 
-    end_time = TimeField("Hora de Fin", validators=[DataRequired(message="La hora de fin es requerida")], format="%H:%M")
+    end_time = TimeField(
+        "Hora de Fin", validators=[DataRequired(message="La hora de fin es requerida")], format="%H:%M"
+    )
 
     platform_name = SelectField(
         "Plataforma",

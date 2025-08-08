@@ -95,6 +95,7 @@ def tags():
 def delete_tag(ulid: str):
     """Elimina una etiqueta."""
     from sqlalchemy import delete
+
     database.session.execute(delete(Etiqueta).where(Etiqueta.id == ulid))
     database.session.commit()
     return redirect(url_for(TAG_TAGS_ROUTE))

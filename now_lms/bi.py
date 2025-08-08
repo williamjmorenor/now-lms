@@ -35,7 +35,16 @@ from flask_login import current_user
 # ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
-from now_lms.db import Curso, CursoRecurso, CursoSeccion, DocenteCurso, EstudianteCurso, ModeradorCurso, Usuario, database
+from now_lms.db import (
+    Curso,
+    CursoRecurso,
+    CursoSeccion,
+    DocenteCurso,
+    EstudianteCurso,
+    ModeradorCurso,
+    Usuario,
+    database,
+)
 from now_lms.logs import log
 
 
@@ -83,9 +92,13 @@ def modificar_indice_curso(
 def reorganiza_indice_curso(codigo_curso: Union[None, str] = None):
     """Al eliminar una sección de un curso se debe generar el indice nuevamente."""
 
-    secciones = database.session.execute(
-        database.select(CursoSeccion).filter_by(curso=codigo_curso).order_by(CursoSeccion.indice)
-    ).scalars().all()
+    secciones = (
+        database.session.execute(
+            database.select(CursoSeccion).filter_by(curso=codigo_curso).order_by(CursoSeccion.indice)
+        )
+        .scalars()
+        .all()
+    )
     if secciones:
         indice = 1
         for seccion in secciones:
@@ -98,9 +111,11 @@ def reorganiza_indice_curso(codigo_curso: Union[None, str] = None):
 def reorganiza_indice_seccion(seccion: Union[None, str] = None):
     """Al eliminar una sección de un curso se debe generar el indice nuevamente."""
 
-    recursos = database.session.execute(
-        database.select(CursoRecurso).filter_by(seccion=seccion).order_by(CursoRecurso.indice)
-    ).scalars().all()
+    recursos = (
+        database.session.execute(database.select(CursoRecurso).filter_by(seccion=seccion).order_by(CursoRecurso.indice))
+        .scalars()
+        .all()
+    )
     if recursos:
         indice = 1
         for recurso in recursos:
@@ -125,15 +140,21 @@ def modificar_indice_seccion(
 
     # Obtenemos lista de recursos de la base de datos.
     RECURSO_ACTUAL = database.session.execute(
-        database.select(CursoRecurso).filter(CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_ACTUAL)
+        database.select(CursoRecurso).filter(
+            CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_ACTUAL
+        )
     ).scalar_one_or_none()
 
     RECURSO_ANTERIOR = database.session.execute(
-        database.select(CursoRecurso).filter(CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_ANTERIOR)
+        database.select(CursoRecurso).filter(
+            CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_ANTERIOR
+        )
     ).scalar_one_or_none()
 
     RECURSO_POSTERIOR = database.session.execute(
-        database.select(CursoRecurso).filter(CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_POSTERIOR)
+        database.select(CursoRecurso).filter(
+            CursoRecurso.seccion == seccion_id, CursoRecurso.indice == NO_INDICE_POSTERIOR
+        )
     ).scalar_one_or_none()
 
     if task == "increment" and RECURSO_POSTERIOR:

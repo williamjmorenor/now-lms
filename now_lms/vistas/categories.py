@@ -91,6 +91,7 @@ def categories():
 def delete_category(ulid: str):
     """Elimina categoria."""
     from sqlalchemy import delete
+
     database.session.execute(delete(Categoria).where(Categoria.id == ulid))
     database.session.commit()
     return redirect("/categories")

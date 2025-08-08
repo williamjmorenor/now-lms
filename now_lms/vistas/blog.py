@@ -113,15 +113,21 @@ def blog_index():
 @blog.route("/blog/<slug>")
 def blog_post(slug):
     """Display a single blog post."""
-    post = database.session.execute(database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))).scalar_one_or_none()
+    post = database.session.execute(
+        database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))
+    ).scalar_one_or_none()
     if not post:
         abort(404)
 
     # Get comments for this post
     comments = (
-        database.session.execute(database.select(BlogComment)
-        .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
-        .order_by(BlogComment.timestamp)).scalars().all()
+        database.session.execute(
+            database.select(BlogComment)
+            .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
+            .order_by(BlogComment.timestamp)
+        )
+        .scalars()
+        .all()
     )
 
     # Comment form
@@ -134,7 +140,9 @@ def blog_post(slug):
 @login_required
 def add_comment(slug):
     """Add a comment to a blog post."""
-    post = database.session.execute(database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))).scalar_one_or_none()
+    post = database.session.execute(
+        database.select(BlogPost).filter(and_(BlogPost.slug == slug, BlogPost.status == "published"))
+    ).scalar_one_or_none()
     if not post:
         abort(404)
 
@@ -144,13 +152,18 @@ def add_comment(slug):
 
     form = BlogCommentForm()
     if form.validate_on_submit():
-        comment = BlogComment(post_id=post.id, user_id=current_user.usuario, content=form.content.data, status="visible")
+        comment = BlogComment(
+            post_id=post.id, user_id=current_user.usuario, content=form.content.data, status="visible"
+        )
         database.session.add(comment)
 
         # Update comment count
         post.comment_count = (
-            database.session.execute(database.select(func.count(BlogComment.id))
-            .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))).scalar()
+            database.session.execute(
+                database.select(func.count(BlogComment.id)).filter(
+                    and_(BlogComment.post_id == post.id, BlogComment.status == "visible")
+                )
+            ).scalar()
             + 1
         )
 
@@ -396,7 +409,9 @@ def create_tag():
 
         # Check if tag already exists
         existing_tag = (
-            database.session.execute(select(BlogTag).filter(or_(BlogTag.name == form.name.data, BlogTag.slug == slug))).scalars().first()
+            database.session.execute(select(BlogTag).filter(or_(BlogTag.name == form.name.data, BlogTag.slug == slug)))
+            .scalars()
+            .first()
         )
 
         if existing_tag:
@@ -443,11 +458,11 @@ def ban_comment(comment_id):
     comment.status = "banned"
 
     # Update comment count
-    comment.post.comment_count = (
-        database.session.execute(select(func.count(BlogComment.id))
-        .filter(and_(BlogComment.post_id == comment.post_id, BlogComment.status == "visible")))
-        .scalar()
-    )
+    comment.post.comment_count = database.session.execute(
+        select(func.count(BlogComment.id)).filter(
+            and_(BlogComment.post_id == comment.post_id, BlogComment.status == "visible")
+        )
+    ).scalar()
 
     database.session.commit()
 
@@ -473,11 +488,9 @@ def delete_comment(comment_id):
 
     # Update comment count
     post = comment.post
-    post.comment_count = (
-        database.session.execute(select(func.count(BlogComment.id))
-        .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible")))
-        .scalar()
-    )
+    post.comment_count = database.session.execute(
+        select(func.count(BlogComment.id)).filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
+    ).scalar()
 
     database.session.commit()
 

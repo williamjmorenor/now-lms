@@ -62,7 +62,9 @@ def validar_acceso(usuario_id, acceso):
     registro = database.session.execute(database.select(Usuario).filter_by(usuario=usuario_id)).scalar_one_or_none()
 
     if not registro:
-        registro = database.session.execute(database.select(Usuario).filter_by(correo_electronico=usuario_id)).scalar_one_or_none()
+        registro = database.session.execute(
+            database.select(Usuario).filter_by(correo_electronico=usuario_id)
+        ).scalar_one_or_none()
 
     if registro is not None:
         try:

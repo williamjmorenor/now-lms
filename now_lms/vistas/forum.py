@@ -59,17 +59,29 @@ forum = Blueprint("forum", __name__)
 def verificar_acceso_curso(course_code, usuario_id):
     """Verifica si un usuario tiene acceso al curso."""
     # Verificar si es instructor
-    instructor = database.session.execute(select(DocenteCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True)).scalars().first()
+    instructor = (
+        database.session.execute(select(DocenteCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True))
+        .scalars()
+        .first()
+    )
     if instructor:
         return True, "instructor"
 
     # Verificar si es moderador
-    moderador = database.session.execute(select(ModeradorCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True)).scalars().first()
+    moderador = (
+        database.session.execute(select(ModeradorCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True))
+        .scalars()
+        .first()
+    )
     if moderador:
         return True, "moderador"
 
     # Verificar si es estudiante
-    estudiante = database.session.execute(select(EstudianteCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True)).scalars().first()
+    estudiante = (
+        database.session.execute(select(EstudianteCurso).filter_by(curso=course_code, usuario=usuario_id, vigente=True))
+        .scalars()
+        .first()
+    )
     if estudiante:
         return True, "estudiante"
 
@@ -108,12 +120,10 @@ def ver_foro(course_code):
     # Obtener mensajes principales (sin parent_id) paginados
     page = request.args.get("page", 1, type=int)
     mensajes = database.paginate(
-        select(ForoMensaje)
-        .filter_by(curso_id=course_code, parent_id=None)
-        .order_by(ForoMensaje.fecha_creacion.desc()),
-        page=page, 
-        per_page=10, 
-        error_out=False
+        select(ForoMensaje).filter_by(curso_id=course_code, parent_id=None).order_by(ForoMensaje.fecha_creacion.desc()),
+        page=page,
+        per_page=10,
+        error_out=False,
     )
 
     # Procesar contenido markdown
@@ -122,7 +132,9 @@ def ver_foro(course_code):
 
     puede_cerrar = puede_cerrar_mensajes(role, current_user.tipo)
 
-    return render_template("forum/forum_list.html", curso=curso, mensajes=mensajes, role=role, puede_cerrar=puede_cerrar)
+    return render_template(
+        "forum/forum_list.html", curso=curso, mensajes=mensajes, role=role, puede_cerrar=puede_cerrar
+    )
 
 
 @forum.route("/course/<course_code>/forum/new", methods=["GET", "POST"])
@@ -165,7 +177,9 @@ def ver_mensaje(course_code, message_id):
     """Ver un mensaje específico con sus respuestas."""
     # Verificar curso y mensaje
     curso = database.session.execute(select(Curso).filter_by(codigo=course_code)).scalars().first()
-    mensaje = database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    mensaje = (
+        database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    )
 
     if not curso or not mensaje or not curso.foro_habilitado:
         abort(404)
@@ -179,10 +193,13 @@ def ver_mensaje(course_code, message_id):
 
     # Obtener todas las respuestas del hilo
     respuestas = (
-        database.session.execute(select(ForoMensaje)
-        .filter_by(curso_id=course_code, parent_id=mensaje_raiz.id)
-        .order_by(ForoMensaje.fecha_creacion.asc()))
-        .scalars().all()
+        database.session.execute(
+            select(ForoMensaje)
+            .filter_by(curso_id=course_code, parent_id=mensaje_raiz.id)
+            .order_by(ForoMensaje.fecha_creacion.asc())
+        )
+        .scalars()
+        .all()
     )
 
     # Procesar contenido markdown
@@ -210,7 +227,9 @@ def responder_mensaje(course_code, message_id):
     """Responder a un mensaje del foro."""
     # Verificar curso y mensaje
     curso = database.session.execute(select(Curso).filter_by(codigo=course_code)).scalars().first()
-    mensaje = database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    mensaje = (
+        database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    )
 
     if not curso or not mensaje or not curso.foro_habilitado:
         abort(404)
@@ -256,7 +275,9 @@ def cerrar_mensaje(course_code, message_id):
     """Cerrar un mensaje/hilo del foro (solo instructores, moderadores y admins)."""
     # Verificar curso y mensaje
     curso = database.session.execute(select(Curso).filter_by(codigo=course_code)).scalars().first()
-    mensaje = database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    mensaje = (
+        database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    )
 
     if not curso or not mensaje:
         abort(404)
@@ -284,7 +305,9 @@ def abrir_mensaje(course_code, message_id):
     """Abrir un mensaje/hilo del foro (solo instructores, moderadores y admins)."""
     # Verificar curso y mensaje
     curso = database.session.execute(select(Curso).filter_by(codigo=course_code)).scalars().first()
-    mensaje = database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    mensaje = (
+        database.session.execute(select(ForoMensaje).filter_by(id=message_id, curso_id=course_code)).scalars().first()
+    )
 
     if not curso or not mensaje:
         abort(404)

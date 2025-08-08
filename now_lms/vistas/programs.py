@@ -170,7 +170,9 @@ def edit_program(ulid: str):
             database.session.commit()
             if "logo" in request.files:
                 try:
-                    picture_file = images.save(request.files["logo"], folder="program" + programa.codigo, name="logo.jpg")
+                    picture_file = images.save(
+                        request.files["logo"], folder="program" + programa.codigo, name="logo.jpg"
+                    )
                     if picture_file:
                         programa.logo = True
                         flash("Portada del curso actualizada correctamente", "success")
@@ -243,5 +245,9 @@ def lista_programas():
         PARAMETROS = None
 
     return render_template(
-        get_program_list_template(), cursos=consulta_cursos, etiquetas=etiquetas, categorias=categorias, parametros=PARAMETROS
+        get_program_list_template(),
+        cursos=consulta_cursos,
+        etiquetas=etiquetas,
+        categorias=categorias,
+        parametros=PARAMETROS,
     )

@@ -42,7 +42,13 @@ def check_user_evaluations_completed(course_code, user_id):
         tuple: (all_passed, failed_evaluations_count, total_evaluations_count)
     """
     # Get all evaluations for the course
-    evaluations = database.session.execute(database.select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)).scalars().all()
+    evaluations = (
+        database.session.execute(
+            database.select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)
+        )
+        .scalars()
+        .all()
+    )
 
     if not evaluations:
         # No evaluations = all passed
@@ -54,14 +60,17 @@ def check_user_evaluations_completed(course_code, user_id):
     for evaluation in evaluations:
         # Check if user has passed this evaluation
         passed_attempt = (
-            database.session.execute(database.select(EvaluationAttempt)
-            .filter(
-                and_(
-                    EvaluationAttempt.evaluation_id == evaluation.id,
-                    EvaluationAttempt.user_id == user_id,
-                    EvaluationAttempt.passed is True,
+            database.session.execute(
+                database.select(EvaluationAttempt).filter(
+                    and_(
+                        EvaluationAttempt.evaluation_id == evaluation.id,
+                        EvaluationAttempt.user_id == user_id,
+                        EvaluationAttempt.passed is True,
+                    )
                 )
-            )).scalars().first()
+            )
+            .scalars()
+            .first()
         )
 
         if not passed_attempt:
@@ -82,7 +91,13 @@ def get_user_evaluation_status(course_code, user_id):
     Returns:
         dict: Evaluation status information
     """
-    evaluations = database.session.execute(database.select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)).scalars().all()
+    evaluations = (
+        database.session.execute(
+            database.select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)
+        )
+        .scalars()
+        .all()
+    )
 
     status = {
         "total_evaluations": len(evaluations),
@@ -95,9 +110,13 @@ def get_user_evaluation_status(course_code, user_id):
     for evaluation in evaluations:
         # Get user's best attempt for this evaluation
         best_attempt = (
-            database.session.execute(database.select(EvaluationAttempt)
-            .filter(and_(EvaluationAttempt.evaluation_id == evaluation.id, EvaluationAttempt.user_id == user_id))
-            .order_by(EvaluationAttempt.score.desc())).scalars().first()
+            database.session.execute(
+                database.select(EvaluationAttempt)
+                .filter(and_(EvaluationAttempt.evaluation_id == evaluation.id, EvaluationAttempt.user_id == user_id))
+                .order_by(EvaluationAttempt.score.desc())
+            )
+            .scalars()
+            .first()
         )
 
         if best_attempt:
@@ -119,8 +138,11 @@ def get_user_evaluation_status(course_code, user_id):
                 "passing_score": evaluation.passing_score,
                 "status": eval_status,
                 "best_score": best_attempt.score if best_attempt else None,
-                "attempts_count": database.session.execute(database.select(func.count(EvaluationAttempt.id))
-                .filter(and_(EvaluationAttempt.evaluation_id == evaluation.id, EvaluationAttempt.user_id == user_id))).scalar(),
+                "attempts_count": database.session.execute(
+                    database.select(func.count(EvaluationAttempt.id)).filter(
+                        and_(EvaluationAttempt.evaluation_id == evaluation.id, EvaluationAttempt.user_id == user_id)
+                    )
+                ).scalar(),
             }
         )
 
@@ -143,14 +165,22 @@ def can_user_receive_certificate(course_code, user_id):
     all_evaluations_passed, failed_count, total_evaluations = check_user_evaluations_completed(course_code, user_id)
 
     if not all_evaluations_passed:
-        return False, f"Debe aprobar todas las evaluaciones. {failed_count} de {total_evaluations} evaluaciones no aprobadas."
+        return (
+            False,
+            f"Debe aprobar todas las evaluaciones. {failed_count} de {total_evaluations} evaluaciones no aprobadas.",
+        )
 
     # Check resource completion (existing functionality)
     from now_lms.db import CursoUsuarioAvance
 
     avance = (
-        database.session.execute(database.select(CursoUsuarioAvance)
-        .filter(and_(CursoUsuarioAvance.curso == course_code, CursoUsuarioAvance.usuario == user_id))).scalars().first()
+        database.session.execute(
+            database.select(CursoUsuarioAvance).filter(
+                and_(CursoUsuarioAvance.curso == course_code, CursoUsuarioAvance.usuario == user_id)
+            )
+        )
+        .scalars()
+        .first()
     )
 
     if not avance or not avance.completado:

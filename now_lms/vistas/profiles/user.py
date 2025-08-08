@@ -41,7 +41,9 @@ def pagina_estudiante():
 @login_required
 def perfil():
     """Perfil del usuario."""
-    registro_usuario = database.session.execute(database.select(Usuario).filter(Usuario.id == current_user.id)).first()[0]
+    registro_usuario = database.session.execute(database.select(Usuario).filter(Usuario.id == current_user.id)).first()[
+        0
+    ]
 
     # Initialize context data
     cursos_inscritos = []
@@ -91,7 +93,9 @@ def perfil():
 @login_required
 def usuario(id_usuario):
     """Acceso administrativo al perfil de un usuario."""
-    perfil_usuario = database.session.execute(database.select(Usuario).filter_by(usuario=id_usuario)).scalar_one_or_none()
+    perfil_usuario = database.session.execute(
+        database.select(Usuario).filter_by(usuario=id_usuario)
+    ).scalar_one_or_none()
     # La misma plantilla del perfil de usuario con permisos elevados como
     # activar desactivar el perfil o cambiar el perfil del usuario.
     if current_user.usuario == id_usuario or current_user.tipo != "student" or perfil_usuario.visible is True:

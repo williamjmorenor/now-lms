@@ -26,7 +26,8 @@
 from cuid2 import Cuid
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, func, select
+from sqlalchemy import select
+
 
 # ---------------------------------------------------------------------------------------
 # Local resources
@@ -233,7 +234,9 @@ class CursoRecurso(database.Model, BaseTabla):
     """Una sección de un curso consta de una serie de recursos."""
 
     indice = database.Column(database.Integer(), index=True)
-    seccion = database.Column(database.String(26), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True)
+    seccion = database.Column(
+        database.String(26), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True
+    )
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
     rel_curso = database.relationship("Curso")
     nombre = database.Column(database.String(150), nullable=False)
@@ -262,8 +265,12 @@ class CursoRecursoAvance(database.Model, BaseTabla):
     """
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    recurso = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True
+    )
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     completado = database.Column(database.Boolean(), default=False)
     requerido = database.Column(database.String(10))
 
@@ -272,7 +279,9 @@ class CursoUsuarioAvance(database.Model, BaseTabla):
     """Control del avance de un usuario en un curso."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     recursos_requeridos = database.Column(database.Integer, default=0)  # Cantidad de recursos requeridos
     recursos_completados = database.Column(database.Integer, default=0)  # Cantidad de recursos completados
     avance = database.Column(database.Float(asdecimal=True), default=0.0)  # Porcentaje de avance del curso
@@ -287,8 +296,12 @@ class CursoRecursoPregunta(database.Model, BaseTabla):
     indice = database.Column(database.Integer())
     codigo = database.Column(database.String(32), unique=False)
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    seccion = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True)
-    recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True)
+    seccion = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True
+    )
+    recurso = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True
+    )
     # Tipo:
     # boleano: Verdadero o Falso
     # seleccionar: El usuario debe seleccionar una de varias opciónes.
@@ -303,8 +316,12 @@ class CursoRecursoPreguntaOpcion(database.Model, BaseTabla):
     """Las preguntas tienen opciones."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True)
-    pregunta = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_PREGUNTA), nullable=False, index=True)
+    recurso = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True
+    )
+    pregunta = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_PREGUNTA), nullable=False, index=True
+    )
     texto = database.Column(database.String(50))
     boleano = database.Column(database.Boolean())
     correcta = database.Column(database.Boolean())
@@ -314,9 +331,15 @@ class CursoRecursoPreguntaRespuesta(database.Model, BaseTabla):
     """Respuestas de los usuarios a las preguntas del curso."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True)
-    pregunta = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_PREGUNTA), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    recurso = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True
+    )
+    pregunta = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_PREGUNTA), nullable=False, index=True
+    )
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     texto = database.Column(database.String(500))
     boleano = database.Column(database.Boolean())
     correcta = database.Column(database.Boolean())
@@ -338,7 +361,9 @@ class SlideShowResource(database.Model, BaseTabla):
 
     __tablename__ = "slide_show_resource"
 
-    course_id = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
+    course_id = database.Column(
+        database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True
+    )
     title = database.Column(database.String(150), nullable=False)
     theme = database.Column(database.String(20), nullable=False, default="simple")
 
@@ -374,7 +399,9 @@ class CursoRecursoSlideShow(database.Model, BaseTabla):
     descripcion = database.Column(database.String(250), nullable=False)
     codigo = database.Column(database.String(32), unique=False)
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True)
+    recurso = database.Column(
+        database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False, index=True
+    )
     usuario = database.Column(database.String(20), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False)
 
 
@@ -386,7 +413,9 @@ class CursoRecursoSlides(database.Model, BaseTabla):
     indice = database.Column(database.Integer())
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False)
     recurso = database.Column(database.String(32), database.ForeignKey(LLAVE_FORANEA_RECURSO), nullable=False)
-    slide_show = database.Column(database.String(32), database.ForeignKey("curso_recurso_slide_show.codigo"), nullable=False)
+    slide_show = database.Column(
+        database.String(32), database.ForeignKey("curso_recurso_slide_show.codigo"), nullable=False
+    )
 
 
 class Files(database.Model, BaseTabla):
@@ -402,7 +431,9 @@ class DocenteCurso(database.Model, BaseTabla):
     """Uno o mas usuario de tipo intructor pueden estar a cargo de un curso."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     vigente = database.Column(database.Boolean())
 
 
@@ -410,7 +441,9 @@ class ModeradorCurso(database.Model, BaseTabla):
     """Uno o mas usuario de tipo moderator pueden estar a cargo de un curso."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     vigente = database.Column(database.Boolean())
 
 
@@ -418,7 +451,9 @@ class EstudianteCurso(database.Model, BaseTabla):
     """Uno o mas usuario de tipo user pueden estar a cargo de un curso."""
 
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     vigente = database.Column(database.Boolean())
     pago = database.Column(database.String(26), database.ForeignKey("pago.id"), nullable=True, index=True)
 
@@ -523,7 +558,9 @@ class ProgramaCurso(database.Model, BaseTabla):
 class ProgramaEstudiante(database.Model, BaseTabla):
     """Cursos en un programa."""
 
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     programa = database.Column(database.String(26), database.ForeignKey("programa.id"), nullable=False, index=True)
     relacion_usuario = database.relationship("Usuario", foreign_keys=usuario)
     relacion_programa = database.relationship("Programa", foreign_keys=programa)
@@ -563,10 +600,16 @@ class Certificado(database.Model, BaseTabla):
 class Certificacion(database.Model, BaseTabla):
     """Una certificación generada a un estudiante."""
 
-    usuario = database.Column(database.String(26), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(26), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=True, index=True)
-    master_class_id = database.Column(database.String(26), database.ForeignKey("master_classes.id"), nullable=True, index=True)
-    certificado = database.Column(database.String(26), database.ForeignKey("certificado.code"), nullable=False, index=True)
+    master_class_id = database.Column(
+        database.String(26), database.ForeignKey("master_classes.id"), nullable=True, index=True
+    )
+    certificado = database.Column(
+        database.String(26), database.ForeignKey("certificado.code"), nullable=False, index=True
+    )
     fecha = database.Column(database.Date, default=database.func.date(database.func.now()), nullable=False)
     nota = database.Column(database.Numeric())
 
@@ -634,8 +677,12 @@ class Message(database.Model, BaseTabla):
 class ForoMensaje(database.Model, BaseTabla):
     """Mensajes del foro de un curso."""
 
-    curso_id = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
-    usuario_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    curso_id = database.Column(
+        database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True
+    )
+    usuario_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     parent_id = database.Column(database.String(26), database.ForeignKey("foro_mensaje.id"), nullable=True, index=True)
     contenido = database.Column(database.Text, nullable=False)
     fecha_creacion = database.Column(database.DateTime, default=database.func.now(), nullable=False)
@@ -722,7 +769,9 @@ class Pago(database.Model):
     id = database.Column(
         database.String(26), primary_key=True, nullable=False, index=True, default=generador_de_codigos_unicos
     )
-    usuario = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    usuario = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     curso = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
     moneda = database.Column(database.String(5))  # Ejemplo: USD, EUR, CRC
     monto = database.Column(database.Numeric(asdecimal=True))
@@ -753,7 +802,9 @@ class Evaluation(database.Model, BaseTabla):
 
     __tablename__ = "evaluation"
 
-    section_id = database.Column(database.String(26), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True)
+    section_id = database.Column(
+        database.String(26), database.ForeignKey(LLAVE_FORANEA_SECCION), nullable=False, index=True
+    )
     title = database.Column(database.String(200), nullable=False)
     description = database.Column(database.String(1000), nullable=True)
     is_exam = database.Column(database.Boolean(), default=False)
@@ -761,13 +812,17 @@ class Evaluation(database.Model, BaseTabla):
     max_attempts = database.Column(database.Integer(), nullable=True)  # null means unlimited
     available_until = database.Column(database.DateTime(), nullable=True)
     reopened_at = database.Column(database.DateTime(), nullable=True)
-    reopened_for_user_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=True)
+    reopened_for_user_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=True
+    )
     penalty_percent = database.Column(database.Float(), nullable=True, default=0.0)
 
     # Relationships
     section = database.relationship("CursoSeccion", foreign_keys=[section_id])
     questions = database.relationship("Question", back_populates="evaluation", cascade=CASCADE_ALL_DELETE_ORPHAN)
-    attempts = database.relationship("EvaluationAttempt", back_populates="evaluation", cascade=CASCADE_ALL_DELETE_ORPHAN)
+    attempts = database.relationship(
+        "EvaluationAttempt", back_populates="evaluation", cascade=CASCADE_ALL_DELETE_ORPHAN
+    )
 
 
 class Question(database.Model, BaseTabla):
@@ -810,7 +865,9 @@ class EvaluationAttempt(database.Model, BaseTabla):
     evaluation_id = database.Column(
         database.String(26), database.ForeignKey(FOREIGN_KEY_EVALUATION_ID), nullable=False, index=True
     )
-    user_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    user_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     score = database.Column(database.Float(), nullable=True)  # null until submitted
     passed = database.Column(database.Boolean(), nullable=True)  # null until graded
     started_at = database.Column(database.DateTime(), default=database.func.now())
@@ -828,7 +885,9 @@ class Answer(database.Model, BaseTabla):
 
     __tablename__ = "answer"
 
-    attempt_id = database.Column(database.String(26), database.ForeignKey("evaluation_attempt.id"), nullable=False, index=True)
+    attempt_id = database.Column(
+        database.String(26), database.ForeignKey("evaluation_attempt.id"), nullable=False, index=True
+    )
     question_id = database.Column(database.String(26), database.ForeignKey("question.id"), nullable=False, index=True)
     selected_option_ids = database.Column(database.Text(), nullable=True)  # JSON array of UUIDs
 
@@ -847,14 +906,18 @@ class Coupon(database.Model, BaseTabla):
 
     __tablename__ = "coupon"
 
-    course_id = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True)
+    course_id = database.Column(
+        database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=False, index=True
+    )
     code = database.Column(database.String(50), nullable=False, index=True)
     discount_type = database.Column(database.String(20), nullable=False)  # 'percentage' or 'fixed'
     discount_value = database.Column(database.Float(), nullable=False)
     max_uses = database.Column(database.Integer(), nullable=True)  # null means unlimited
     expires_at = database.Column(database.DateTime(), nullable=True)  # null means no expiration
     current_uses = database.Column(database.Integer(), nullable=False, default=0)
-    created_by = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    created_by = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
 
     # Constraints
     __table_args__ = (database.UniqueConstraint("course_id", "code", name="unique_coupon_per_course"),)
@@ -899,7 +962,9 @@ class EvaluationReopenRequest(database.Model, BaseTabla):
 
     __tablename__ = "evaluation_reopen_request"
 
-    user_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    user_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     evaluation_id = database.Column(
         database.String(26), database.ForeignKey(FOREIGN_KEY_EVALUATION_ID), nullable=False, index=True
     )
@@ -924,7 +989,9 @@ class Announcement(database.Model, BaseTabla):
     message = database.Column(database.Text, nullable=False)  # Formato Markdown
 
     # Relaciones
-    course_id = database.Column(database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=True, index=True)
+    course_id = database.Column(
+        database.String(10), database.ForeignKey(LLAVE_FORANEA_CURSO), nullable=True, index=True
+    )
     created_by_id = database.Column(
         database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
     )
@@ -1049,7 +1116,9 @@ class MasterClassEnrollment(database.Model, BaseTabla):
     master_class_id = database.Column(
         database.String(26), database.ForeignKey("master_classes.id"), nullable=False, index=True
     )
-    user_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    user_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     is_confirmed = database.Column(database.Boolean, default=False, nullable=False)
     payment_id = database.Column(database.String(26), database.ForeignKey("pago.id"), nullable=True, index=True)
     enrolled_at = database.Column(database.DateTime, default=database.func.now(), nullable=False)
@@ -1087,7 +1156,9 @@ class BlogPost(database.Model, BaseTabla):
     title = database.Column(database.String(200), nullable=False)
     slug = database.Column(database.String(250), unique=True, nullable=False, index=True)
     content = database.Column(database.Text, nullable=False)
-    author_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    author_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     status = database.Column(
         database.String(20), default="draft", nullable=False, index=True
     )  # draft, pending, published, banned
@@ -1116,9 +1187,13 @@ class BlogComment(database.Model, BaseTabla):
     __tablename__ = "blog_comment"
 
     post_id = database.Column(database.String(26), database.ForeignKey("blog_post.id"), nullable=False, index=True)
-    user_id = database.Column(database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True)
+    user_id = database.Column(
+        database.String(150), database.ForeignKey(LLAVE_FORANEA_USUARIO), nullable=False, index=True
+    )
     content = database.Column(database.Text, nullable=False)
-    status = database.Column(database.String(20), default="visible", nullable=False, index=True)  # visible, flagged, banned
+    status = database.Column(
+        database.String(20), default="visible", nullable=False, index=True
+    )  # visible, flagged, banned
 
     # Relationships
     user = database.relationship("Usuario", backref="blog_comments")

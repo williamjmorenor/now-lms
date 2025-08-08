@@ -1070,7 +1070,9 @@ body {
 
 CERTIFICADO_FINANCE_TITULO = "Finance"
 
-CERTIFICADO_FINANCE_DESCRIPCION = "Certificado inspirado en el billete de $100 USD con elementos de seguridad financiera."
+CERTIFICADO_FINANCE_DESCRIPCION = (
+    "Certificado inspirado en el billete de $100 USD con elementos de seguridad financiera."
+)
 
 CERTIFICADO_FINANCE_HTML = """
 <!doctype html>

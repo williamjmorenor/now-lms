@@ -50,10 +50,13 @@ def global_announcements():
         .filter(
             Announcement.course_id.is_(None),  # Solo anuncios globales
             database.or_(
-                Announcement.expires_at.is_(None), Announcement.expires_at >= now  # Sin fecha de expiración  # No expirados
+                Announcement.expires_at.is_(None),
+                Announcement.expires_at >= now,  # Sin fecha de expiración  # No expirados
             ),
         )
-        .order_by(Announcement.is_sticky.desc(), Announcement.timestamp.desc()),  # Destacados primero  # Más recientes primero
+        .order_by(
+            Announcement.is_sticky.desc(), Announcement.timestamp.desc()
+        ),  # Destacados primero  # Más recientes primero
         page=request.args.get("page", default=1, type=int),
         max_per_page=MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA,
         count=True,
@@ -90,7 +93,9 @@ def course_announcements(course_id):
 
     # Obtener anuncios del curso
     consulta = database.paginate(
-        database.select(Announcement).filter(Announcement.course_id == course_id).order_by(Announcement.timestamp.desc()),
+        database.select(Announcement)
+        .filter(Announcement.course_id == course_id)
+        .order_by(Announcement.timestamp.desc()),
         page=request.args.get("page", default=1, type=int),
         max_per_page=MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA,
         count=True,

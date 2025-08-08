@@ -29,14 +29,24 @@ from datetime import datetime
 # ---------------------------------------------------------------------------------------
 from flask import Blueprint, abort, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func
 
 # ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
 from now_lms.auth import perfil_requerido
 from now_lms.config import DIRECTORIO_PLANTILLAS
-from now_lms.db import Curso, DocenteCurso, EstudianteCurso, Mensaje, Message, MessageThread, ModeradorCurso, Usuario, database, select
+from now_lms.db import (
+    Curso,
+    DocenteCurso,
+    EstudianteCurso,
+    Mensaje,
+    Message,
+    MessageThread,
+    ModeradorCurso,
+    Usuario,
+    database,
+    select,
+)
 from now_lms.forms import MessageReplyForm, MessageReportForm, MessageThreadForm, MsgForm
 from now_lms.misc import INICIO_SESION
 
@@ -60,19 +70,31 @@ def check_course_access(course_code, user):
 
     if user.tipo == "student":
         return (
-            database.session.execute(select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)).scalars().first()
+            database.session.execute(
+                select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)
+            )
+            .scalars()
+            .first()
             is not None
         )
 
     if user.tipo == "instructor":
         return (
-            database.session.execute(select(DocenteCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)).scalars().first()
+            database.session.execute(
+                select(DocenteCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)
+            )
+            .scalars()
+            .first()
             is not None
         )
 
     if user.tipo == "moderator":
         return (
-            database.session.execute(select(ModeradorCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)).scalars().first()
+            database.session.execute(
+                select(ModeradorCurso).filter_by(curso=course_code, usuario=user.usuario, vigente=True)
+            )
+            .scalars()
+            .first()
             is not None
         )
 
@@ -112,16 +134,22 @@ def course_messages(course_code):
     if current_user.tipo == "student":
         # Students only see their own threads
         threads = (
-            database.session.execute(select(MessageThread)
-            .filter_by(course_id=course_code, student_id=current_user.usuario)
-            .order_by(MessageThread.timestamp.desc())).scalars().all()
+            database.session.execute(
+                select(MessageThread)
+                .filter_by(course_id=course_code, student_id=current_user.usuario)
+                .order_by(MessageThread.timestamp.desc())
+            )
+            .scalars()
+            .all()
         )
     else:
         # Instructors, moderators, and admins see all threads in the course
         threads = (
-            database.session.execute(select(MessageThread)
-            .filter_by(course_id=course_code)
-            .order_by(MessageThread.timestamp.desc())).scalars().all()
+            database.session.execute(
+                select(MessageThread).filter_by(course_id=course_code).order_by(MessageThread.timestamp.desc())
+            )
+            .scalars()
+            .all()
         )
 
     return render_template("learning/mensajes/course_messages.html", course=course, threads=threads)
@@ -135,29 +163,45 @@ def user_messages():
     if current_user.tipo == "student":
         # Students see their own threads
         threads = (
-            database.session.execute(select(MessageThread)
-            .filter_by(student_id=current_user.usuario)
-            .order_by(MessageThread.timestamp.desc())).scalars().all()
+            database.session.execute(
+                select(MessageThread)
+                .filter_by(student_id=current_user.usuario)
+                .order_by(MessageThread.timestamp.desc())
+            )
+            .scalars()
+            .all()
         )
     else:
         # Instructors and moderators see threads from their courses
         if current_user.tipo == "instructor":
             course_codes = [
                 dc.curso
-                for dc in database.session.execute(select(DocenteCurso).filter_by(usuario=current_user.usuario, vigente=True)).scalars().all()
+                for dc in database.session.execute(
+                    select(DocenteCurso).filter_by(usuario=current_user.usuario, vigente=True)
+                )
+                .scalars()
+                .all()
             ]
         elif current_user.tipo == "moderator":
             course_codes = [
                 mc.curso
-                for mc in database.session.execute(select(ModeradorCurso).filter_by(usuario=current_user.usuario, vigente=True)).scalars().all()
+                for mc in database.session.execute(
+                    select(ModeradorCurso).filter_by(usuario=current_user.usuario, vigente=True)
+                )
+                .scalars()
+                .all()
             ]
         else:  # admin
             course_codes = [c.codigo for c in database.session.execute(select(Curso)).scalars().all()]
 
         threads = (
-            database.session.execute(select(MessageThread)
-            .filter(MessageThread.course_id.in_(course_codes))
-            .order_by(MessageThread.timestamp.desc())).scalars().all()
+            database.session.execute(
+                select(MessageThread)
+                .filter(MessageThread.course_id.in_(course_codes))
+                .order_by(MessageThread.timestamp.desc())
+            )
+            .scalars()
+            .all()
         )
 
     return render_template("learning/mensajes/user_messages.html", threads=threads)
@@ -221,7 +265,11 @@ def view_thread(thread_id):
         return abort(403)
 
     # Get all messages in the thread
-    messages = database.session.execute(select(Message).filter_by(thread_id=thread_id).order_by(Message.timestamp.asc())).scalars().all()
+    messages = (
+        database.session.execute(select(Message).filter_by(thread_id=thread_id).order_by(Message.timestamp.asc()))
+        .scalars()
+        .all()
+    )
 
     # Mark messages as read for non-students
     if current_user.tipo != "student":
@@ -239,7 +287,11 @@ def view_thread(thread_id):
     report_form.thread_id.data = thread_id
 
     return render_template(
-        "learning/mensajes/view_thread.html", thread=thread, messages=messages, reply_form=reply_form, report_form=report_form
+        "learning/mensajes/view_thread.html",
+        thread=thread,
+        messages=messages,
+        reply_form=reply_form,
+        report_form=report_form,
     )
 
 
@@ -354,7 +406,11 @@ def admin_flagged_messages():
     """Admin view for flagged messages."""
 
     # Get all reported messages
-    flagged_messages = database.session.execute(select(Message).filter_by(is_reported=True).order_by(Message.timestamp.desc())).scalars().all()
+    flagged_messages = (
+        database.session.execute(select(Message).filter_by(is_reported=True).order_by(Message.timestamp.desc()))
+        .scalars()
+        .all()
+    )
 
     return render_template("admin/flagged_messages.html", flagged_messages=flagged_messages)
 
@@ -388,11 +444,19 @@ def standalone_report_message():
 
     if current_user.tipo == "student":
         # Students can see messages in threads from courses they're enrolled in
-        student_courses = database.session.execute(select(EstudianteCurso).filter_by(usuario=current_user.usuario, vigente=True)).scalars().all()
+        student_courses = (
+            database.session.execute(select(EstudianteCurso).filter_by(usuario=current_user.usuario, vigente=True))
+            .scalars()
+            .all()
+        )
         course_codes = [sc.curso for sc in student_courses]
 
         if course_codes:
-            threads = database.session.execute(select(MessageThread).filter(MessageThread.course_id.in_(course_codes))).scalars().all()
+            threads = (
+                database.session.execute(select(MessageThread).filter(MessageThread.course_id.in_(course_codes)))
+                .scalars()
+                .all()
+            )
 
             for thread in threads:
                 messages = database.session.execute(select(Message).filter_by(thread_id=thread.id)).scalars().all()
@@ -411,18 +475,30 @@ def standalone_report_message():
         if current_user.tipo == "instructor":
             course_codes = [
                 dc.curso
-                for dc in database.session.execute(select(DocenteCurso).filter_by(usuario=current_user.usuario, vigente=True)).scalars().all()
+                for dc in database.session.execute(
+                    select(DocenteCurso).filter_by(usuario=current_user.usuario, vigente=True)
+                )
+                .scalars()
+                .all()
             ]
         elif current_user.tipo == "moderator":
             course_codes = [
                 mc.curso
-                for mc in database.session.execute(select(ModeradorCurso).filter_by(usuario=current_user.usuario, vigente=True)).scalars().all()
+                for mc in database.session.execute(
+                    select(ModeradorCurso).filter_by(usuario=current_user.usuario, vigente=True)
+                )
+                .scalars()
+                .all()
             ]
         else:  # admin
             course_codes = [c.codigo for c in database.session.execute(select(Curso)).scalars().all()]
 
         if course_codes:
-            threads = database.session.execute(select(MessageThread).filter(MessageThread.course_id.in_(course_codes))).scalars().all()
+            threads = (
+                database.session.execute(select(MessageThread).filter(MessageThread.course_id.in_(course_codes)))
+                .scalars()
+                .all()
+            )
 
             for thread in threads:
                 messages = database.session.execute(select(Message).filter_by(thread_id=thread.id)).scalars().all()

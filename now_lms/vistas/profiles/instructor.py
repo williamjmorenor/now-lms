@@ -120,9 +120,9 @@ def grupo(ulid: str):
 def elimina_usuario__grupo(group: str, user: str):
     """Elimina usuario de grupo."""
 
-    database.session.execute(delete(UsuarioGrupoMiembro).where(
-        (UsuarioGrupoMiembro.usuario == user) & (UsuarioGrupoMiembro.grupo == group)
-    ))
+    database.session.execute(
+        delete(UsuarioGrupoMiembro).where((UsuarioGrupoMiembro.usuario == user) & (UsuarioGrupoMiembro.grupo == group))
+    )
     database.session.commit()
     return redirect(url_for("grupo", id=group))
 
@@ -167,9 +167,11 @@ def course_evaluations(course_code):
     # Check if instructor has access to this course
     if current_user.tipo != "admin":
         instructor_assignment = (
-            database.session.execute(select(DocenteCurso)
-            .filter_by(curso=course_code, usuario=current_user.usuario, vigente=True))
-            .scalars().first()
+            database.session.execute(
+                select(DocenteCurso).filter_by(curso=course_code, usuario=current_user.usuario, vigente=True)
+            )
+            .scalars()
+            .first()
         )
         if not instructor_assignment:
             flash("No tiene permisos para acceder a este curso.", "danger")
@@ -181,13 +183,25 @@ def course_evaluations(course_code):
         return redirect(url_for(ROUTE_INSTRUCTOR_PROFILE_CURSOS))
 
     # Get course sections and their evaluations
-    secciones = database.session.execute(select(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice)).scalars().all()
-    evaluaciones = database.session.execute(select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)).scalars().all()
+    secciones = (
+        database.session.execute(select(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice))
+        .scalars()
+        .all()
+    )
+    evaluaciones = (
+        database.session.execute(select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code))
+        .scalars()
+        .all()
+    )
 
-    return render_template("instructor/course_evaluations.html", curso=curso, secciones=secciones, evaluaciones=evaluaciones)
+    return render_template(
+        "instructor/course_evaluations.html", curso=curso, secciones=secciones, evaluaciones=evaluaciones
+    )
 
 
-@instructor_profile.route("/instructor/courses/<course_code>/sections/<section_id>/evaluations/new", methods=["GET", "POST"])
+@instructor_profile.route(
+    "/instructor/courses/<course_code>/sections/<section_id>/evaluations/new", methods=["GET", "POST"]
+)
 @login_required
 @perfil_requerido("instructor")
 def new_evaluation(course_code, section_id):
@@ -196,9 +210,11 @@ def new_evaluation(course_code, section_id):
     # Check permissions
     if current_user.tipo != "admin":
         instructor_assignment = (
-            database.session.execute(select(DocenteCurso)
-            .filter_by(curso=course_code, usuario=current_user.usuario, vigente=True))
-            .scalars().first()
+            database.session.execute(
+                select(DocenteCurso).filter_by(curso=course_code, usuario=current_user.usuario, vigente=True)
+            )
+            .scalars()
+            .first()
         )
         if not instructor_assignment:
             flash("No tiene permisos para acceder a este curso.", "danger")
@@ -247,13 +263,19 @@ def evaluaciones_lista():
         evaluaciones = database.session.execute(select(Evaluation)).scalars().all()
     else:
         # Filter evaluations created by current instructor
-        evaluaciones = database.session.execute(select(Evaluation).filter_by(creado_por=current_user.usuario)).scalars().all()
+        evaluaciones = (
+            database.session.execute(select(Evaluation).filter_by(creado_por=current_user.usuario)).scalars().all()
+        )
 
     # Get course information for each evaluation
     evaluaciones_con_curso = []
     for eval in evaluaciones:
         seccion = database.session.get(CursoSeccion, eval.section_id)
-        curso = database.session.execute(select(Curso).filter_by(codigo=seccion.curso)).scalars().first() if seccion else None
+        curso = (
+            database.session.execute(select(Curso).filter_by(codigo=seccion.curso)).scalars().first()
+            if seccion
+            else None
+        )
         evaluaciones_con_curso.append({"evaluacion": eval, "seccion": seccion, "curso": curso})
 
     return render_template("instructor/evaluaciones_lista.html", evaluaciones=evaluaciones_con_curso)
@@ -270,10 +292,13 @@ def nueva_evaluacion_global():
     else:
         # Get courses assigned to this instructor
         cursos = (
-            database.session.execute(select(Curso)
-            .join(DocenteCurso)
-            .filter(DocenteCurso.usuario == current_user.usuario, DocenteCurso.vigente == True))  # noqa: E712
-            .scalars().all()
+            database.session.execute(
+                select(Curso)
+                .join(DocenteCurso)
+                .filter(DocenteCurso.usuario == current_user.usuario, DocenteCurso.vigente)
+            )  # noqa: E712
+            .scalars()
+            .all()
         )
 
     return render_template("instructor/nueva_evaluacion_global.html", cursos=cursos)
@@ -296,7 +321,9 @@ def edit_evaluation(evaluation_id):
         return redirect(url_for(ROUTE_INSTRUCTOR_PROFILE_EVALUACIONES_LISTA))
 
     seccion = database.session.get(CursoSeccion, evaluacion.section_id)
-    curso = database.session.execute(select(Curso).filter_by(codigo=seccion.curso)).scalars().first() if seccion else None
+    curso = (
+        database.session.execute(select(Curso).filter_by(codigo=seccion.curso)).scalars().first() if seccion else None
+    )
 
     form = EvaluationForm(obj=evaluacion)
 
@@ -314,12 +341,20 @@ def edit_evaluation(evaluation_id):
             flash("Error al actualizar la evaluación.", "danger")
 
     # Get questions for this evaluation
-    preguntas = database.session.execute(select(Question).filter_by(evaluation_id=evaluation_id).order_by(Question.order)).scalars().all()
+    preguntas = (
+        database.session.execute(select(Question).filter_by(evaluation_id=evaluation_id).order_by(Question.order))
+        .scalars()
+        .all()
+    )
 
     course_code = curso.codigo if curso else ""
 
     return render_template(
-        "instructor/edit_evaluation.html", form=form, evaluacion=evaluacion, preguntas=preguntas, course_code=course_code
+        "instructor/edit_evaluation.html",
+        form=form,
+        evaluacion=evaluacion,
+        preguntas=preguntas,
+        course_code=course_code,
     )
 
 

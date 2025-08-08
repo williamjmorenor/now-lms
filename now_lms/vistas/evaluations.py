@@ -84,17 +84,26 @@ def can_user_access_evaluation(evaluation_obj, user):
     course_code = section.curso
 
     # Check if user is enrolled in the course
-    inscription = database.session.execute(database.select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario)).scalars().first()
+    inscription = (
+        database.session.execute(database.select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario))
+        .scalars()
+        .first()
+    )
     if not inscription:
         return False
 
     # Check if course is paid and user has paid
-    from now_lms.db import Curso
 
     course = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalars().first()
     if course and course.pagado:
         # Check if user has paid for the course
-        enrollment = database.session.execute(database.select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario)).scalars().first()
+        enrollment = (
+            database.session.execute(
+                database.select(EstudianteCurso).filter_by(curso=course_code, usuario=user.usuario)
+            )
+            .scalars()
+            .first()
+        )
 
         if not enrollment or not enrollment.pago:
             return False  # User hasn't paid for paid course
@@ -111,7 +120,9 @@ def is_evaluation_available(evaluation_obj):
 
 def get_user_attempts_count(evaluation_id, user_id):
     """Get the number of attempts a user has made for an evaluation."""
-    return database.session.execute(database.select(func.count(EvaluationAttempt.id)).filter_by(evaluation_id=evaluation_id, user_id=user_id)).scalar()
+    return database.session.execute(
+        database.select(func.count(EvaluationAttempt.id)).filter_by(evaluation_id=evaluation_id, user_id=user_id)
+    ).scalar()
 
 
 def can_user_attempt_evaluation(evaluation_obj, user):
@@ -182,7 +193,9 @@ def take_evaluation(evaluation_id):
 
     if request.method == "POST":
         # Create new attempt
-        attempt = EvaluationAttempt(evaluation_id=evaluation_id, user_id=current_user.usuario, started_at=datetime.now())
+        attempt = EvaluationAttempt(
+            evaluation_id=evaluation_id, user_id=current_user.usuario, started_at=datetime.now()
+        )
         database.session.add(attempt)
         database.session.flush()  # Get the attempt ID
 
@@ -197,7 +210,13 @@ def take_evaluation(evaluation_id):
                 for value in selected_values:
                     if question.type == "boolean":
                         # For boolean questions, value is "true" or "false"
-                        option = database.session.execute(database.select(QuestionOption).filter_by(question_id=question.id, text=value)).scalars().first()
+                        option = (
+                            database.session.execute(
+                                database.select(QuestionOption).filter_by(question_id=question.id, text=value)
+                            )
+                            .scalars()
+                            .first()
+                        )
                         if option:
                             selected_option_ids.append(option.id)
                     else:
@@ -260,8 +279,13 @@ def request_reopen(evaluation_id):
 
     # Check if user has passed any attempt
     passed_attempt = (
-        database.session.execute(database.select(EvaluationAttempt)
-        .filter_by(evaluation_id=evaluation_id, user_id=current_user.usuario, passed=True)).scalars().first()
+        database.session.execute(
+            database.select(EvaluationAttempt).filter_by(
+                evaluation_id=evaluation_id, user_id=current_user.usuario, passed=True
+            )
+        )
+        .scalars()
+        .first()
     )
 
     if passed_attempt:
@@ -274,8 +298,13 @@ def request_reopen(evaluation_id):
     if form.validate_on_submit():
         # Check if there's already a pending request
         existing_request = (
-            database.session.execute(database.select(EvaluationReopenRequest)
-            .filter_by(user_id=current_user.usuario, evaluation_id=evaluation_id, status="pending")).scalars().first()
+            database.session.execute(
+                database.select(EvaluationReopenRequest).filter_by(
+                    user_id=current_user.usuario, evaluation_id=evaluation_id, status="pending"
+                )
+            )
+            .scalars()
+            .first()
         )
 
         if existing_request:
