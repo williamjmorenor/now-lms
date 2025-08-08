@@ -84,7 +84,7 @@ def crear_certificado_prueba():
         titulo="Certficado Test",
         descripcion="Certificado Test",
         habilitado=True,
-        publico=True
+        publico=True,
     )
     database.session.add(certificado)
     database.session.commit()
