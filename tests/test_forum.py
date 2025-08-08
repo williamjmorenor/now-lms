@@ -17,6 +17,7 @@
 
 from unittest import TestCase
 from now_lms import app
+from now_lms.db import eliminar_base_de_datos_segura
 from now_lms.db import database, Curso, ForoMensaje, Usuario
 
 
@@ -33,7 +34,7 @@ class TestForum(TestCase):
         """Limpieza después de cada prueba."""
         with self.app.app_context():
             database.session.remove()
-            database.drop_all()
+            eliminar_base_de_datos_segura()
 
     def create_test_user(self):
         """Crea un usuario de prueba para los tests."""

@@ -29,11 +29,12 @@ def test_fill_all_forms(full_db_setup, request):
     if request.config.getoption("--slow") == "True":
 
         from now_lms import database, initial_setup
+from now_lms.db import eliminar_base_de_datos_segura, initial_setup
 
         with lms_application.app_context():
             from flask_login import current_user
 
-            database.drop_all()
+            eliminar_base_de_datos_segura()
             initial_setup(with_tests=True, with_examples=False)
 
             with lms_application.test_client() as client:

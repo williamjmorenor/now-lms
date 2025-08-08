@@ -157,10 +157,11 @@ def test_error_pages(basic_config_setup):
 def test_demo_course(full_db_setup):
 
     from now_lms import database, initial_setup
+    from now_lms.db import eliminar_base_de_datos_segura
 
     with full_db_setup.app_context():
         # This test specifically needs examples, so we need to recreate with examples
-        database.drop_all()
+        eliminar_base_de_datos_segura()
         initial_setup(with_tests=True, with_examples=True)
         with full_db_setup.test_client() as client:
             client.get("/course/resources/view")
@@ -191,13 +192,14 @@ def test_email_backend(basic_config_setup):
 def test_contraseña_incorrecta(lms_application):
 
     from now_lms import database, initial_setup
+    from now_lms.db import eliminar_base_de_datos_segura
     from now_lms.auth import validar_acceso
 
     with lms_application.app_context():
         from flask_login import current_user
         from flask_login.mixins import AnonymousUserMixin
 
-        database.drop_all()
+        eliminar_base_de_datos_segura()
         initial_setup(with_tests=False, with_examples=False)
         with lms_application.test_client() as client:
             # Keep the session alive until the with clausule closes

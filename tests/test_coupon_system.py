@@ -265,7 +265,7 @@ class TestCouponSystem(TestCase):
 
         with self.app.app_context():
             database.session.remove()
-            database.drop_all()
+            eliminar_base_de_datos_segura()
 
 
 if __name__ == "__main__":

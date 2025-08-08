@@ -24,11 +24,13 @@
 # Third-party libraries
 # ---------------------------------------------------------------------------------------
 from cuid2 import Cuid
+from flask import current_app
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
-__all__ = ["select", "database", "UserMixin"]
+__all__ = ["select", "database", "UserMixin", "eliminar_base_de_datos_segura"]
 
 
 # ---------------------------------------------------------------------------------------
@@ -40,6 +42,34 @@ __all__ = ["select", "database", "UserMixin"]
 # < --------------------------------------------------------------------------------------------- >
 # Definición principal de la clase del ORM.
 database: SQLAlchemy = SQLAlchemy()
+
+
+def eliminar_base_de_datos_segura():
+    """
+    Elimina todas las tablas de la base de datos de forma segura.
+    Se asegura de cerrar cualquier sesión activa y evitar estados inconsistentes.
+    Debe ejecutarse dentro del contexto de aplicación Flask.
+    """
+    app = current_app._get_current_object()  # Accede a la app real si es un proxy
+
+    with app.app_context():
+        try:
+            # Cierra cualquier sesión activa antes de manipular el esquema
+            database.session.remove()
+
+            # Ejecutar drop_all en el engine de la app
+            database.drop_all()
+
+            # Asegurarse de que no hay transacciones pendientes
+            database.session.commit()
+        except SQLAlchemyError as e:
+            # Si hay un error, hacer rollback para evitar inconsistencia
+            database.session.rollback()
+            app.logger.error(f"Error eliminando la base de datos: {e}")
+            raise
+        finally:
+            # Cierra la sesión para asegurar limpieza
+            database.session.close()
 
 # < --------------------------------------------------------------------------------------------- >
 # Base de datos relacional

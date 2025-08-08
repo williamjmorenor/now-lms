@@ -26,6 +26,7 @@ class TestMasterClassBasic(TestCase):
 
     def setUp(self):
         from now_lms import app
+from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -37,7 +38,7 @@ class TestMasterClassBasic(TestCase):
 
     def tearDown(self):
         database.session.remove()
-        database.drop_all()
+        eliminar_base_de_datos_segura()
 
     def test_master_class_model_exists(self):
         """Test that MasterClass model can be imported."""
@@ -207,6 +208,7 @@ class TestMasterClassCertificates(TestCase):
 
     def setUp(self):
         from now_lms import app
+from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -218,7 +220,7 @@ class TestMasterClassCertificates(TestCase):
 
     def tearDown(self):
         database.session.remove()
-        database.drop_all()
+        eliminar_base_de_datos_segura()
 
     def test_certificacion_model_supports_master_class(self):
         """Test that Certificacion model can reference master classes."""

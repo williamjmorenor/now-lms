@@ -69,6 +69,7 @@ def minimal_db_setup(lms_application):
     Use this for tests that don't need the complete database setup.
     """
     from now_lms import database
+    from now_lms.db import eliminar_base_de_datos_segura
 
     with lms_application.app_context():
         try:
@@ -88,8 +89,7 @@ def minimal_db_setup(lms_application):
             if "postgresql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
-            database.drop_all()
-            database.session.close()
+            eliminar_base_de_datos_segura()
             log.debug("Minimal database cleaned up.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Database cleanup warning: {e}")
@@ -102,6 +102,7 @@ def full_db_setup(lms_application):
     Use this for tests that need the complete populated database (like test_vistas).
     """
     from now_lms import database, initial_setup
+    from now_lms.db import eliminar_base_de_datos_segura
 
     with lms_application.app_context():
         try:
@@ -115,7 +116,7 @@ def full_db_setup(lms_application):
                     pass
 
             # Full database setup with test data
-            database.drop_all()
+            eliminar_base_de_datos_segura()
             initial_setup(with_tests=True, with_examples=False)
             log.debug("Full database setup completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
@@ -131,8 +132,7 @@ def full_db_setup(lms_application):
             if "postgresql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
-            database.drop_all()
-            database.session.close()
+            eliminar_base_de_datos_segura()
             log.debug("Full database cleaned up.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Database cleanup warning: {e}")
@@ -145,6 +145,7 @@ def basic_config_setup(lms_application):
     For tests that need basic config but not full database.
     """
     from now_lms import database
+    from now_lms.db import eliminar_base_de_datos_segura
     from now_lms.db.tools import crear_configuracion_predeterminada
 
     with lms_application.app_context():
@@ -166,8 +167,7 @@ def basic_config_setup(lms_application):
             if "postgresql" in db_url.lower():
                 database.session.rollback()
                 database.session.close()
-            database.drop_all()
-            database.session.close()
+            eliminar_base_de_datos_segura()
             log.debug("Basic configuration cleaned up.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Database cleanup warning: {e}")

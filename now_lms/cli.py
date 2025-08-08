@@ -37,7 +37,7 @@ from flask.cli import FlaskGroup
 from now_lms import alembic, initial_setup, lms_app
 from now_lms.cache import cache
 from now_lms.config import DESARROLLO
-from now_lms.db import database as db
+from now_lms.db import database as db, eliminar_base_de_datos_segura
 from sqlalchemy import select
 from now_lms.db.info import config_info, course_info
 from now_lms.logs import log
@@ -122,7 +122,7 @@ def drop():  # pragma: no cover
     """Delete database schema and all the data in it."""
     with lms_app.app_context():
         if click.confirm("This will delete the database and all the data on it. Do you want to continue?", abort=True):
-            db.drop_all()
+            eliminar_base_de_datos_segura()
 
 
 @database.command()
@@ -133,7 +133,7 @@ def reset(with_examples=False, with_tests=False) -> None:  # pragma: no cover
             "This will delete the current database and all the data on it. Do you want to continue?", abort=True
         ):
             cache.clear()
-            db.drop_all()
+            eliminar_base_de_datos_segura()
             initial_setup(with_examples, with_tests)
 
 

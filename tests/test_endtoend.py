@@ -24,11 +24,12 @@ Casos de uso mas comunes.
 def test_user_registration_to_free_course_enroll(basic_config_setup):
 
     from now_lms import database, initial_setup
+from now_lms.db import eliminar_base_de_datos_segura, initial_setup
     from now_lms.db import Usuario
 
     with basic_config_setup.app_context():
         # This test needs a specific setup, so we recreate the database
-        database.drop_all()
+        eliminar_base_de_datos_segura()
         initial_setup(with_tests=False, with_examples=False)
         with basic_config_setup.test_client() as client:
             post = client.post(
@@ -175,11 +176,12 @@ def test_user_password_change(basic_config_setup):
     """Test password change functionality for users."""
 
     from now_lms import database, initial_setup
+from now_lms.db import eliminar_base_de_datos_segura, initial_setup
     from now_lms.db import Usuario
     from now_lms.auth import proteger_passwd, validar_acceso
 
     with basic_config_setup.app_context():
-        database.drop_all()
+        eliminar_base_de_datos_segura()
         initial_setup(with_tests=False, with_examples=False)
 
         # Create a test user
@@ -262,11 +264,12 @@ def test_password_recovery_functionality(basic_config_setup):
     """Test the complete password recovery flow."""
 
     from now_lms import database, initial_setup
+from now_lms.db import eliminar_base_de_datos_segura, initial_setup
     from now_lms.db import Usuario, MailConfig
     from now_lms.auth import proteger_passwd, validar_acceso
 
     with basic_config_setup.app_context():
-        database.drop_all()
+        eliminar_base_de_datos_segura()
         initial_setup(with_tests=False, with_examples=False)
 
         # Update the default mail configuration to enable email verification
@@ -393,6 +396,7 @@ def test_theme_functionality_comprehensive(basic_config_setup):
     """Test comprehensive theme functionality including overrides and custom pages."""
 
     from now_lms import database, initial_setup
+from now_lms.db import eliminar_base_de_datos_segura, initial_setup
     from now_lms.themes import (
         get_home_template,
         get_course_list_template,
