@@ -55,6 +55,7 @@ from now_lms.cache import cache, no_guardar_en_cache_global
 from now_lms.config import DESARROLLO, DIRECTORIO_PLANTILLAS, audio, files, images
 from now_lms.db import (
     Categoria,
+    Certificacion,
     Coupon,
     Curso,
     CursoRecurso,
@@ -75,6 +76,7 @@ from now_lms.db import (
     SlideShowResource,
     Usuario,
     database,
+    select,
 )
 from now_lms.db.tools import crear_indice_recurso
 from now_lms.forms import (
@@ -344,13 +346,13 @@ def tomar_curso(course_code):
 
     if current_user.tipo == "student":
         # Get evaluations for this course
-        evaluaciones = database.session.query(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code).all()
+        evaluaciones = database.session.execute(select(Evaluation).join(CursoSeccion).filter(CursoSeccion.curso == course_code)).scalars().all()
 
         # Get user's evaluation attempts
-        evaluation_attempts = database.session.query(EvaluationAttempt).filter_by(user_id=current_user.usuario).all()
+        evaluation_attempts = database.session.execute(select(EvaluationAttempt).filter_by(user_id=current_user.usuario)).scalars().all()
 
         # Get reopen requests
-        reopen_requests = database.session.query(EvaluationReopenRequest).filter_by(user_id=current_user.usuario).all()
+        reopen_requests = database.session.execute(select(EvaluationReopenRequest).filter_by(user_id=current_user.usuario)).scalars().all()
 
         # Check if user has paid for course (for paid courses)
         curso_obj = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalar_one_or_none()
@@ -362,17 +364,15 @@ def tomar_curso(course_code):
             user_has_paid = enrollment and enrollment.pago
 
         # Check if user has a certificate for this course
-        from now_lms.db import Certificacion
-
         user_certificate = (
-            database.session.query(Certificacion).filter_by(curso=course_code, usuario=current_user.usuario).first()
+            database.session.execute(select(Certificacion).filter_by(curso=course_code, usuario=current_user.usuario)).scalars().first()
         )
 
         return render_template(
             "learning/curso.html",
             curso=curso_obj,
-            secciones=database.session.query(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice).all(),
-            recursos=database.session.query(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice).all(),
+            secciones=database.session.execute(select(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice)).scalars().all(),
+            recursos=database.session.execute(select(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice)).scalars().all(),
             descargas=database.session.execute(
                 database.select(Recurso).join(CursoRecursoDescargable).filter(CursoRecursoDescargable.curso == course_code)
             ).all(),  # El join devuelve una tuple.
@@ -398,9 +398,9 @@ def moderar_curso(course_code):
     if current_user.tipo == "moderator" or current_user.tipo == "admin":
         return render_template(
             "learning/curso.html",
-            curso=database.session.query(Curso).filter_by(codigo=course_code).first(),
-            secciones=database.session.query(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice).all(),
-            recursos=database.session.query(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice).all(),
+            curso=database.session.execute(select(Curso).filter_by(codigo=course_code)).scalars().first(),
+            secciones=database.session.execute(select(CursoSeccion).filter_by(curso=course_code).order_by(CursoSeccion.indice)).scalars().all(),
+            recursos=database.session.execute(select(CursoRecurso).filter_by(curso=course_code).order_by(CursoRecurso.indice)).scalars().all(),
             descargas=database.session.execute(
                 database.select(Recurso).join(CursoRecursoDescargable).filter(CursoRecursoDescargable.curso == course_code)
             ).all(),  # El join devuelve una tuple.
