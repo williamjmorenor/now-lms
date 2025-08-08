@@ -243,7 +243,7 @@ def admin_create_post():
             tag_names = [name.strip() for name in form.tags.data.split(",") if name.strip()]
             for tag_name in tag_names:
                 tag_slug = create_slug(tag_name)
-                tag = database.session.query(BlogTag).filter(BlogTag.slug == tag_slug).first()
+                tag = database.session.execute(select(BlogTag).filter(BlogTag.slug == tag_slug)).scalars().first()
                 if not tag:
                     # Only admins can create new tags
                     if current_user.tipo == "admin":
@@ -311,7 +311,7 @@ def admin_edit_post(post_id):
             tag_names = [name.strip() for name in form.tags.data.split(",") if name.strip()]
             for tag_name in tag_names:
                 tag_slug = create_slug(tag_name)
-                tag = database.session.query(BlogTag).filter(BlogTag.slug == tag_slug).first()
+                tag = database.session.execute(select(BlogTag).filter(BlogTag.slug == tag_slug)).scalars().first()
                 if not tag and current_user.tipo == "admin":
                     tag = BlogTag(name=tag_name, slug=tag_slug)
                     database.session.add(tag)
@@ -396,7 +396,7 @@ def create_tag():
 
         # Check if tag already exists
         existing_tag = (
-            database.session.query(BlogTag).filter(or_(BlogTag.name == form.name.data, BlogTag.slug == slug)).first()
+            database.session.execute(select(BlogTag).filter(or_(BlogTag.name == form.name.data, BlogTag.slug == slug))).scalars().first()
         )
 
         if existing_tag:
@@ -444,9 +444,9 @@ def ban_comment(comment_id):
 
     # Update comment count
     comment.post.comment_count = (
-        database.session.query(BlogComment)
-        .filter(and_(BlogComment.post_id == comment.post_id, BlogComment.status == "visible"))
-        .count()
+        database.session.execute(select(func.count(BlogComment.id))
+        .filter(and_(BlogComment.post_id == comment.post_id, BlogComment.status == "visible")))
+        .scalar()
     )
 
     database.session.commit()
@@ -474,9 +474,9 @@ def delete_comment(comment_id):
     # Update comment count
     post = comment.post
     post.comment_count = (
-        database.session.query(BlogComment)
-        .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible"))
-        .count()
+        database.session.execute(select(func.count(BlogComment.id))
+        .filter(and_(BlogComment.post_id == post.id, BlogComment.status == "visible")))
+        .scalar()
     )
 
     database.session.commit()
