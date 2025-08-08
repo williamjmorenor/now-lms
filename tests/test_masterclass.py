@@ -26,7 +26,6 @@ class TestMasterClassBasic(TestCase):
 
     def setUp(self):
         from now_lms import app
-        from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -37,6 +36,8 @@ class TestMasterClassBasic(TestCase):
         database.create_all()
 
     def tearDown(self):
+        from now_lms.db import eliminar_base_de_datos_segura
+        
         database.session.remove()
         eliminar_base_de_datos_segura()
 
@@ -208,7 +209,6 @@ class TestMasterClassCertificates(TestCase):
 
     def setUp(self):
         from now_lms import app
-        from now_lms.db import eliminar_base_de_datos_segura
 
         self.app = app
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -219,6 +219,8 @@ class TestMasterClassCertificates(TestCase):
         database.create_all()
 
     def tearDown(self):
+        from now_lms.db import eliminar_base_de_datos_segura
+        
         database.session.remove()
         eliminar_base_de_datos_segura()
 
