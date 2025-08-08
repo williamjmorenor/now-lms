@@ -30,6 +30,7 @@ from flask_login import current_user
 from pg8000.dbapi import ProgrammingError as PGProgrammingError
 from pg8000.exceptions import DatabaseError
 from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy import func
 
 # ---------------------------------------------------------------------------------------
 # Local resources
@@ -67,9 +68,9 @@ from now_lms.logs import log
 def verifica_docente_asignado_a_curso(id_curso: Union[None, str] = None):
     """Si el usuario no esta asignado como docente al curso devuelve None."""
     if current_user.is_authenticated:
-        return database.session.query(DocenteCurso).filter(
+        return database.session.execute(database.select(DocenteCurso).filter(
             DocenteCurso.usuario == current_user.usuario, DocenteCurso.curso == id_curso
-        )
+        ))
     else:
         return False
 
@@ -77,9 +78,9 @@ def verifica_docente_asignado_a_curso(id_curso: Union[None, str] = None):
 def verifica_moderador_asignado_a_curso(id_curso: Union[None, str] = None):
     """Si el usuario no esta asignado como moderador al curso devuelve None."""
     if current_user.is_authenticated:
-        return database.session.query(ModeradorCurso).filter(
+        return database.session.execute(database.select(ModeradorCurso).filter(
             ModeradorCurso.usuario == current_user.usuario, ModeradorCurso.curso == id_curso
-        )
+        ))
     else:
         return False
 
@@ -88,12 +89,11 @@ def verifica_estudiante_asignado_a_curso(id_curso: Union[None, str] = None):
     """Si el usuario no esta asignado como estudiante al curso devuelve None."""
     if current_user.is_authenticated:
         regitro = (
-            database.session.query(EstudianteCurso)
+            database.session.execute(database.select(EstudianteCurso)
             .filter(EstudianteCurso.usuario == current_user.usuario, EstudianteCurso.curso == id_curso)
-            .first()
-        )
+        )).scalars().first()
         if regitro:
-            pago = database.session.query(Pago).filter(Pago.id == regitro.pago).first()
+            pago = database.session.execute(database.select(Pago).filter(Pago.id == regitro.pago)).scalars().first()
             if pago:
                 if pago.estado == "completed" or pago.audit:
                     return True
@@ -156,10 +156,9 @@ def verificar_avance_recurso(recurso: str, usuario: str) -> int:
 
     if recurso and usuario:
         if (
-            consulta := database.session.query(CursoRecursoAvance)
+            consulta := database.session.execute(database.select(CursoRecursoAvance)
             .filter(CursoRecursoAvance.recurso == recurso, CursoRecursoAvance.usuario == usuario)
-            .first()
-        ):
+        )).scalars().first():
             return consulta.avance
         else:
             return 0
@@ -203,15 +202,13 @@ def crear_indice_recurso(recurso: str) -> NamedTuple:
         seccion_from_db: Union[None, CursoRecurso] = database.session.get(CursoSeccion, recurso_from_db.seccion)
         # Verifica si existe un recurso anterior o posterior en la misma sección.
         recurso_anterior = (
-            database.session.query(CursoRecurso)
+            database.session.execute(database.select(CursoRecurso)
             .filter(CursoRecurso.seccion == recurso_from_db.seccion, CursoRecurso.indice == recurso_from_db.indice - 1)
-            .first()
-        )
+        )).scalars().first()
         recurso_posterior = (
-            database.session.query(CursoRecurso)
+            database.session.execute(database.select(CursoRecurso)
             .filter(CursoRecurso.seccion == recurso_from_db.seccion, CursoRecurso.indice == recurso_from_db.indice + 1)
-            .first()
-        )
+        )).scalars().first()
     else:
         seccion_from_db = None
         recurso_anterior = None
@@ -223,15 +220,14 @@ def crear_indice_recurso(recurso: str) -> NamedTuple:
         prev_resource = RecursoInfo(recurso_anterior.curso, recurso_anterior.tipo, recurso_anterior.id)  # type: ignore[assignment]
     elif seccion_from_db:
         seccion_anterior = (
-            database.session.query(CursoSeccion).filter(CursoSeccion.indice == seccion_from_db.indice - 1).first()
+            database.session.execute(database.select(CursoSeccion).filter(CursoSeccion.indice == seccion_from_db.indice - 1)).scalars().first()
         )
         if seccion_anterior:
             recurso_de_seccion_anterior = (
-                database.session.query(CursoRecurso)
+                database.session.execute(database.select(CursoRecurso)
                 .filter(CursoRecurso.seccion == seccion_anterior.id)
                 .order_by(CursoRecurso.indice.desc())
-                .first()
-            )
+            )).scalars().first()
             if recurso_de_seccion_anterior:
                 has_prev = True
                 prev_is_alternative = recurso_de_seccion_anterior.requerido == 3
@@ -243,15 +239,14 @@ def crear_indice_recurso(recurso: str) -> NamedTuple:
         next_resource = RecursoInfo(recurso_posterior.curso, recurso_posterior.tipo, recurso_posterior.id)  # type: ignore[assignment]
     elif seccion_from_db:
         seccion_posterior = (
-            database.session.query(CursoSeccion).filter(CursoSeccion.indice == seccion_from_db.indice + 1).first()
+            database.session.execute(database.select(CursoSeccion).filter(CursoSeccion.indice == seccion_from_db.indice + 1)).scalars().first()
         )
         if seccion_posterior:
             recurso_de_seccion_posterior = (
-                database.session.query(CursoRecurso)
+                database.session.execute(database.select(CursoRecurso)
                 .filter(CursoRecurso.seccion == seccion_posterior.id)
                 .order_by(CursoRecurso.indice)
-                .first()
-            )
+            )).scalars().first()
             if recurso_de_seccion_posterior:
                 has_next = True
                 next_is_alternative = recurso_de_seccion_posterior.requerido == 3
@@ -295,7 +290,7 @@ def elimina_logo_perzonalizado_curso(course_code: str):
     LOGO = path.join(DIRECTORIO_UPLOAD_IMAGENES, course_code, get_current_course_logo(course_code))
     remove(LOGO)
 
-    curso = database.session.query(Curso).filter_by(codigo=course_code).first()
+    curso = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalars().first()
     curso.portada = False
     database.session.commit()
 
@@ -303,7 +298,7 @@ def elimina_logo_perzonalizado_curso(course_code: str):
 def elimina_logo_perzonalizado_programa(course_code: str):
     """Elimina logo tipo perzonalizado de un programa."""
 
-    programa = database.session.query(Programa).filter_by(id=course_code).first()
+    programa = database.session.execute(database.select(Programa).filter_by(id=course_code)).scalars().first()
     programa.logo = False
 
     database.session.commit()
@@ -316,7 +311,7 @@ def elimina_logo_perzonalizado_programa(course_code: str):
 def elimina_imagen_usuario(ulid: str):
     """Elimina imagen de usuario."""
 
-    usuario = database.session.query(Usuario).filter_by(id=ulid).first()
+    usuario = database.session.execute(database.select(Usuario).filter_by(id=ulid)).scalars().first()
     usuario.portada = False
 
     database.session.commit()
@@ -332,17 +327,17 @@ def elimina_imagen_usuario(ulid: str):
 
 def cursos_por_etiqueta(tag: str) -> int:
     """Devuelve el numero de cursos en una etiqueta"""
-    return database.session.query(EtiquetaCurso).filter(EtiquetaCurso.etiqueta == tag).count()
+    return database.session.execute(database.select(func.count(EtiquetaCurso.id)).filter(EtiquetaCurso.etiqueta == tag)).scalar()
 
 
 def cursos_por_categoria(tag: str) -> int:
     """Devuelve el numero de cursos en una Categoria"""
-    return database.session.query(CategoriaCurso).filter(CategoriaCurso.categoria == tag).count()
+    return database.session.execute(database.select(func.count(CategoriaCurso.id)).filter(CategoriaCurso.categoria == tag)).scalar()
 
 
 def cuenta_cursos_por_programa(codigo_programa: str) -> int:
     """Devuelve el número de programas que tiene un curso."""
-    return database.session.query(ProgramaCurso).filter(ProgramaCurso.programa == codigo_programa).count()
+    return database.session.execute(database.select(func.count(ProgramaCurso.id)).filter(ProgramaCurso.programa == codigo_programa)).scalar()
 
 
 def get_addsense_meta():
