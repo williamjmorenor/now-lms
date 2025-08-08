@@ -169,7 +169,9 @@ def curso(course_code):
                 database.select(Recurso)
                 .join(CursoRecursoDescargable)
                 .filter(CursoRecursoDescargable.curso == course_code)
-            ).scalars().all(),  # El join devuelve una tuple.
+            )
+            .scalars()
+            .all(),  # El join devuelve una tuple.
             nivel=CURSO_NIVEL,
             tipo=TIPOS_RECURSOS,
             editable=editable,
@@ -184,9 +186,13 @@ def _crear_indice_avance_curso(course_code):
 
     from now_lms.db import CursoRecurso, CursoRecursoAvance
 
-    recursos = database.session.execute(
-        database.select(CursoRecurso).filter(CursoRecurso.curso == course_code).order_by(CursoRecurso.indice)
-    ).scalars().all()
+    recursos = (
+        database.session.execute(
+            database.select(CursoRecurso).filter(CursoRecurso.curso == course_code).order_by(CursoRecurso.indice)
+        )
+        .scalars()
+        .all()
+    )
     usuario = current_user.usuario
 
     if recursos:
@@ -421,7 +427,9 @@ def tomar_curso(course_code):
                 database.select(Recurso)
                 .join(CursoRecursoDescargable)
                 .filter(CursoRecursoDescargable.curso == course_code)
-            ).scalars().all(),  # El join devuelve una tuple.
+            )
+            .scalars()
+            .all(),  # El join devuelve una tuple.
             nivel=CURSO_NIVEL,
             tipo=TIPOS_RECURSOS,
             evaluaciones=evaluaciones,
@@ -459,7 +467,9 @@ def moderar_curso(course_code):
                 database.select(Recurso)
                 .join(CursoRecursoDescargable)
                 .filter(CursoRecursoDescargable.curso == course_code)
-            ).scalars().all(),  # El join devuelve una tuple.
+            )
+            .scalars()
+            .all(),  # El join devuelve una tuple.
             nivel=CURSO_NIVEL,
             tipo=TIPOS_RECURSOS,
         )
@@ -489,7 +499,9 @@ def administrar_curso(course_code):
         .all(),
         descargas=database.session.execute(
             database.select(Recurso).join(CursoRecursoDescargable).filter(CursoRecursoDescargable.curso == course_code)
-        ).scalars().all(),  # El join devuelve una tuple.
+        )
+        .scalars()
+        .all(),  # El join devuelve una tuple.
         nivel=CURSO_NIVEL,
         tipo=TIPOS_RECURSOS,
     )
@@ -548,9 +560,13 @@ def nuevo_curso():
                             logo_ext = logo_ext.lstrip(".")  # Si solo quieres la extensión sin el punto
                             picture_file = images.save(logo, folder=form.codigo.data, name=f"logo.{logo_ext}")
                         if picture_file:
-                            _curso = database.session.execute(
-                                database.select(Curso).filter(Curso.codigo == form.codigo.data)
-                            ).scalars().first()
+                            _curso = (
+                                database.session.execute(
+                                    database.select(Curso).filter(Curso.codigo == form.codigo.data)
+                                )
+                                .scalars()
+                                .first()
+                            )
                             _curso.portada = True
                     except UploadNotAllowed:  # pragma: no cover
                         log.warning("Could not update profile photo.")
@@ -666,9 +682,7 @@ def nuevo_seccion(course_code):
     # Las seccion son contenedores de recursos.
     form = CursoSeccionForm()
     if form.validate_on_submit() or request.method == "POST":
-        secciones = database.session.execute(
-            select(func.count(CursoSeccion.id)).filter_by(curso=course_code)
-        ).scalar()
+        secciones = database.session.execute(select(func.count(CursoSeccion.id)).filter_by(curso=course_code)).scalar()
         nuevo_indice = int(secciones + 1)
         nueva_seccion = CursoSeccion(
             curso=course_code,
@@ -815,9 +829,9 @@ def _get_user_resource_progress(curso_id, usuario=None):
     if not usuario:
         return {}
 
-    progress_data = database.session.execute(
-        select(CursoRecursoAvance).filter_by(usuario=usuario, curso=curso_id)
-    ).scalars().all()
+    progress_data = (
+        database.session.execute(select(CursoRecursoAvance).filter_by(usuario=usuario, curso=curso_id)).scalars().all()
+    )
 
     return {p.recurso: {"completado": p.completado} for p in progress_data}
 
@@ -829,9 +843,9 @@ def _get_course_evaluations_and_attempts(curso_id, usuario=None):
     section_ids = [s.id for s in secciones]
 
     # Obtener evaluaciones de todas las secciones del curso
-    evaluaciones = database.session.execute(
-        select(Evaluation).filter(Evaluation.section_id.in_(section_ids))
-    ).scalars().all()
+    evaluaciones = (
+        database.session.execute(select(Evaluation).filter(Evaluation.section_id.in_(section_ids))).scalars().all()
+    )
 
     evaluation_attempts = {}
     if usuario:
@@ -861,9 +875,9 @@ def pagina_recurso(curso_id, resource_type, codigo):
     RECURSOS = database.session.execute(
         select(CursoRecurso).filter(CursoRecurso.curso == curso_id).order_by(CursoRecurso.indice)
     )
-    SECCION = database.session.execute(
-        select(CursoSeccion).filter(CursoSeccion.id == RECURSO.seccion)
-    ).scalars().first()
+    SECCION = (
+        database.session.execute(select(CursoSeccion).filter(CursoSeccion.id == RECURSO.seccion)).scalars().first()
+    )
     SECCIONES = database.session.execute(
         select(CursoSeccion).filter(CursoSeccion.curso == curso_id).order_by(CursoSeccion.indice)
     )
@@ -882,9 +896,15 @@ def pagina_recurso(curso_id, resource_type, codigo):
 
     if show_resource or RECURSO.publico:
         # Obtener progreso del recurso actual
-        resource_progress = database.session.execute(
-            database.select(CursoRecursoAvance).filter_by(usuario=current_user.usuario, curso=curso_id, recurso=codigo)
-        ).scalars().first()
+        resource_progress = (
+            database.session.execute(
+                database.select(CursoRecursoAvance).filter_by(
+                    usuario=current_user.usuario, curso=curso_id, recurso=codigo
+                )
+            )
+            .scalars()
+            .first()
+        )
         if resource_progress:
             recurso_completado = resource_progress.completado
         else:
@@ -957,9 +977,7 @@ def _actualizar_avance_curso(curso_id, usuario):
         database.session.commit()
 
     _recursos_requeridos = database.session.execute(
-        select(func.count(CursoRecurso.id)).filter(
-            CursoRecurso.curso == curso_id, CursoRecurso.requerido == "required"
-        )
+        select(func.count(CursoRecurso.id)).filter(CursoRecurso.curso == curso_id, CursoRecurso.requerido == "required")
     ).scalar()
 
     _recursos_completados = database.session.execute(
@@ -1044,9 +1062,9 @@ def pagina_recurso_alternativo(curso_id, codigo, order):
 
     CURSO = database.session.execute(select(Curso).filter(Curso.codigo == curso_id)).scalars().first()
     RECURSO = database.session.execute(select(CursoRecurso).filter(CursoRecurso.id == codigo)).scalars().first()
-    SECCION = database.session.execute(
-        select(CursoSeccion).filter(CursoSeccion.id == RECURSO.seccion)
-    ).scalars().first()
+    SECCION = (
+        database.session.execute(select(CursoSeccion).filter(CursoSeccion.id == RECURSO.seccion)).scalars().first()
+    )
     INDICE = crear_indice_recurso(codigo)
 
     if order == "asc":
@@ -1106,7 +1124,9 @@ def nuevo_recurso(course_code, seccion):
 def nuevo_recurso_youtube_video(course_code, seccion):
     """Formulario para crear un nuevo recurso tipo vídeo en Youtube."""
     form = CursoRecursoVideoYoutube()
-    consulta_recursos = database.session.execute(select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)).scalar()
+    consulta_recursos = database.session.execute(
+        select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)
+    ).scalar()
     nuevo_indice = int(consulta_recursos + 1)
     if form.validate_on_submit() or request.method == "POST":
         nuevo_recurso_ = CursoRecurso(
@@ -1144,7 +1164,9 @@ def nuevo_recurso_youtube_video(course_code, seccion):
 def nuevo_recurso_text(course_code, seccion):
     """Formulario para crear un nuevo documento de texto."""
     form = CursoRecursoArchivoText()
-    consulta_recursos = database.session.execute(select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)).scalar()
+    consulta_recursos = database.session.execute(
+        select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)
+    ).scalar()
     nuevo_indice = int(consulta_recursos + 1)
     if form.validate_on_submit() or request.method == "POST":
         nuevo_recurso_ = CursoRecurso(
@@ -1446,7 +1468,8 @@ def nuevo_recurso_slideshow(course_code, seccion):
         current_user.tipo == "admin"
         or database.session.execute(select(DocenteCurso))
         .filter(DocenteCurso.usuario == current_user.usuario, DocenteCurso.curso == course_code)
-        .scalars().first()
+        .scalars()
+        .first()
     ):
         flash("No tienes permisos para crear recursos en este curso.", "warning")
         return abort(403)
@@ -1455,7 +1478,9 @@ def nuevo_recurso_slideshow(course_code, seccion):
     if form.validate_on_submit():
         try:
             # Crear el recurso en CursoRecurso
-            consulta_recursos = database.session.execute(select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)).scalar()
+            consulta_recursos = database.session.execute(
+                select(func.count(CursoRecurso.id)).filter_by(seccion=seccion)
+            ).scalar()
             nuevo_indice = int(consulta_recursos + 1)
 
             nuevo_recurso = CursoRecurso(
@@ -1508,13 +1533,18 @@ def editar_slideshow(course_code, slideshow_id):
         current_user.tipo == "admin"
         or database.session.execute(select(DocenteCurso))
         .filter(DocenteCurso.usuario == current_user.usuario, DocenteCurso.curso == course_code)
-        .scalars().first()
+        .scalars()
+        .first()
     ):
         flash("No tienes permisos para editar este recurso.", "warning")
         return abort(403)
 
     # Obtener slides existentes
-    slides = database.session.execute(select(Slide).filter_by(slide_show_id=slideshow_id).order_by(Slide.order)).scalars().all()
+    slides = (
+        database.session.execute(select(Slide).filter_by(slide_show_id=slideshow_id).order_by(Slide.order))
+        .scalars()
+        .all()
+    )
 
     if request.method == "POST":
         try:
@@ -1593,15 +1623,21 @@ def preview_slideshow(course_code, slideshow_id):
         current_user.tipo == "admin"
         or database.session.execute(select(DocenteCurso))
         .filter(DocenteCurso.usuario == current_user.usuario, DocenteCurso.curso == course_code)
-        .scalars().first()
+        .scalars()
+        .first()
         or database.session.execute(select(EstudianteCurso))
         .filter(EstudianteCurso.usuario == current_user.usuario, EstudianteCurso.curso == course_code)
-        .scalars().first()
+        .scalars()
+        .first()
     ):
         flash("No tienes acceso a este curso.", "warning")
         return abort(403)
 
-    slides = database.session.execute(select(Slide).filter_by(slide_show_id=slideshow_id).order_by(Slide.order)).scalars().all()
+    slides = (
+        database.session.execute(select(Slide).filter_by(slide_show_id=slideshow_id).order_by(Slide.order))
+        .scalars()
+        .all()
+    )
 
     return render_template(TEMPLATE_SLIDE_SHOW, slideshow=slideshow, slides=slides)
 
@@ -1617,8 +1653,11 @@ def preview_slideshow(course_code, slideshow_id):
 def recurso_file(course_code, recurso_code):
     """Devuelve un archivo desde el sistema de archivos."""
     doc = (
-        database.session.execute(select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code))
-        .scalars().first()
+        database.session.execute(
+            select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code)
+        )
+        .scalars()
+        .first()
     )
     config = current_app.upload_set_config.get(doc.base_doc_url)
 
@@ -1636,8 +1675,11 @@ def external_code(course_code, recurso_code):
     """Devuelve un archivo desde el sistema de archivos."""
 
     recurso = (
-        database.session.execute(select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code))
-        .scalars().first()
+        database.session.execute(
+            select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code)
+        )
+        .scalars()
+        .first()
     )
 
     if current_user.is_authenticated:
@@ -1664,20 +1706,24 @@ def slide_show(recurso_code):
         # Usar nuevo modelo SlideShowResource
         slideshow = database.session.get(SlideShowResource, recurso.external_code)
         if slideshow:
-            slides = database.session.execute(select(Slide).filter_by(slide_show_id=slideshow.id).order_by(Slide.order)).scalars().all()
+            slides = (
+                database.session.execute(select(Slide).filter_by(slide_show_id=slideshow.id).order_by(Slide.order))
+                .scalars()
+                .all()
+            )
             return render_template(TEMPLATE_SLIDE_SHOW, slideshow=slideshow, slides=slides, resource=recurso)
 
     # Fallback a modelos legacy para compatibilidad
     legacy_slide = (
-        database.session.execute(
-            select(CursoRecursoSlideShow).filter(CursoRecursoSlideShow.recurso == recurso_code)
-        )
+        database.session.execute(select(CursoRecursoSlideShow).filter(CursoRecursoSlideShow.recurso == recurso_code))
         .scalars()
         .first()
     )
-    legacy_slides = database.session.execute(
-        select(CursoRecursoSlides).filter(CursoRecursoSlides.recurso == recurso_code)
-    ).scalars().all()
+    legacy_slides = (
+        database.session.execute(select(CursoRecursoSlides).filter(CursoRecursoSlides.recurso == recurso_code))
+        .scalars()
+        .all()
+    )
 
     if legacy_slide:
         return render_template(TEMPLATE_SLIDE_SHOW, resource=legacy_slide, slides=legacy_slides, legacy=True)
@@ -1691,8 +1737,11 @@ def slide_show(recurso_code):
 def markdown_a_html(course_code, recurso_code):
     """Devuelve un texto en markdown como HTML."""
     recurso = (
-        database.session.execute(select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code))
-        .scalars().first()
+        database.session.execute(
+            select(CursoRecurso).filter(CursoRecurso.id == recurso_code, CursoRecurso.curso == course_code)
+        )
+        .scalars()
+        .first()
     )
     allowed_tags = HTML_TAGS
     allowed_attrs = {"*": ["class"], "a": ["href", "rel"], "img": ["src", "alt"]}
@@ -1720,8 +1769,11 @@ def curso_descripcion_a_html(course_code):
 def recurso_descripcion_a_html(course_code, resource):
     """Devuelve la descripción de un curso como HTML."""
     recurso = (
-        database.session.execute(select(CursoRecurso).filter(CursoRecurso.id == resource, CursoRecurso.curso == course_code))
-        .scalars().first()
+        database.session.execute(
+            select(CursoRecurso).filter(CursoRecurso.id == resource, CursoRecurso.curso == course_code)
+        )
+        .scalars()
+        .first()
     )
     allowed_tags = HTML_TAGS
     allowed_attrs = {"*": ["class"], "a": ["href", "rel"], "img": ["src", "alt"]}
@@ -1806,9 +1858,11 @@ def _validate_coupon_for_enrollment(course_code, coupon_code, user):
         return None, None, "No se proporcionó código de cupón"
 
     # Find coupon
-    coupon = database.session.execute(
-        select(Coupon).filter_by(course_id=course_code, code=coupon_code.upper())
-    ).scalars().first()
+    coupon = (
+        database.session.execute(select(Coupon).filter_by(course_id=course_code, code=coupon_code.upper()))
+        .scalars()
+        .first()
+    )
 
     if not coupon:
         return None, None, "Código de cupón inválido"
@@ -1843,9 +1897,11 @@ def list_coupons(course_code):
         flash(error, "warning")
         return redirect(url_for("course.administrar_curso", course_code=course_code))
 
-    coupons = database.session.execute(
-        select(Coupon).filter_by(course_id=course_code).order_by(Coupon.timestamp.desc())
-    ).scalars().all()
+    coupons = (
+        database.session.execute(select(Coupon).filter_by(course_id=course_code).order_by(Coupon.timestamp.desc()))
+        .scalars()
+        .all()
+    )
 
     return render_template("learning/curso/coupons/list.html", curso=curso, coupons=coupons)
 
@@ -1864,9 +1920,11 @@ def create_coupon(course_code):
 
     if form.validate_on_submit():
         # Check if coupon code already exists for this course
-        existing = database.session.execute(
-            select(Coupon).filter_by(course_id=course_code, code=form.code.data.upper())
-        ).scalars().first()
+        existing = (
+            database.session.execute(select(Coupon).filter_by(course_id=course_code, code=form.code.data.upper()))
+            .scalars()
+            .first()
+        )
 
         if existing:
             flash("Ya existe un cupón con este código para este curso", "warning")
@@ -1928,7 +1986,8 @@ def edit_coupon(course_code, coupon_id):
         existing = (
             database.session.execute(select(Coupon))
             .filter(Coupon.course_id == course_code, Coupon.code == form.code.data.upper(), Coupon.id != coupon_id)
-            .scalars().first()
+            .scalars()
+            .first()
         )
 
         if existing:

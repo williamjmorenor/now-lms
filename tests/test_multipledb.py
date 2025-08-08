@@ -29,7 +29,7 @@ def test_postgress_pg8000(database_url):
         from sqlalchemy.exc import OperationalError, ProgrammingError
         from pg8000.dbapi import ProgrammingError as PGProgrammingError
         from pg8000.exceptions import DatabaseError
-        
+
         app.config.update({"SQLALCHEMY_DATABASE_URI": database_url})
         assert app.config.get("SQLALCHEMY_DATABASE_URI") == database_url
 
@@ -41,7 +41,7 @@ def test_postgress_pg8000(database_url):
                     database.session.close()
                 except:
                     pass
-                    
+
                 database.drop_all()
                 initial_setup(with_tests=True, with_examples=True)
             except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
@@ -61,7 +61,7 @@ def test_postgress_psycopg2(database_url):
     if database_url.startswith("postgresql+psycopg2"):
         from now_lms import app, database, initial_setup
         from sqlalchemy.exc import OperationalError, ProgrammingError
-        
+
         app.config.update({"SQLALCHEMY_DATABASE_URI": database_url})
         assert app.config.get("SQLALCHEMY_DATABASE_URI") == database_url
 
@@ -73,7 +73,7 @@ def test_postgress_psycopg2(database_url):
                     database.session.close()
                 except:
                     pass
-                    
+
                 database.drop_all()
                 initial_setup(with_tests=True, with_examples=True)
             except (OperationalError, ProgrammingError) as e:
@@ -93,7 +93,7 @@ def test_mysql_mysqldb(database_url, request):
     if database_url.startswith("mysql+mysqldb"):
         from now_lms import app, database, initial_setup
         from sqlalchemy.exc import OperationalError, IntegrityError
-        
+
         app.config.update({"SQLALCHEMY_DATABASE_URI": database_url})
         assert app.config.get("SQLALCHEMY_DATABASE_URI") == database_url
 

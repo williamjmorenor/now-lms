@@ -44,7 +44,7 @@ def database_url():
 def lms_application(database_url):
     """Create Flask application with test configuration."""
     from now_lms import app
-    
+
     # Configure the application for testing
     app.config.update(
         {
@@ -58,7 +58,7 @@ def lms_application(database_url):
             "MAIL_SUPPRESS_SEND": True,
         }
     )
-    
+
     yield app
 
 
@@ -69,7 +69,7 @@ def minimal_db_setup(lms_application):
     Use this for tests that don't need the complete database setup.
     """
     from now_lms import database
-    
+
     with lms_application.app_context():
         try:
             # Only create schema, don't populate with full data
@@ -77,9 +77,9 @@ def minimal_db_setup(lms_application):
             log.debug("Minimal database schema created.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Database setup error (continuing): {e}")
-            
+
     yield lms_application  # Return the application with minimal database setup
-    
+
     # Clean up after test
     with lms_application.app_context():
         try:
@@ -102,7 +102,7 @@ def full_db_setup(lms_application):
     Use this for tests that need the complete populated database (like test_vistas).
     """
     from now_lms import database, initial_setup
-    
+
     with lms_application.app_context():
         try:
             # For PostgreSQL, ensure clean state before setup
@@ -113,16 +113,16 @@ def full_db_setup(lms_application):
                     database.session.close()
                 except:
                     pass
-                    
+
             # Full database setup with test data
             database.drop_all()
             initial_setup(with_tests=True, with_examples=False)
             log.debug("Full database setup completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Full database setup error (continuing): {e}")
-            
+
     yield lms_application  # Return the application with the full database setup
-    
+
     # Clean up after test
     with lms_application.app_context():
         try:
@@ -146,7 +146,7 @@ def basic_config_setup(lms_application):
     """
     from now_lms import database
     from now_lms.db.tools import crear_configuracion_predeterminada
-    
+
     with lms_application.app_context():
         try:
             # Only create schema and basic configuration
@@ -155,9 +155,9 @@ def basic_config_setup(lms_application):
             log.debug("Basic configuration setup completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError) as e:
             log.warning(f"Basic config setup error (continuing): {e}")
-            
+
     yield lms_application  # Return the application with basic configuration
-    
+
     # Clean up after test
     with lms_application.app_context():
         try:

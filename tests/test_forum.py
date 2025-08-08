@@ -185,7 +185,10 @@ class TestForum(TestCase):
 
             # Crear mensaje principal
             mensaje_principal = ForoMensaje(
-                curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Mensaje principal del hilo", estado="abierto"
+                curso_id=curso.codigo,
+                usuario_id=usuario.usuario,
+                contenido="Mensaje principal del hilo",
+                estado="abierto",
             )
             database.session.add(mensaje_principal)
             database.session.commit()

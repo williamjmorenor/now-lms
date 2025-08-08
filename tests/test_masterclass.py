@@ -311,7 +311,9 @@ class TestMasterClassCertificates(TestCase):
         database.session.add(user)
 
         # Create certificate template
-        cert_template = Certificado(code="TEST_CERT", titulo="Test Certificate", descripcion="Test certificate template")
+        cert_template = Certificado(
+            code="TEST_CERT", titulo="Test Certificate", descripcion="Test certificate template"
+        )
         database.session.add(cert_template)
         database.session.commit()
 
