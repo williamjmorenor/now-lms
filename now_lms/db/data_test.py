@@ -80,7 +80,7 @@ def crear_certificado_prueba():
 
     certificado = Certificado(
         id="01HNP0TTQNTR03J7ZQHR09YMKK",
-        code="01HNP0TTQNTR03J7ZQHR09YMKK",  # Set the code field for foreign key reference
+        code="lala",
         titulo="Certficado Test",
         descripcion="Certificado Test",
         habilitado=True,
