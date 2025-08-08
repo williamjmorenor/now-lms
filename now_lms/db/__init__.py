@@ -52,24 +52,23 @@ def eliminar_base_de_datos_segura():
     """
     app = current_app._get_current_object()  # Accede a la app real si es un proxy
 
-    with app.app_context():
-        try:
-            # Cierra cualquier sesión activa antes de manipular el esquema
-            database.session.remove()
+    try:
+        # Cierra cualquier sesión activa antes de manipular el esquema
+        database.session.remove()
 
-            # Ejecutar drop_all en el engine de la app
-            database.drop_all()
+        # Ejecutar drop_all en el engine de la app
+        database.drop_all()
 
-            # Asegurarse de que no hay transacciones pendientes
-            database.session.commit()
-        except SQLAlchemyError as e:
-            # Si hay un error, hacer rollback para evitar inconsistencia
-            database.session.rollback()
-            app.logger.error(f"Error eliminando la base de datos: {e}")
-            raise
-        finally:
-            # Cierra la sesión para asegurar limpieza
-            database.session.close()
+        # Asegurarse de que no hay transacciones pendientes
+        database.session.commit()
+    except SQLAlchemyError as e:
+        # Si hay un error, hacer rollback para evitar inconsistencia
+        database.session.rollback()
+        app.logger.error(f"Error eliminando la base de datos: {e}")
+        raise
+    finally:
+        # Cierra la sesión para asegurar limpieza
+        database.session.close()
 
 # < --------------------------------------------------------------------------------------------- >
 # Base de datos relacional
