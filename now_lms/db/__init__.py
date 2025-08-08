@@ -26,7 +26,9 @@
 from cuid2 import Cuid
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select  # noqa: F401
+from sqlalchemy import select
+
+__all__ = ["select", "database", "UserMixin"]
 
 
 # ---------------------------------------------------------------------------------------
