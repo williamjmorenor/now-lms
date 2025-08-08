@@ -119,7 +119,9 @@ def crear_masterclass_prueba():
     database.session.refresh(masterclass)
 
     # Enroll admin user in the master class
-    enrollment = MasterClassEnrollment(master_class_id=masterclass.id, user_id="admin", is_confirmed=True, payment_id=None)
+    enrollment = MasterClassEnrollment(
+        master_class_id=masterclass.id, user_id="admin", is_confirmed=True, payment_id=None
+    )
 
     database.session.add(enrollment)
     database.session.commit()

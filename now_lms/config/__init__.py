@@ -98,7 +98,9 @@ if not path.isdir(DIRECTORIO_BASE_ARCHIVOS_USUARIO):  # pragma: no cover
         makedirs(DIRECTORIO_UPLOAD_AUDIO)
     except OSError:  # pragma: no cover
         log.warning(f"Cannot create directory for file uploads: {DIRECTORIO_BASE_ARCHIVOS_USUARIO}")
-if access(DIRECTORIO_BASE_ARCHIVOS_USUARIO, R_OK) and access(DIRECTORIO_BASE_ARCHIVOS_USUARIO, W_OK):  # pragma: no cover
+if access(DIRECTORIO_BASE_ARCHIVOS_USUARIO, R_OK) and access(
+    DIRECTORIO_BASE_ARCHIVOS_USUARIO, W_OK
+):  # pragma: no cover
     log.trace(f"Access verified to: {DIRECTORIO_BASE_ARCHIVOS_USUARIO}")
 else:
     log.warning(f"No access to upload files to directory: {DIRECTORIO_BASE_ARCHIVOS_USUARIO}")

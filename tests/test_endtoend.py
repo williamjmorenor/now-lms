@@ -311,7 +311,9 @@ def test_password_recovery_functionality(basic_config_setup):
 
         with patch("now_lms.mail.send_mail") as mock_send_mail:
             mock_send_mail.return_value = True
-            forgot_post = client.post("/user/forgot_password", data={"email": "testuser2@nowlms.com"}, follow_redirects=True)
+            forgot_post = client.post(
+                "/user/forgot_password", data={"email": "testuser2@nowlms.com"}, follow_redirects=True
+            )
             assert forgot_post.status_code == 200
             assert "Se ha enviado un correo".encode("utf-8") in forgot_post.data
             mock_send_mail.assert_called_once()
@@ -401,7 +403,7 @@ def test_theme_functionality_comprehensive(basic_config_setup):
 
     with basic_config_setup.app_context():
         try:
-            initial_setup(with_tests=False, with_examples=False) # Do not need a freesh database for this test
+            initial_setup(with_tests=False, with_examples=False)  # Do not need a freesh database for this test
         except:
             pass
 
@@ -425,9 +427,7 @@ def test_theme_functionality_comprehensive(basic_config_setup):
         # Test template override detection
         expected_harvard_home = "themes/harvard/overrides/home.j2"
 
-
         assert get_home_template() == expected_harvard_home
-
 
         # Test Cambridge theme
         config.theme = "cambridge"
@@ -435,13 +435,11 @@ def test_theme_functionality_comprehensive(basic_config_setup):
 
         assert get_home_template() == "themes/cambridge/overrides/home.j2"
 
-
         # Test Oxford theme
         config.theme = "oxford"
         database.session.commit()
 
         assert get_home_template() == "themes/oxford/overrides/home.j2"
-
 
         # Test all other themes have override templates
         themes_to_test = ["classic", "corporative", "finance", "oxford", "cambridge", "harvard"]
@@ -452,7 +450,6 @@ def test_theme_functionality_comprehensive(basic_config_setup):
 
             # All themes should have override templates
             assert get_home_template() == f"themes/{theme}/overrides/home.j2"
-
 
         # Restore original theme
         config.theme = original_theme

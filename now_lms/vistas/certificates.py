@@ -225,7 +225,9 @@ def certificacion(ulid: str):
     certificacion = database.session.execute(database.select(Certificacion).filter_by(id=ulid)).first()
     certificacion = certificacion[0]
 
-    certificado = database.session.execute(database.select(Certificado).filter_by(code=certificacion.certificado)).first()
+    certificado = database.session.execute(
+        database.select(Certificado).filter_by(code=certificacion.certificado)
+    ).first()
     certificado = certificado[0]
 
     # Get course or master class information
@@ -266,7 +268,9 @@ def certificate_serve_pdf(ulid: str):
     certificacion = database.session.execute(database.select(Certificacion).filter_by(id=ulid)).first()
     certificacion = certificacion[0]
 
-    certificado = database.session.execute(database.select(Certificado).filter_by(code=certificacion.certificado)).first()
+    certificado = database.session.execute(
+        database.select(Certificado).filter_by(code=certificacion.certificado)
+    ).first()
     certificado = certificado[0]
 
     # Get course or master class information
@@ -321,7 +325,9 @@ def certificado(ulid):
     certificacion = database.session.execute(database.select(Certificacion).filter_by(id=ulid)).first()
     certificacion = certificacion[0]
 
-    certificado = database.session.execute(database.select(Certificado).filter_by(code=certificacion.certificado)).first()
+    certificado = database.session.execute(
+        database.select(Certificado).filter_by(code=certificacion.certificado)
+    ).first()
     certificado = certificado[0]
 
     # Get course or master class information
@@ -332,7 +338,12 @@ def certificado(ulid):
     usuario = usuario[0]
 
     # Create context with both curso and master_class for template compatibility
-    context = {"usuario": usuario, "certificacion": certificacion, "certificado": certificado, "content_type": content_type}
+    context = {
+        "usuario": usuario,
+        "certificacion": certificacion,
+        "certificado": certificado,
+        "content_type": content_type,
+    }
 
     if content_type == "course":
         context["curso"] = content
