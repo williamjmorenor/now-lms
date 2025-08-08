@@ -110,7 +110,7 @@ def crear_masterclass_prueba():
         platform_name="Zoom",
         platform_url="https://zoom.us/j/1234567890",
         is_certificate=True,
-        diploma_template_id="01HNP0TTQNTR03J7ZQHR09YMKK",  # Reference to test certificate
+        diploma_template_id="lala",  # Reference to test certificate code
         instructor_id="admin",  # Admin user as instructor
     )
 
@@ -126,7 +126,7 @@ def crear_masterclass_prueba():
 
     # Create a certificate for the admin user
     certificacion = Certificacion(
-        usuario="admin", curso=None, master_class_id=masterclass.id, certificado="01HNP0TTQNTR03J7ZQHR09YMKK", nota=95.0
+        usuario="admin", curso=None, master_class_id=masterclass.id, certificado="lala", nota=95.0
     )
 
     database.session.add(certificacion)
