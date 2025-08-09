@@ -58,8 +58,6 @@ pyproject.toml
 run_test.sh
 MANIFEST.in
 
-run_mail.sh
-
 test.pdf
 .prettierrc.yaml
 node_modules
