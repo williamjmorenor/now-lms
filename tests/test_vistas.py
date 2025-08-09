@@ -192,7 +192,7 @@ def test_email_backend(basic_config_setup):
 
 def test_contraseña_incorrecta(lms_application):
 
-    from now_lms import database, initial_setup
+    from now_lms import database
     from now_lms.db import eliminar_base_de_datos_segura
     from now_lms.auth import validar_acceso
 
@@ -201,7 +201,19 @@ def test_contraseña_incorrecta(lms_application):
         from flask_login.mixins import AnonymousUserMixin
 
         eliminar_base_de_datos_segura()
-        initial_setup(with_tests=False, with_examples=False)
+        # Recreate tables after dropping them
+        database.create_all()
+        # Setup database within current app context instead of using global initial_setup
+        from now_lms.db.tools import crear_configuracion_predeterminada
+        from now_lms.db.initial_data import (
+            crear_certificados, crear_curso_predeterminado,
+            crear_usuarios_predeterminados, crear_certificacion
+        )
+        crear_configuracion_predeterminada()
+        crear_certificados()
+        crear_curso_predeterminado()
+        crear_usuarios_predeterminados()
+        crear_certificacion()
         with lms_application.test_client() as client:
             # Keep the session alive until the with clausule closes
             client.post("/user/login", data={"usuario": "lms-admin", "acceso": "lms_admin"})

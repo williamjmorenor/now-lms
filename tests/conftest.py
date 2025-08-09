@@ -160,7 +160,23 @@ def db_session(app):
 def lms_application(database_url):
     """Legacy fixture for backwards compatibility."""
     test_app = create_app(testing=True, database_uri=database_url)
+    
+    # Initialize database within the test app context to ensure proper setup
+    with test_app.app_context():
+        from now_lms import database
+        database.create_all()
+    
     yield test_app
+    
+    # Clean teardown
+    with test_app.app_context():
+        from now_lms import database
+        try:
+            database.session.remove()
+            database.drop_all()
+            database.engine.dispose()
+        except Exception as e:
+            log.warning(f"Database cleanup error in lms_application: {e}")
 
 
 @pytest.fixture(scope="function")
