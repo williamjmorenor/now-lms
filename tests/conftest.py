@@ -34,191 +34,211 @@ if not DB_URL:
 log.info(f"Using test database URL: {DB_URL}")
 
 
-@pytest.fixture(scope="session")
-def database_url():
-    """Provide the database URL for tests."""
-    return DB_URL
-
-
-@pytest.fixture
-def lms_application(database_url):
-    """Create Flask application with test configuration."""
-    from now_lms import app
-
-    # Configure the application for testing
-    app.config.update(
-        {
+def create_app(testing=True, database_uri=None, minimal=False):
+    """Create Flask application with test configuration (factory pattern)."""
+    from flask import Flask
+    from now_lms.config import CONFIGURACION, DIRECTORIO_ARCHIVOS, DIRECTORIO_PLANTILLAS
+    
+    app = Flask(
+        "now_lms",
+        template_folder=DIRECTORIO_PLANTILLAS,
+        static_folder=DIRECTORIO_ARCHIVOS,
+    )
+    
+    # Base configuration
+    app.config.from_mapping(CONFIGURACION)
+    
+    if testing:
+        app.config.update({
             "TESTING": True,
             "SECRET_KEY": "test-secret-key-for-testing",
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
             "WTF_CSRF_ENABLED": False,
             "DEBUG": True,
             "PRESERVE_CONTEXT_ON_EXCEPTION": True,
-            "SQLALCHEMY_DATABASE_URI": database_url,
             "MAIL_SUPPRESS_SEND": True,
-        }
-    )
+            "SERVER_NAME": "localhost.localdomain",
+            "APPLICATION_ROOT": "/",
+            "PREFERRED_URL_SCHEME": "http",
+        })
+        
+    if database_uri:
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
+    
+    # Initialize extensions (similar to what the main app does)
+    if not minimal:
+        from now_lms import inicializa_extenciones_terceros, registrar_modulos_en_la_aplicacion_principal, define_variables_globales_jinja2
+        inicializa_extenciones_terceros(app)
+        registrar_modulos_en_la_aplicacion_principal(app)
+        define_variables_globales_jinja2(app)
+    else:
+        # Minimal initialization for basic tests
+        from now_lms import database, administrador_sesion
+        database.init_app(app)
+        administrador_sesion.init_app(app)
+    
+    return app
 
-    yield app
+
+@pytest.fixture(scope="session")
+def database_url():
+    """Provide the database URL for tests."""
+    return DB_URL
+
+
+@pytest.fixture(scope="function")
+def app():
+    """Create a Flask app for testing with proper setup and teardown."""
+    # Use the existing LMS app but configure it for testing
+    from now_lms import lms_app
+    
+    # Store original config
+    original_config = dict(lms_app.config)
+    
+    # Configure for testing
+    lms_app.config.update({
+        "TESTING": True,
+        "SECRET_KEY": "test-secret-key-for-testing",
+        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+        "WTF_CSRF_ENABLED": False,
+        "DEBUG": True,
+        "PRESERVE_CONTEXT_ON_EXCEPTION": True,
+        "MAIL_SUPPRESS_SEND": True,
+        "SERVER_NAME": "localhost.localdomain",
+        "APPLICATION_ROOT": "/",
+        "PREFERRED_URL_SCHEME": "http",
+        "SQLALCHEMY_DATABASE_URI": DB_URL,
+    })
+    
+    # Initialize database with the app context
+    with lms_app.app_context():
+        from now_lms import database
+        database.create_all()
+    
+    yield lms_app
+    
+    # Clean teardown - this is the key to fixing MySQL hanging
+    with lms_app.app_context():
+        from now_lms import database
+        try:
+            # Ensure session is properly closed
+            database.session.remove()
+            # Drop all tables
+            database.drop_all()
+            # Dispose of the engine and all connections 
+            database.engine.dispose()
+        except Exception as e:
+            log.warning(f"Database cleanup error: {e}")
+    
+    # Restore original config
+    lms_app.config.clear()
+    lms_app.config.update(original_config)
+
+
+@pytest.fixture(scope="function")
+def client(app):
+    """Flask test client."""
+    return app.test_client()
+
+
+@pytest.fixture(scope="function") 
+def db_session(app):
+    """Database session with proper cleanup for each test."""
+    with app.app_context():
+        from now_lms import database
+        yield database.session  # Use the regular Flask-SQLAlchemy session
+        
+        # Cleanup after each test - this ensures no hanging connections
+        try:
+            database.session.rollback()
+            database.session.remove()
+        except Exception as e:
+            log.warning(f"Session cleanup error: {e}")
 
 
 @pytest.fixture
-def minimal_db_setup(lms_application):
+def lms_application(database_url):
+    """Legacy fixture for backwards compatibility."""
+    test_app = create_app(testing=True, database_uri=database_url)
+    yield test_app
+
+
+@pytest.fixture(scope="function")
+def minimal_db_setup(app, db_session):
     """
     Minimal database setup that only creates schema without full data population.
     Use this for tests that don't need the complete database setup.
     """
-    from now_lms import database
-    from now_lms.db import eliminar_base_de_datos_segura
-
-    with lms_application.app_context():
-        try:
-            # Only create schema, don't populate with full data
-            database.create_all()
-            log.debug("Minimal database schema created.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
-            log.warning(f"Database setup error (continuing): {e}")
-
-    yield lms_application  # Return the application with minimal database setup
-
-    # Clean up after test
-    with lms_application.app_context():
-        try:
-            # For PostgreSQL and MySQL, handle potential rollback issues
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                database.session.rollback()
-                database.session.close()
-            eliminar_base_de_datos_segura()
-            log.debug("Minimal database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
-            log.warning(f"Database cleanup warning: {e}")
+    # db_session already provides isolated session, just return the app
+    yield app
 
 
-@pytest.fixture
-def full_db_setup(lms_application):
+@pytest.fixture(scope="function")
+def full_db_setup(app, db_session):
     """
     Full database setup with complete data population.
     Use this for tests that need the complete populated database (like test_vistas).
     """
-    from now_lms import database, initial_setup
-    from now_lms.db import eliminar_base_de_datos_segura
-
-    # Get admin username from environment, just like in initial_data.py
-    admin_username = os.environ.get("ADMIN_USER") or os.environ.get("LMS_USER") or "lms-admin"
-    admin_password = os.environ.get("ADMIN_PSWD") or os.environ.get("LMS_PSWD") or "lms-admin"
-
-    with lms_application.app_context():
+    with app.app_context():
         try:
-            # For PostgreSQL and MySQL, ensure clean state before setup
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                try:
-                    database.session.rollback()
-                    database.session.close()
-                except:
-                    pass
-
-            # Full database setup with test data
-            eliminar_base_de_datos_segura()
-            initial_setup(with_tests=True, with_examples=False)
+            # Directly create the setup data in the correct app context
+            from now_lms.db.tools import crear_configuracion_predeterminada
+            from now_lms.db.initial_data import (
+                crear_certificados, crear_curso_predeterminado,
+                crear_usuarios_predeterminados, crear_certificacion
+            )
+            
+            # Setup data that's needed for tests
+            crear_configuracion_predeterminada()
+            crear_certificados()
+            crear_curso_predeterminado()
+            crear_usuarios_predeterminados()
+            crear_certificacion()
+            
+            # Create test data
+            from now_lms.db.data_test import crear_data_para_pruebas
+            crear_data_para_pruebas()
+            
             log.debug("Full database setup completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Full database setup error (continuing): {e}")
 
-    yield lms_application  # Return the application with the full database setup
-
-    # Clean up after test
-    with lms_application.app_context():
-        try:
-            # For PostgreSQL and MySQL, handle potential rollback issues
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                database.session.rollback()
-                database.session.close()
-            eliminar_base_de_datos_segura()
-            log.debug("Full database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
-            log.warning(f"Database cleanup warning: {e}")
+    yield app  # Return the application with the full database setup
 
 
-@pytest.fixture
-def full_db_setup_with_examples(lms_application):
+@pytest.fixture(scope="function")
+def full_db_setup_with_examples(app, db_session):
     """
-    Full database setup with complete data population.
-    Use this for tests that need the complete populated database (like test_vistas).
+    Full database setup with complete data population including examples.
+    Use this for tests that need the complete populated database with examples.
     """
-    from now_lms import database, initial_setup
-    from now_lms.db import eliminar_base_de_datos_segura
-
-    # Get admin username from environment, just like in initial_data.py
-    admin_username = os.environ.get("ADMIN_USER") or os.environ.get("LMS_USER") or "lms-admin"
-    admin_password = os.environ.get("ADMIN_PSWD") or os.environ.get("LMS_PSWD") or "lms-admin"
-
-    with lms_application.app_context():
+    from now_lms import initial_setup
+    
+    with app.app_context():
         try:
-            # For PostgreSQL and MySQL, ensure clean state before setup
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                try:
-                    database.session.rollback()
-                    database.session.close()
-                except:
-                    pass
-
-            # Full database setup with test data
-            eliminar_base_de_datos_segura()
+            # Full database setup with test data and examples
             initial_setup(with_tests=True, with_examples=True)
-            log.debug("Full database setup completed.")
+            log.debug("Full database setup with examples completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Full database setup error (continuing): {e}")
 
-    yield lms_application  # Return the application with the full database setup
-
-    # Clean up after test
-    with lms_application.app_context():
-        try:
-            # For PostgreSQL and MySQL, handle potential rollback issues
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                database.session.rollback()
-                database.session.close()
-            eliminar_base_de_datos_segura()
-            log.debug("Full database cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
-            log.warning(f"Database cleanup warning: {e}")
+    yield app  # Return the application with the full database setup
 
 
-@pytest.fixture
-def basic_config_setup(lms_application):
+@pytest.fixture(scope="function")
+def basic_config_setup(app, db_session):
     """
     Basic configuration setup that only creates essential configuration.
     For tests that need basic config but not full database.
     """
-    from now_lms import database
-    from now_lms.db import eliminar_base_de_datos_segura
     from now_lms.db.tools import crear_configuracion_predeterminada
 
-    with lms_application.app_context():
+    with app.app_context():
         try:
-            # Only create schema and basic configuration
-            database.create_all()
+            # Only create basic configuration
             crear_configuracion_predeterminada()
             log.debug("Basic configuration setup completed.")
         except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
             log.warning(f"Basic config setup error (continuing): {e}")
 
-    yield lms_application  # Return the application with basic configuration
-
-    # Clean up after test
-    with lms_application.app_context():
-        try:
-            # For PostgreSQL and MySQL, handle potential rollback issues
-            db_url = lms_application.config.get("SQLALCHEMY_DATABASE_URI", "")
-            if "postgresql" in db_url.lower() or "mysql" in db_url.lower():
-                database.session.rollback()
-                database.session.close()
-            eliminar_base_de_datos_segura()
-            log.debug("Basic configuration cleaned up.")
-        except (OperationalError, ProgrammingError, PGProgrammingError, DatabaseError, IntegrityError) as e:
-            log.warning(f"Database cleanup warning: {e}")
+    yield app  # Return the application with basic configuration
