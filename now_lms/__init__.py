@@ -150,6 +150,8 @@ babel = Babel()
 administrador_sesion: LoginManager = LoginManager()
 mde: Mde = Mde()
 mail = Mail()
+# Keep a reference that won't be shadowed by module imports
+_mail_instance = mail
 
 
 # ---------------------------------------------------------------------------------------
@@ -167,7 +169,7 @@ def inicializa_extenciones_terceros(flask_app: Flask):
         administrador_sesion.init_app(flask_app)
         cache.init_app(flask_app)
         mde.init_app(flask_app)
-        mail.init_app(flask_app)
+        _mail_instance.init_app(flask_app)
         flask_app.config["BABEL_DEFAULT_LOCALE"] = "es"
         flask_app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
         flask_app.config["BABEL_SUPPORTED_LOCALES"] = ["es", "en"]
