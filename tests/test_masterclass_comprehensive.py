@@ -455,7 +455,7 @@ class TestMasterClassCertificationSystem:
         # Create certificate template
         cert_template = Certificado(
             code="MC_CERT_TEMPLATE",
-            title="MasterClass Certificate",
+            titulo="MasterClass Certificate",
             habilitado=True,
             publico=True,
         )
@@ -505,7 +505,7 @@ class TestMasterClassCertificationSystem:
         # Create certificate template
         cert_template = Certificado(
             code="MC_GEN_TEMPLATE",
-            title="Generated MasterClass Certificate",
+            titulo="Generated MasterClass Certificate",
             habilitado=True,
         )
         database.session.add(cert_template)
