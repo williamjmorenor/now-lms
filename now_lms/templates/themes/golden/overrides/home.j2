@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+    {% set current_theme = current_theme() %}{% set site_config = config() %}
+    <head>
+        {{ current_theme.headertags() }} {{ current_theme.local_style() }}
+        <title>Golden Learning - {{ site_config.nombre }}</title>
+
+        <style>
+            /* Custom styles for golden theme hero */
+            :root {
+                --sun-orange: #f49640;
+            }
+
+            .hero-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: linear-gradient(135deg, #f0b744 0%, #f49640 100%);
+                z-index: -1;
+            }
+
+            .hero-inner {
+                display: flex;
+                align-items: center;
+                min-height: 100vh;
+                padding: 2rem 0;
+            }
+
+            .hero-copy {
+                flex: 1;
+                padding-right: 2rem;
+            }
+
+            .brand-line {
+                font-family: "Lato", sans-serif;
+                font-weight: 900;
+                font-size: 1.2rem;
+                color: #141411;
+                margin-bottom: 1rem;
+                letter-spacing: 2px;
+            }
+
+            .hero-title {
+                font-family: "Lato", sans-serif;
+                font-size: 3.5rem;
+                font-weight: 700;
+                color: #141411;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-sub {
+                font-size: 1.2rem;
+                color: #141411;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+            }
+
+            .cta-row {
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .cta-primary {
+                background: #141411;
+                color: #f4f4f4;
+                border: none;
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .cta-primary:hover {
+                background: #2a2a24;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(20, 20, 17, 0.3);
+                color: #f4f4f4;
+            }
+
+            .cta-secondary {
+                background: transparent;
+                color: #141411;
+                border: 2px solid #141411;
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                font-weight: 600;
+                border-radius: 8px;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s ease;
+            }
+
+            .cta-secondary:hover {
+                background: #141411;
+                color: #f4f4f4;
+                transform: translateY(-2px);
+            }
+
+            .hero-art {
+                flex: 0 0 300px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .character {
+                width: 200px;
+                height: 200px;
+                animation: float 3s ease-in-out infinite;
+            }
+
+            @keyframes float {
+                0%,
+                100% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .hero-inner {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .hero-copy {
+                    padding-right: 0;
+                    margin-bottom: 2rem;
+                }
+
+                .hero-title {
+                    font-size: 2.5rem;
+                }
+
+                .cta-row {
+                    justify-content: center;
+                }
+
+                .hero-art {
+                    flex: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        {{ current_theme.navbar() }}
+
+        <!-- Hero Background -->
+        <div class="hero-bg" aria-hidden="true"></div>
+
+        <main style="position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 1rem">
+            <section class="hero-inner">
+                <div class="hero-copy">
+                    <div class="brand-line">NOW-LMS</div>
+                    <h1 class="hero-title">
+                        Aprende inglés
+                        <span style="color: var(--sun-orange); font-family: &quot;Caveat&quot;, cursive">con confianza</span>
+                    </h1>
+                    <p class="hero-sub">
+                        Cursos dinámicos, prácticos y divertidos — Clases online en vivo, profesores nativos y material
+                        interactivo.
+                    </p>
+                    <div class="cta-row">
+                        {% if not current_user.is_authenticated %}
+                        <a
+                            href="{{ url_for('user.crear_cuenta') }}"
+                            class="cta-primary"
+                            aria-label="Reserva tu clase gratis en NOW-LMS"
+                            >Reserva tu clase gratis</a
+                        >
+                        <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
+                        {% else %}
+                        <a href="{{ url_for('home.panel') }}" class="cta-primary" aria-label="Ir a mi panel de usuario"
+                            >Mi Panel</a
+                        >
+                        <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="hero-art" aria-hidden="true">
+                    <!-- Personaje simple como en el diseño proporcionado -->
+                    <svg class="character" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="80" fill="#fff" stroke="#141411" stroke-width="4"></circle>
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#141411">
+                            😊
+                        </text>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Contenido de cursos y características -->
+            <section
+                style="
+                    margin-top: 60vh;
+                    background: #fff;
+                    padding: 32px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+                    margin-bottom: 2rem;
+                "
+            >
+                <div class="row">
+                    <div class="col-12 text-center mb-5">
+                        <h2 class="display-6 fw-bold mb-4" style="color: #141411">Descubre Nuestros Cursos</h2>
+                        <p class="lead" style="color: #5a5a54">
+                            Explora una nueva forma de aprender con nuestra plataforma educativa moderna y eficiente.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="feature-icon mb-3">
+                                <span style="color: #141411; font-size: 1.5rem">🎯</span>
+                            </div>
+                            <h4 class="mb-3" style="color: #141411">Cursos Especializados</h4>
+                            <p style="line-height: 1.6; color: #5a5a54">
+                                Accede a una amplia variedad de cursos diseñados por expertos en cada área de conocimiento.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="feature-icon mb-3">
+                                <span style="color: #141411; font-size: 1.5rem">👥</span>
+                            </div>
+                            <h4 class="mb-3" style="color: #141411">Comunidad Activa</h4>
+                            <p style="line-height: 1.6; color: #5a5a54">
+                                Únete a una comunidad de estudiantes y profesionales que comparten tus intereses y objetivos.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="feature-icon mb-3">
+                                <span style="color: #141411; font-size: 1.5rem">🏆</span>
+                            </div>
+                            <h4 class="mb-3" style="color: #141411">Certificaciones</h4>
+                            <p style="line-height: 1.6; color: #5a5a54">
+                                Obtén certificaciones reconocidas que validen tu conocimiento y impulsen tu carrera
+                                profesional.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Courses Section -->
+                {% if cursos and cursos.total > 0 %}
+                <div class="row">
+                    <div class="col-12 text-center mb-4">
+                        <h3 class="fw-bold mb-4" style="color: #141411">Cursos Destacados</h3>
+                    </div>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 g-4 mb-4">
+                    {% for curso in cursos.items[:4] %}
+                    <div class="col">
+                        <div class="card-golden h-100">
+                            {% if curso.portada and course_logo(curso.codigo) %}
+                            <img
+                                src="{{ url_for('static', filename='/files/public/images/' + curso.codigo + '/' + course_logo(curso.codigo)) }}"
+                                alt="{{ curso.nombre }}"
+                                class="card-img-top"
+                                style="height: 200px; object-fit: cover; border-radius: 12px 12px 0 0"
+                            />
+                            {% else %}
+                            <div
+                                class="card-img-top d-flex align-items-center justify-content-center"
+                                style="
+                                    height: 200px;
+                                    background: linear-gradient(135deg, #f0b744 0%, #f49640 100%);
+                                    border-radius: 12px 12px 0 0;
+                                    color: #141411;
+                                "
+                            >
+                                <div class="text-center">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem">📚</div>
+                                    <div style="font-size: 1rem; font-weight: 600">{{ curso.nombre }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="card-body d-flex flex-column" style="padding: 1.5rem">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0" style="color: #141411">{{ curso.nombre }}</h5>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if not curso.precio %}
+                                        <span class="badge badge-golden">Gratis</span>
+                                        {% endif %} {% if curso.nivel == 0 %}
+                                        <span class="badge bg-secondary" title="Nivel Introductorio">Intro</span>
+                                        {% elif curso.nivel == 1 %}
+                                        <span class="badge bg-primary" title="Nivel Principiante">Principiante</span>
+                                        {% elif curso.nivel == 2 %}
+                                        <span class="badge bg-warning" title="Nivel Intermedio">Intermedio</span>
+                                        {% elif curso.nivel == 3 %}
+                                        <span class="badge bg-danger" title="Nivel Avanzado">Avanzado</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <p class="card-text flex-grow-1" style="color: #5a5a54">
+                                    {{ curso.descripcion_corta | truncate(100) }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a
+                                        href="{{ url_for('course.curso', course_code=curso.codigo) }}"
+                                        class="btn btn-golden-secondary btn-sm"
+                                        >Ver Curso</a
+                                    >
+                                    <div class="text-end">
+                                        {% if curso.duracion %}
+                                        <small class="text-muted d-block">{{ curso.duracion }} mins</small>
+                                        {% endif %} {% if curso.precio %}
+                                        <small class="fw-bold" style="color: #141411"
+                                            >{{ curso.precio | float }} {{ site_config.moneda }}</small
+                                        >
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center">
+                    <a href="{{ url_for('course.lista_cursos', page=1) }}" class="btn btn-golden-primary btn-lg px-4 py-2">
+                        Ver Todos los Cursos
+                    </a>
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Call to Action Section -->
+            <section
+                style="
+                    background: #fff;
+                    padding: 2rem;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+                    margin-bottom: 2rem;
+                "
+            >
+                <div class="text-center">
+                    {% if not current_user.is_authenticated %}
+                    <h3 class="mb-4" style="color: #141411">¿Listo para Comenzar?</h3>
+                    <p class="lead mb-4" style="color: #5a5a54">
+                        Únete a nuestra plataforma educativa y comienza tu viaje de aprendizaje hoy mismo.
+                    </p>
+                    <a href="{{ url_for('user.crear_cuenta') }}" class="cta-primary"> Registrarse Gratis </a>
+                    {% else %}
+                    <h3 class="mb-4" style="color: #141411">Bienvenido de vuelta, {{ current_user.nombre }}</h3>
+                    <p class="lead mb-4" style="color: #5a5a54">
+                        Continúa tu viaje de aprendizaje y explora nuevas oportunidades educativas.
+                    </p>
+                    <a href="{{ url_for('home.panel') }}" class="cta-primary me-3"> Ir a Mi Panel </a>
+                    <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary"> Explorar Cursos </a>
+                    {% endif %}
+                </div>
+            </section>
+
+            <footer style="text-align: center; padding: 2rem 0; color: #5a5a54">© NOW-LMS — Tema Golden</footer>
+        </main>
+
+        {{ current_theme.jslibs() }}
+    </body>
+</html>
