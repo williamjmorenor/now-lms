@@ -45,7 +45,7 @@ def test_visit_views_anonimus(full_db_setup_with_examples):
                         for t in text:
                             log.warning(route)
                             log.warning(t)
-                            assert t in consulta.data"""
+                            assert t in consulta.data
                 
 
 
@@ -69,11 +69,11 @@ def test_visit_views_admin(full_db_setup_with_examples):
                 log.warning(ruta.ruta)
                 consulta = client.get(ruta.ruta)
                 assert consulta.status_code == ruta.admin
-                """if consulta.status_code == 200 and ruta.texto:
+                if consulta.status_code == 200 and ruta.texto:
                         for t in ruta.texto:
                             assert t in consulta.data
                         for t in ruta.como_admin:
-                            assert t in consulta.data"""
+                            assert t in consulta.data
             client.get("/user/logout")
 
 
@@ -92,11 +92,11 @@ def test_visit_views_student(full_db_setup):
                 log.warning(ruta.ruta)
                 consulta = client.get(ruta.ruta)
                 assert consulta.status_code == ruta.user
-                """if consulta.status_code == 200 and ruta.texto:
+                if consulta.status_code == 200 and ruta.texto:
                         for t in ruta.texto:
                             assert t in consulta.data
                         for t in ruta.como_user:
-                            assert t in consulta.data"""
+                            assert t in consulta.data
             client.get("/user/logout")
 
 
@@ -115,11 +115,11 @@ def test_visit_views_moderator(full_db_setup):
                 log.warning(ruta.ruta)
                 consulta = client.get(ruta.ruta)
                 assert consulta.status_code == ruta.moderator
-                """if consulta.status_code == 200 and ruta.texto:
+                if consulta.status_code == 200 and ruta.texto:
                         for t in ruta.texto:
                             assert t in consulta.data
                         for t in ruta.como_moderador:
-                            assert t in consulta.data"""
+                            assert t in consulta.data
             client.get("/user/logout")
 
 
@@ -138,12 +138,12 @@ def test_visit_views_instructor(full_db_setup):
                 log.warning(ruta.ruta)
                 consulta = client.get(ruta.ruta)
                 assert consulta.status_code == ruta.instructor
-                """if consulta.status_code == 200 and ruta.texto:
+                if consulta.status_code == 200 and ruta.texto:
                         for t in ruta.texto:
                             assert t in consulta.data
                             for t in ruta.como_instructor:
-                                assert t in consulta.data"""
-            client.get("/user/logout")
+                                assert t in consulta.data
+            client.get("/user/logout")"""
 
 
 def test_error_pages(basic_config_setup):
