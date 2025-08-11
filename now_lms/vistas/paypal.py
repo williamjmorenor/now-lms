@@ -145,7 +145,10 @@ def get_paypal_access_token():
 
         # Decrypt the client secret
         try:
-            client_secret = descifrar_secreto(client_secret_encrypted).decode()
+            client_secret = descifrar_secreto(client_secret_encrypted)
+            # If it's bytes, decode it; if it's already a string, use as-is
+            if isinstance(client_secret, bytes):
+                client_secret = client_secret.decode()
         except Exception as e:
             logging.error(f"Failed to decrypt PayPal client secret: {e}")
             return None
@@ -186,7 +189,12 @@ def get_paypal_access_token():
 def verify_paypal_payment(order_id, access_token):
     """Verify a PayPal payment by order ID."""
     try:
-        paypal_config = database.session.execute(database.select(PaypalConfig)).first()[0]
+        paypal_config_result = database.session.execute(database.select(PaypalConfig)).first()
+        if not paypal_config_result:
+            logging.error("PayPal configuration not found in database")
+            return {"verified": False, "error": "PayPal configuration not found"}
+        
+        paypal_config = paypal_config_result[0]
         base_url = PAYPAL_SANDBOX_API_URL if paypal_config.sandbox else PAYPAL_PRODUCTION_API_URL
         order_url = f"{base_url}/v2/checkout/orders/{order_id}"
 
@@ -199,11 +207,22 @@ def verify_paypal_payment(order_id, access_token):
 
         if response.status_code == 200:
             order_data = response.json()
+            purchase_units = order_data.get("purchase_units", [])
+            
+            # Safely extract amount and currency from first purchase unit if it exists
+            amount = None
+            currency = None
+            if purchase_units:
+                first_unit = purchase_units[0]
+                amount_data = first_unit.get("amount", {})
+                amount = amount_data.get("value")
+                currency = amount_data.get("currency_code")
+            
             return {
                 "verified": True,
                 "status": order_data.get("status"),
-                "amount": order_data.get("purchase_units", [{}])[0].get("amount", {}).get("value"),
-                "currency": order_data.get("purchase_units", [{}])[0].get("amount", {}).get("currency_code"),
+                "amount": amount,
+                "currency": currency,
                 "payer_id": order_data.get("payer", {}).get("payer_id"),
                 "order_data": order_data,
             }
@@ -222,7 +241,12 @@ def verify_paypal_payment(order_id, access_token):
 def confirm_payment():
     """Confirm PayPal payment after successful client-side processing."""
     try:
-        data = request.get_json()
+        # Handle JSON parsing errors specifically
+        try:
+            data = request.get_json()
+        except Exception as json_error:
+            logging.warning(f"Invalid JSON in payment confirmation from user {current_user.usuario}: {json_error}")
+            return jsonify({"success": False, "error": "Invalid JSON in request body"}), 400
 
         if not data:
             logging.warning(f"Payment confirmation attempt without data from user {current_user.usuario}")
@@ -483,7 +507,12 @@ def payment_page(course_code):
 def get_client_id():
     """Get PayPal client ID for JavaScript SDK."""
     try:
-        paypal_config = database.session.execute(database.select(PaypalConfig)).first()[0]
+        paypal_config_result = database.session.execute(database.select(PaypalConfig)).first()
+        if not paypal_config_result:
+            logging.error(f"PayPal configuration not found for user {current_user.usuario}")
+            return jsonify({"error": "PayPal not configured"}), 500
+        
+        paypal_config = paypal_config_result[0]
 
         # Return the appropriate client ID based on sandbox mode
         client_id = paypal_config.paypal_sandbox if paypal_config.sandbox else paypal_config.paypal_id
@@ -526,7 +555,7 @@ def payment_status(course_code):
             database.session.execute(
                 database.select(Pago)
                 .filter_by(usuario=current_user.usuario, curso=course_code)
-                .order_by(Pago.fecha_creacion.desc())
+                .order_by(Pago.fecha.desc())
             )
             .scalars()
             .all()
@@ -543,7 +572,7 @@ def payment_status(course_code):
                     "status": payment.estado,
                     "reference": payment.referencia,
                     "audit": payment.audit,
-                    "created": payment.fecha_creacion.isoformat() if payment.fecha_creacion else None,
+                    "created": payment.fecha.isoformat() if payment.fecha else None,
                 }
             )
 

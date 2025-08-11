@@ -707,30 +707,44 @@ class TestPayPalPaymentConfirmation:
             database.session.add(existing_payment)
             database.session.commit()
 
-            with app_with_paypal_data.test_client() as client:
-                # Login as test user
-                with client.session_transaction() as sess:
-                    sess["_user_id"] = user.id
-                    sess["_fresh"] = True
+            # Mock PayPal API calls
+            with (
+                patch("now_lms.vistas.paypal.get_paypal_access_token") as mock_token,
+                patch("now_lms.vistas.paypal.verify_paypal_payment") as mock_verify,
+            ):
+                mock_token.return_value = "mock_access_token"
+                mock_verify.return_value = {
+                    "verified": True,
+                    "status": "COMPLETED",
+                    "amount": "99.99",
+                    "currency": "USD",
+                    "payer_id": "test_payer_id",
+                }
 
-                response = client.post(
-                    "/paypal_checkout/confirm_payment",
-                    data=json.dumps(
-                        {
-                            "orderID": "test_order_123",
-                            "payerID": "test_payer_id",
-                            "courseCode": "PAYPAL001",
-                            "amount": 99.99,
-                            "currency": "USD",
-                        }
-                    ),
-                    content_type="application/json",
-                )
+                with app_with_paypal_data.test_client() as client:
+                    # Login as test user
+                    with client.session_transaction() as sess:
+                        sess["_user_id"] = user.id
+                        sess["_fresh"] = True
 
-                assert response.status_code == 200
-                data = json.loads(response.data)
-                assert data["success"] is True
-                assert "ya procesado" in data["message"]
+                    response = client.post(
+                        "/paypal_checkout/confirm_payment",
+                        data=json.dumps(
+                            {
+                                "orderID": "test_order_123",
+                                "payerID": "test_payer_id",
+                                "courseCode": "PAYPAL001",
+                                "amount": 99.99,
+                                "currency": "USD",
+                            }
+                        ),
+                        content_type="application/json",
+                    )
+
+                    assert response.status_code == 200
+                    data = json.loads(response.data)
+                    assert data["success"] is True
+                    assert "ya procesado" in data["message"]
 
     def test_confirm_payment_no_access_token(self, app_with_paypal_data):
         """Test payment confirmation when access token retrieval fails."""
@@ -901,7 +915,7 @@ class TestPayPalUtilityEndpoints:
         from now_lms.db import Usuario
 
         with app_with_paypal_data.app_context():
-            admin = database.session.execute(database.select(Usuario).filter_by(usuario="admin_paypal")).first()[0]
+            admin = database.session.execute(database.select(Usuario).filter_by(usuario="lms-admin")).first()[0]
 
             with app_with_paypal_data.test_client() as client:
                 # Login as admin
@@ -1065,7 +1079,7 @@ class TestPayPalEdgeCases:
                 assert response.status_code == 400
                 data = json.loads(response.data)
                 assert data["success"] is False
-                assert "No payment data received" in data["error"]
+                assert "Invalid JSON in request body" in data["error"]
 
     def test_confirm_payment_with_string_amount(self, app_with_paypal_data):
         """Test payment confirmation with string amount."""
@@ -1305,26 +1319,40 @@ class TestPayPalSecurityAndValidation:
         with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_paypal_data.test_client() as client:
-                # Login as test user
-                with client.session_transaction() as sess:
-                    sess["_user_id"] = user.id
-                    sess["_fresh"] = True
+            # Mock PayPal API calls to focus on SQL injection testing
+            with (
+                patch("now_lms.vistas.paypal.get_paypal_access_token") as mock_token,
+                patch("now_lms.vistas.paypal.verify_paypal_payment") as mock_verify,
+            ):
+                mock_token.return_value = "mock_access_token"
+                mock_verify.return_value = {
+                    "verified": True,
+                    "status": "COMPLETED",
+                    "amount": "99.99",
+                    "currency": "USD",
+                    "payer_id": "test_payer_id",
+                }
 
-                # Attempt SQL injection in course code
-                response = client.post(
-                    "/paypal_checkout/confirm_payment",
-                    data=json.dumps(
-                        {
-                            "orderID": "test_order_123",
-                            "payerID": "test_payer_id",
-                            "courseCode": "PAYPAL001'; DROP TABLE usuarios; --",
-                            "amount": 99.99,
-                            "currency": "USD",
-                        }
-                    ),
-                    content_type="application/json",
-                )
+                with app_with_paypal_data.test_client() as client:
+                    # Login as test user
+                    with client.session_transaction() as sess:
+                        sess["_user_id"] = user.id
+                        sess["_fresh"] = True
 
-                # Should handle safely (course not found)
-                assert response.status_code in [400, 404]
+                    # Attempt SQL injection in course code
+                    response = client.post(
+                        "/paypal_checkout/confirm_payment",
+                        data=json.dumps(
+                            {
+                                "orderID": "test_order_123",
+                                "payerID": "test_payer_id",
+                                "courseCode": "PAYPAL001'; DROP TABLE usuarios; --",
+                                "amount": 99.99,
+                                "currency": "USD",
+                            }
+                        ),
+                        content_type="application/json",
+                    )
+
+                    # Should handle safely (course not found)
+                    assert response.status_code in [400, 404]

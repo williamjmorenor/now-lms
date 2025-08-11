@@ -219,72 +219,63 @@ class TestPayPalPaymentVerification:
     def test_verify_paypal_payment_success_approved(self, app):
         """Test successful PayPal payment verification for approved order."""
         from now_lms.vistas.paypal import verify_paypal_payment
+        from now_lms.db import PaypalConfig
 
         with app.app_context():
-            # Mock verification response for approved payment
-            with patch("requests.get") as mock_get:
-                mock_response = Mock()
-                mock_response.status_code = 200
-                mock_response.json.return_value = {
-                    "id": "test_order_id",
-                    "status": "APPROVED",
-                    "purchase_units": [
-                        {
-                            "amount": {"value": "49.99", "currency_code": "EUR"},
-                            "description": "European course payment",
-                        }
-                    ],
-                    "payer": {"payer_id": "eur_payer_id"},
-                }
-                mock_get.return_value = mock_response
-
-                result = verify_paypal_payment("test_order_id", "mock_access_token")
-
-                assert result["verified"] is True
-                assert result["status"] == "APPROVED"
-                assert result["amount"] == "49.99"
-                assert result["currency"] == "EUR"
-
-        # Mock verification response for approved payment
-        with patch("requests.get") as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "id": "test_order_id",
-                "status": "APPROVED",
-                "purchase_units": [
-                    {
-                        "amount": {"value": "49.99", "currency_code": "EUR"},
-                        "description": "European course payment",
+            # Mock database and verification response for approved payment
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                with patch("requests.get") as mock_get:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {
+                        "id": "test_order_id",
+                        "status": "APPROVED",
+                        "purchase_units": [
+                            {
+                                "amount": {"value": "49.99", "currency_code": "EUR"},
+                                "description": "European course payment",
+                            }
+                        ],
+                        "payer": {"payer_id": "eur_payer_id"},
                     }
-                ],
-                "payer": {"payer_id": "eur_payer_id"},
-            }
-            mock_get.return_value = mock_response
+                    mock_get.return_value = mock_response
 
-            result = verify_paypal_payment("test_order_id", "mock_access_token")
+                    result = verify_paypal_payment("test_order_id", "mock_access_token")
 
-            assert result["verified"] is True
-            assert result["status"] == "APPROVED"
-            assert result["amount"] == "49.99"
-            assert result["currency"] == "EUR"
+                    assert result["verified"] is True
+                    assert result["status"] == "APPROVED"
+                    assert result["amount"] == "49.99"
+                    assert result["currency"] == "EUR"
 
     def test_verify_paypal_payment_order_not_found(self, app):
         """Test PayPal payment verification for non-existent order."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
-        # Mock 404 response
-        with patch("requests.get") as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 404
-            mock_response.text = "Order not found"
-            mock_get.return_value = mock_response
+        with app.app_context():
+            # Mock database 
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                # Mock 404 response
+                with patch("requests.get") as mock_get:
+                    mock_response = Mock()
+                    mock_response.status_code = 404
+                    mock_response.text = "Order not found"
+                    mock_get.return_value = mock_response
 
-            result = verify_paypal_payment("invalid_order_id", "mock_access_token")
+                    result = verify_paypal_payment("invalid_order_id", "mock_access_token")
 
-            assert result["verified"] is False
-            assert "error" in result
-            assert "Payment verification failed" in result["error"]
+                    assert result["verified"] is False
+                    assert "error" in result
+                    assert "Payment verification failed" in result["error"]
 
     def test_verify_paypal_payment_unauthorized(self, app):
         """Test PayPal payment verification with unauthorized access token."""
@@ -306,14 +297,22 @@ class TestPayPalPaymentVerification:
         """Test PayPal payment verification with network error."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
-        with patch("requests.get") as mock_get:
-            mock_get.side_effect = requests.exceptions.ConnectionError("Network error")
+        with app.app_context():
+            # Mock database 
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                with patch("requests.get") as mock_get:
+                    mock_get.side_effect = requests.exceptions.ConnectionError("Network error")
 
-            result = verify_paypal_payment("test_order_id", "mock_access_token")
+                    result = verify_paypal_payment("test_order_id", "mock_access_token")
 
-            assert result["verified"] is False
-            assert "error" in result
-            assert "Network error" in result["error"]
+                    assert result["verified"] is False
+                    assert "error" in result
+                    assert "Network error" in result["error"]
 
     def test_verify_paypal_payment_timeout(self, app):
         """Test PayPal payment verification with timeout."""
@@ -346,76 +345,100 @@ class TestPayPalPaymentVerification:
         """Test PayPal payment verification with missing purchase units."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
-        # Mock response with missing purchase_units
-        with patch("requests.get") as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "id": "test_order_id",
-                "status": "COMPLETED",
-                # Missing purchase_units
-                "payer": {"payer_id": "test_payer_id"},
-            }
-            mock_get.return_value = mock_response
+        with app.app_context():
+            # Mock database 
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                # Mock response with missing purchase_units
+                with patch("requests.get") as mock_get:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {
+                        "id": "test_order_id",
+                        "status": "COMPLETED",
+                        # Missing purchase_units
+                        "payer": {"payer_id": "test_payer_id"},
+                    }
+                    mock_get.return_value = mock_response
 
-            result = verify_paypal_payment("test_order_id", "mock_access_token")
+                    result = verify_paypal_payment("test_order_id", "mock_access_token")
 
-            assert result["verified"] is True  # Still verified if 200
-            assert result["amount"] is None  # But amount is None
-            assert result["currency"] is None
+                    assert result["verified"] is True  # Still verified if 200
+                    assert result["amount"] is None  # But amount is None
+                    assert result["currency"] is None
 
     def test_verify_paypal_payment_empty_purchase_units(self, app):
         """Test PayPal payment verification with empty purchase units."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
-        # Mock response with empty purchase_units
-        with patch("requests.get") as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "id": "test_order_id",
-                "status": "COMPLETED",
-                "purchase_units": [],  # Empty list
-                "payer": {"payer_id": "test_payer_id"},
-            }
-            mock_get.return_value = mock_response
+        with app.app_context():
+            # Mock database 
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                # Mock response with empty purchase_units
+                with patch("requests.get") as mock_get:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {
+                        "id": "test_order_id",
+                        "status": "COMPLETED",
+                        "purchase_units": [],  # Empty list
+                        "payer": {"payer_id": "test_payer_id"},
+                    }
+                    mock_get.return_value = mock_response
 
-            result = verify_paypal_payment("test_order_id", "mock_access_token")
+                    result = verify_paypal_payment("test_order_id", "mock_access_token")
 
-            assert result["verified"] is True
-            assert result["amount"] is None
-            assert result["currency"] is None
+                    assert result["verified"] is True
+                    assert result["amount"] is None
+                    assert result["currency"] is None
 
     def test_verify_paypal_payment_multiple_purchase_units(self, app):
         """Test PayPal payment verification with multiple purchase units."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
-        # Mock response with multiple purchase_units (should use first one)
-        with patch("requests.get") as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "id": "test_order_id",
-                "status": "COMPLETED",
-                "purchase_units": [
-                    {
-                        "amount": {"value": "99.99", "currency_code": "USD"},
-                        "description": "First item",
-                    },
-                    {
-                        "amount": {"value": "49.99", "currency_code": "USD"},
-                        "description": "Second item",
-                    },
-                ],
-                "payer": {"payer_id": "test_payer_id"},
-            }
-            mock_get.return_value = mock_response
+        with app.app_context():
+            # Mock database 
+            with patch("now_lms.vistas.paypal.database.session") as mock_session:
+                # Mock PayPal config
+                mock_config = Mock()
+                mock_config.sandbox = True
+                mock_session.execute.return_value.first.return_value = [mock_config]
+                
+                # Mock response with multiple purchase_units (should use first one)
+                with patch("requests.get") as mock_get:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {
+                        "id": "test_order_id",
+                        "status": "COMPLETED",
+                        "purchase_units": [
+                            {
+                                "amount": {"value": "99.99", "currency_code": "USD"},
+                                "description": "First item",
+                            },
+                            {
+                                "amount": {"value": "49.99", "currency_code": "USD"},
+                                "description": "Second item",
+                            },
+                        ],
+                        "payer": {"payer_id": "test_payer_id"},
+                    }
+                    mock_get.return_value = mock_response
 
-            result = verify_paypal_payment("test_order_id", "mock_access_token")
+                    result = verify_paypal_payment("test_order_id", "mock_access_token")
 
-            assert result["verified"] is True
-            assert result["amount"] == "99.99"  # Should use first purchase unit
-            assert result["currency"] == "USD"
+                    assert result["verified"] is True
+                    assert result["amount"] == "99.99"  # Should use first purchase unit
+                    assert result["currency"] == "USD"
 
 
 class TestPayPalConstants:
