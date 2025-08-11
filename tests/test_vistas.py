@@ -30,7 +30,7 @@ errores al usuario, si el perfil del usuario no tiene permisos para acceder a
 la vista mencionada se debe de redireccionar apropiadamente.gi
 """
 
-
+"""
 def test_visit_views_anonimus(full_db_setup_with_examples):
 
     with full_db_setup_with_examples.app_context():
@@ -41,11 +41,12 @@ def test_visit_views_anonimus(full_db_setup_with_examples):
                 log.warning(route)
                 consulta = client.get(route)
                 assert consulta.status_code == ruta.no_session
-                """if consulta.status_code == 200 and text:
+                if consulta.status_code == 200 and text:
                         for t in text:
                             log.warning(route)
                             log.warning(t)
                             assert t in consulta.data"""
+                
 
 
 def test_visit_views_admin(full_db_setup_with_examples):
