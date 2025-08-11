@@ -5,6 +5,7 @@
     <head>
         {{ current_theme.headertags() }}
         <title>Pago con PayPal - {{ curso.nombre | title }}</title>
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
 
         <!-- PayPal SDK -->
         <script>

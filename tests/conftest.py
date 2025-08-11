@@ -195,14 +195,6 @@ def lms_application(database_url):
 
 
 @pytest.fixture(scope="function")
-def app_context(app):
-    """Provide application context for tests."""
-    with app.app_context():
-        from now_lms import database
-        yield database
-
-
-@pytest.fixture(scope="function")
 def minimal_db_setup(app, db_session):
     """
     Minimal database setup that only creates schema without full data population.

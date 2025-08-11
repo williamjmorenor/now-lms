@@ -38,9 +38,8 @@ def test_paypal_configuration():
                 print(f"   [INFO] Site configs found: {len(site_configs)}")
 
             except Exception as e:
-                print(f"   [WARN] Database may not be fully initialized: {e}")
-                # This is expected in testing environments
-                print("   [INFO] This is normal for test environments")
+                print(f"   [ERROR] Database error: {e}")
+                assert False, f"Database error: {e}"
 
             print("\n2. Testing PayPal Configuration...")
             if paypal_configs:
@@ -74,13 +73,12 @@ def test_paypal_configuration():
                 else:
                     print("   [WARN] PayPal is disabled")
             else:
-                print("   [INFO] No PayPal configuration found (testing environment)")
+                print("   [ERROR] No PayPal configuration found")
 
             print("\n3. Testing Site Currency Configuration...")
             try:
-                with app.test_request_context():
-                    currency = get_site_currency()
-                    print(f"   Site Currency: {currency}")
+                currency = get_site_currency()
+                print(f"   Site Currency: {currency}")
 
                 if site_configs:
                     site_config = site_configs[0][0]
@@ -93,7 +91,7 @@ def test_paypal_configuration():
                     )
 
             except Exception as e:
-                print(f"   [INFO] Currency test skipped in test environment: {e}")
+                print(f"   [ERROR] Currency configuration error: {e}")
 
             print("\n4. Testing Application Routes...")
             try:
@@ -122,8 +120,7 @@ def test_paypal_configuration():
                 config = paypal_configs[0][0]
                 mode = "Sandbox" if config.sandbox else "Production"
                 print(f"   PayPal Status: ENABLED ({mode})")
-                with app.test_request_context():
-                    print(f"   Currency: {get_site_currency()}")
+                print(f"   Currency: {get_site_currency()}")
                 print(
                     f"   Ready for testing: {'[OK]' if (config.paypal_sandbox and config.paypal_sandbox_secret) or (config.paypal_id and config.paypal_secret) else '[NO]'}"
                 )
@@ -152,16 +149,15 @@ def test_paypal_configuration():
             print("\n   [DOC] See PAYPAL_MANUAL_TESTING.md for detailed testing instructions")
 
             # Test passed - PayPal configuration is accessible
-            return True
+            assert True
 
     except ImportError as e:
         print(f"[ERROR] Failed to import application: {e}")
         print("Make sure you're running this from the project root directory")
-        return False
+        assert False, f"Failed to import application: {e}"
     except Exception as e:
-        print(f"[WARN] Some functionality unavailable in test environment: {e}")
-        print("[INFO] This is expected when running in isolated test environments")
-        return True  # Consider this a pass for testing purposes
+        print(f"[ERROR] Unexpected error: {e}")
+        assert False, f"Unexpected error: {e}"
 
 
 def generate_test_report():

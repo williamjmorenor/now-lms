@@ -43,55 +43,26 @@ HOME_PAGE_ROUTE = "home.pagina_de_inicio"
 paypal = Blueprint("paypal", __name__, template_folder=DIRECTORIO_PLANTILLAS, url_prefix="/paypal_checkout")
 
 
+@cache.cached(timeout=50)
 def check_paypal_enabled():
-    """Check if PayPal is enabled in configuration."""
-    # Skip caching in testing mode
-    if current_app.config.get('TESTING'):
-        return _check_paypal_enabled_no_cache()
-    return _check_paypal_enabled_cached()
+    with current_app.app_context():
+        try:
+            q = database.session.execute(database.select(PaypalConfig)).first()[0]
+            enabled = q.enable
+            return enabled
+        except OperationalError:
+            return False
 
 
 @cache.cached(timeout=50)
-def _check_paypal_enabled_cached():
-    """Cached version for production use."""
-    return _check_paypal_enabled_no_cache()
-
-
-def _check_paypal_enabled_no_cache():
-    """Non-cached implementation."""
-    try:
-        q = database.session.execute(database.select(PaypalConfig)).first()
-        if q:
-            enabled = q[0].enable
-            return enabled
-        return False
-    except (OperationalError, AttributeError, TypeError):
-        return False
-
-
 def get_site_currency():
     """Get the site's default currency from configuration."""
-    # Skip caching in testing mode
-    if current_app.config.get('TESTING'):
-        return _get_site_currency_no_cache()
-    return _get_site_currency_cached()
-
-
-@cache.cached(timeout=50)
-def _get_site_currency_cached():
-    """Cached version for production use."""
-    return _get_site_currency_no_cache()
-
-
-def _get_site_currency_no_cache():
-    """Non-cached implementation."""
-    try:
-        config = database.session.execute(database.select(Configuracion)).first()
-        if config:
-            return config[0].moneda or "USD"  # Default to USD if not configured
-        return "USD"
-    except (OperationalError, AttributeError, TypeError):
-        return "USD"
+    with current_app.app_context():
+        try:
+            config = database.session.execute(database.select(Configuracion)).first()[0]
+            return config.moneda or "USD"  # Default to USD if not configured
+        except OperationalError:
+            return "USD"
 
 
 def validate_paypal_configuration(client_id, client_secret, sandbox=False):
@@ -145,10 +116,7 @@ def get_paypal_access_token():
 
         # Decrypt the client secret
         try:
-            client_secret = descifrar_secreto(client_secret_encrypted)
-            # If it's bytes, decode it; if it's already a string, use as-is
-            if isinstance(client_secret, bytes):
-                client_secret = client_secret.decode()
+            client_secret = descifrar_secreto(client_secret_encrypted).decode()
         except Exception as e:
             logging.error(f"Failed to decrypt PayPal client secret: {e}")
             return None
@@ -189,12 +157,7 @@ def get_paypal_access_token():
 def verify_paypal_payment(order_id, access_token):
     """Verify a PayPal payment by order ID."""
     try:
-        paypal_config_result = database.session.execute(database.select(PaypalConfig)).first()
-        if not paypal_config_result:
-            logging.error("PayPal configuration not found in database")
-            return {"verified": False, "error": "PayPal configuration not found"}
-        
-        paypal_config = paypal_config_result[0]
+        paypal_config = database.session.execute(database.select(PaypalConfig)).first()[0]
         base_url = PAYPAL_SANDBOX_API_URL if paypal_config.sandbox else PAYPAL_PRODUCTION_API_URL
         order_url = f"{base_url}/v2/checkout/orders/{order_id}"
 
@@ -207,22 +170,11 @@ def verify_paypal_payment(order_id, access_token):
 
         if response.status_code == 200:
             order_data = response.json()
-            purchase_units = order_data.get("purchase_units", [])
-            
-            # Safely extract amount and currency from first purchase unit if it exists
-            amount = None
-            currency = None
-            if purchase_units:
-                first_unit = purchase_units[0]
-                amount_data = first_unit.get("amount", {})
-                amount = amount_data.get("value")
-                currency = amount_data.get("currency_code")
-            
             return {
                 "verified": True,
                 "status": order_data.get("status"),
-                "amount": amount,
-                "currency": currency,
+                "amount": order_data.get("purchase_units", [{}])[0].get("amount", {}).get("value"),
+                "currency": order_data.get("purchase_units", [{}])[0].get("amount", {}).get("currency_code"),
                 "payer_id": order_data.get("payer", {}).get("payer_id"),
                 "order_data": order_data,
             }
@@ -241,12 +193,7 @@ def verify_paypal_payment(order_id, access_token):
 def confirm_payment():
     """Confirm PayPal payment after successful client-side processing."""
     try:
-        # Handle JSON parsing errors specifically
-        try:
-            data = request.get_json()
-        except Exception as json_error:
-            logging.warning(f"Invalid JSON in payment confirmation from user {current_user.usuario}: {json_error}")
-            return jsonify({"success": False, "error": "Invalid JSON in request body"}), 400
+        data = request.get_json()
 
         if not data:
             logging.warning(f"Payment confirmation attempt without data from user {current_user.usuario}")
@@ -507,12 +454,7 @@ def payment_page(course_code):
 def get_client_id():
     """Get PayPal client ID for JavaScript SDK."""
     try:
-        paypal_config_result = database.session.execute(database.select(PaypalConfig)).first()
-        if not paypal_config_result:
-            logging.error(f"PayPal configuration not found for user {current_user.usuario}")
-            return jsonify({"error": "PayPal not configured"}), 500
-        
-        paypal_config = paypal_config_result[0]
+        paypal_config = database.session.execute(database.select(PaypalConfig)).first()[0]
 
         # Return the appropriate client ID based on sandbox mode
         client_id = paypal_config.paypal_sandbox if paypal_config.sandbox else paypal_config.paypal_id
@@ -555,7 +497,7 @@ def payment_status(course_code):
             database.session.execute(
                 database.select(Pago)
                 .filter_by(usuario=current_user.usuario, curso=course_code)
-                .order_by(Pago.fecha.desc())
+                .order_by(Pago.fecha_creacion.desc())
             )
             .scalars()
             .all()
@@ -572,7 +514,7 @@ def payment_status(course_code):
                     "status": payment.estado,
                     "reference": payment.referencia,
                     "audit": payment.audit,
-                    "created": payment.fecha.isoformat() if payment.fecha else None,
+                    "created": payment.fecha_creacion.isoformat() if payment.fecha_creacion else None,
                 }
             )
 
