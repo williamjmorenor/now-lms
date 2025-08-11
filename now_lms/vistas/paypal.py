@@ -43,26 +43,55 @@ HOME_PAGE_ROUTE = "home.pagina_de_inicio"
 paypal = Blueprint("paypal", __name__, template_folder=DIRECTORIO_PLANTILLAS, url_prefix="/paypal_checkout")
 
 
-@cache.cached(timeout=50)
 def check_paypal_enabled():
-    with current_app.app_context():
-        try:
-            q = database.session.execute(database.select(PaypalConfig)).first()[0]
-            enabled = q.enable
-            return enabled
-        except OperationalError:
-            return False
+    """Check if PayPal is enabled in configuration."""
+    # Skip caching in testing mode
+    if current_app.config.get('TESTING'):
+        return _check_paypal_enabled_no_cache()
+    return _check_paypal_enabled_cached()
 
 
 @cache.cached(timeout=50)
+def _check_paypal_enabled_cached():
+    """Cached version for production use."""
+    return _check_paypal_enabled_no_cache()
+
+
+def _check_paypal_enabled_no_cache():
+    """Non-cached implementation."""
+    try:
+        q = database.session.execute(database.select(PaypalConfig)).first()
+        if q:
+            enabled = q[0].enable
+            return enabled
+        return False
+    except (OperationalError, AttributeError, TypeError):
+        return False
+
+
 def get_site_currency():
     """Get the site's default currency from configuration."""
-    with current_app.app_context():
-        try:
-            config = database.session.execute(database.select(Configuracion)).first()[0]
-            return config.moneda or "USD"  # Default to USD if not configured
-        except OperationalError:
-            return "USD"
+    # Skip caching in testing mode
+    if current_app.config.get('TESTING'):
+        return _get_site_currency_no_cache()
+    return _get_site_currency_cached()
+
+
+@cache.cached(timeout=50)
+def _get_site_currency_cached():
+    """Cached version for production use."""
+    return _get_site_currency_no_cache()
+
+
+def _get_site_currency_no_cache():
+    """Non-cached implementation."""
+    try:
+        config = database.session.execute(database.select(Configuracion)).first()
+        if config:
+            return config[0].moneda or "USD"  # Default to USD if not configured
+        return "USD"
+    except (OperationalError, AttributeError, TypeError):
+        return "USD"
 
 
 def validate_paypal_configuration(client_id, client_secret, sandbox=False):

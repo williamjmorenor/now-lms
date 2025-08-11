@@ -60,11 +60,16 @@ def app_with_paypal_data(full_db_setup):
             paypal_config.paypal_secret = proteger_secreto("live_secret_test")
             paypal_config.paypal_sandbox_secret = proteger_secreto("sandbox_secret_test")
             database.session.add(paypal_config)
+            database.session.commit()
         else:
+            # Update existing PayPal configuration
             existing_paypal[0].enable = True
             existing_paypal[0].sandbox = True
             existing_paypal[0].paypal_id = "live_client_id_test"
             existing_paypal[0].paypal_sandbox = "sandbox_client_id_test"
+            existing_paypal[0].paypal_secret = proteger_secreto("live_secret_test")
+            existing_paypal[0].paypal_sandbox_secret = proteger_secreto("sandbox_secret_test")
+            database.session.commit()
 
         # Create test user if not exists
         existing_user = database.session.execute(
