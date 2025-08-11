@@ -23,80 +23,65 @@ import requests
 
 
 @pytest.fixture
-def lms_application():
-    """Create test application with proper configuration."""
-    from now_lms import app
-
-    app.config.update(
-        {
-            "TESTING": True,
-            "SECRET_KEY": "test_secret_key_for_comprehensive_paypal",
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "WTF_CSRF_ENABLED": False,
-            "DEBUG": True,
-            "PRESERVE_CONTEXT_ON_EXCEPTION": False,
-            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-            "MAIL_SUPPRESS_SEND": True,
-        }
-    )
-
-    yield app
-
-
-@pytest.fixture
-def app_with_data(lms_application):
-    """Application with database and test data."""
-    from now_lms import database, initial_setup
-    from now_lms.db import eliminar_base_de_datos_segura
+def app_with_paypal_data(full_db_setup):
+    """Application with PayPal configuration and test data."""
+    from now_lms import database
     from now_lms.db import Usuario, Curso, PaypalConfig, Configuracion
     from now_lms.auth import proteger_secreto
+    from now_lms.cache import cache
 
-    with lms_application.app_context():
-        eliminar_base_de_datos_segura()
-        initial_setup()
-
+    with full_db_setup.app_context():
+        # Clear cache before each test
+        cache.clear()
+        
+        # Ensure configuration exists for proteger_secreto to work
+        config = database.session.execute(database.select(Configuracion)).first()
+        if not config:
+            site_config = Configuracion(
+                titulo="Test LMS",
+                descripcion="Test Learning Management System",
+                moneda="USD",
+            )
+            database.session.add(site_config)
+            database.session.commit()
+        else:
+            config[0].moneda = "USD"
+            database.session.commit()
+        
         # Create PayPal configuration
-        paypal_config = PaypalConfig(
-            enable=True,
-            sandbox=True,
-            paypal_id="live_client_id_test",
-            paypal_sandbox="sandbox_client_id_test",
-        )
-        paypal_config.paypal_secret = proteger_secreto("live_secret_test")
-        paypal_config.paypal_sandbox_secret = proteger_secreto("sandbox_secret_test")
-        database.session.add(paypal_config)
+        existing_paypal = database.session.execute(database.select(PaypalConfig)).first()
+        if not existing_paypal:
+            paypal_config = PaypalConfig(
+                enable=True,
+                sandbox=True,
+                paypal_id="live_client_id_test",
+                paypal_sandbox="sandbox_client_id_test",
+            )
+            paypal_config.paypal_secret = proteger_secreto("live_secret_test")
+            paypal_config.paypal_sandbox_secret = proteger_secreto("sandbox_secret_test")
+            database.session.add(paypal_config)
+        else:
+            existing_paypal[0].enable = True
+            existing_paypal[0].sandbox = True
+            existing_paypal[0].paypal_id = "live_client_id_test"
+            existing_paypal[0].paypal_sandbox = "sandbox_client_id_test"
 
-        # Create site configuration
-        site_config = Configuracion(
-            titulo="Test LMS",
-            descripcion="Test Learning Management System",
-            moneda="USD",
-        )
-        database.session.add(site_config)
-
-        # Create test user
-        user = Usuario(
-            usuario="test_paypal_user",
-            acceso=proteger_secreto("test_password"),
-            nombre="PayPal",
-            apellido="Tester",
-            correo_electronico="paypal@test.com",
-            activo=True,
-            tipo="student",
-        )
-        database.session.add(user)
-
-        # Create admin user
-        admin = Usuario(
-            usuario="admin_paypal",
-            acceso=proteger_secreto("admin_password"),
-            nombre="Admin",
-            apellido="PayPal",
-            correo_electronico="admin_paypal@test.com",
-            activo=True,
-            tipo="admin",
-        )
-        database.session.add(admin)
+        # Create test user if not exists
+        existing_user = database.session.execute(
+            database.select(Usuario).where(Usuario.usuario == "test_paypal_user")
+        ).first()
+        
+        if not existing_user:
+            user = Usuario(
+                usuario="test_paypal_user",
+                acceso=proteger_secreto("test_password"),
+                nombre="PayPal",
+                apellido="Tester",
+                correo_electronico="paypal@test.com",
+                activo=True,
+                tipo="student",
+            )
+            database.session.add(user)
 
         # Create test courses
         paid_course = Curso(
@@ -138,29 +123,33 @@ def app_with_data(lms_application):
 
         database.session.commit()
 
-        yield lms_application
+        yield full_db_setup
 
 
 class TestPayPalConfiguration:
     """Test PayPal configuration and validation."""
 
-    def test_check_paypal_enabled_returns_true_when_enabled(self, app_with_data):
+    def test_check_paypal_enabled_returns_true_when_enabled(self, app_with_paypal_data):
         """Test that check_paypal_enabled returns True when PayPal is enabled."""
         from now_lms.vistas.paypal import check_paypal_enabled
 
-        with app_with_data.app_context():
-            with app_with_data.test_request_context():
+        with app_with_paypal_data.app_context():
+            with app_with_paypal_data.test_request_context():
                 result = check_paypal_enabled()
                 assert result is True
 
-    def test_check_paypal_enabled_returns_false_when_disabled(self, app_with_data):
+    def test_check_paypal_enabled_returns_false_when_disabled(self, app_with_paypal_data):
         """Test that check_paypal_enabled returns False when PayPal is disabled."""
         from now_lms.vistas.paypal import check_paypal_enabled
         from now_lms import database
         from now_lms.db import PaypalConfig
+        from now_lms.cache import cache
 
-        with app_with_data.app_context():
-            with app_with_data.test_request_context():
+        with app_with_paypal_data.app_context():
+            with app_with_paypal_data.test_request_context():
+                # Clear cache first
+                cache.clear()
+                
                 # Disable PayPal
                 config = database.session.execute(database.select(PaypalConfig)).first()[0]
                 config.enable = False
@@ -169,30 +158,36 @@ class TestPayPalConfiguration:
                 result = check_paypal_enabled()
                 assert result is False
 
-    def test_get_site_currency_returns_configured_currency(self, app_with_data):
+    def test_get_site_currency_returns_configured_currency(self, app_with_paypal_data):
         """Test that get_site_currency returns the configured currency."""
         from now_lms.vistas.paypal import get_site_currency
 
-        with app_with_data.app_context():
-            with app_with_data.test_request_context():
+        with app_with_paypal_data.app_context():
+            with app_with_paypal_data.test_request_context():
                 currency = get_site_currency()
                 assert currency == "USD"
 
-    def test_get_site_currency_returns_default_when_not_configured(self, lms_application):
+    def test_get_site_currency_returns_default_when_not_configured(self, app_with_paypal_data):
         """Test that get_site_currency returns USD when no currency is configured."""
         from now_lms.vistas.paypal import get_site_currency
-        from now_lms import database, initial_setup
-        from now_lms.db import eliminar_base_de_datos_segura
+        from now_lms import database
+        from now_lms.db import Configuracion
+        from now_lms.cache import cache
 
-        with lms_application.app_context():
-            with lms_application.test_request_context():
-                eliminar_base_de_datos_segura()
-                initial_setup()
+        with app_with_paypal_data.app_context():
+            with app_with_paypal_data.test_request_context():
+                # Clear cache first
+                cache.clear()
+                
+                # Remove currency configuration
+                config = database.session.execute(database.select(Configuracion)).first()[0]
+                config.moneda = None
+                database.session.commit()
 
                 currency = get_site_currency()
                 assert currency == "USD"
 
-    def test_validate_paypal_configuration_with_valid_credentials(self, app_with_data):
+    def test_validate_paypal_configuration_with_valid_credentials(self, app_with_paypal_data):
         """Test PayPal configuration validation with valid credentials."""
         from now_lms.vistas.paypal import validate_paypal_configuration
 
@@ -208,7 +203,7 @@ class TestPayPalConfiguration:
             assert result["valid"] is True
             assert "válida" in result["message"]
 
-    def test_validate_paypal_configuration_with_invalid_credentials(self, app_with_data):
+    def test_validate_paypal_configuration_with_invalid_credentials(self, app_with_paypal_data):
         """Test PayPal configuration validation with invalid credentials."""
         from now_lms.vistas.paypal import validate_paypal_configuration
 
@@ -224,7 +219,7 @@ class TestPayPalConfiguration:
             assert result["valid"] is False
             assert "Error de configuración" in result["message"]
 
-    def test_validate_paypal_configuration_with_network_error(self, app_with_data):
+    def test_validate_paypal_configuration_with_network_error(self, app_with_paypal_data):
         """Test PayPal configuration validation with network error."""
         from now_lms.vistas.paypal import validate_paypal_configuration
 
@@ -241,7 +236,7 @@ class TestPayPalConfiguration:
 class TestPayPalAccessToken:
     """Test PayPal access token management."""
 
-    def test_get_paypal_access_token_success_sandbox(self, app_with_data):
+    def test_get_paypal_access_token_success_sandbox(self, app_with_paypal_data):
         """Test successful access token retrieval in sandbox mode."""
         from now_lms.vistas.paypal import get_paypal_access_token
 
@@ -260,18 +255,18 @@ class TestPayPalAccessToken:
             mock_post.return_value = mock_response
             mock_decrypt.return_value = b"sandbox_secret_test"
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 token = get_paypal_access_token()
                 assert token == "sandbox_access_token_123"
 
-    def test_get_paypal_access_token_success_production(self, app_with_data):
+    def test_get_paypal_access_token_success_production(self, app_with_paypal_data):
         """Test successful access token retrieval in production mode."""
         from now_lms.vistas.paypal import get_paypal_access_token
         from now_lms import database
         from now_lms.db import PaypalConfig
 
         # Switch to production mode
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             config = database.session.execute(database.select(PaypalConfig)).first()[0]
             config.sandbox = False
             database.session.commit()
@@ -294,7 +289,7 @@ class TestPayPalAccessToken:
                 token = get_paypal_access_token()
                 assert token == "production_access_token_456"
 
-    def test_get_paypal_access_token_api_error(self, app_with_data):
+    def test_get_paypal_access_token_api_error(self, app_with_paypal_data):
         """Test access token retrieval with API error."""
         from now_lms.vistas.paypal import get_paypal_access_token
 
@@ -305,30 +300,30 @@ class TestPayPalAccessToken:
             mock_response.text = "Invalid client credentials"
             mock_post.return_value = mock_response
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 token = get_paypal_access_token()
                 assert token is None
 
-    def test_get_paypal_access_token_no_config(self, lms_application):
+    def test_get_paypal_access_token_no_config(self, app_with_paypal_data):
         """Test access token retrieval when no PayPal config exists."""
         from now_lms.vistas.paypal import get_paypal_access_token
         from now_lms import initial_setup
         from now_lms.db import eliminar_base_de_datos_segura
 
-        with lms_application.app_context():
+        with app_with_paypal_data.app_context():
             eliminar_base_de_datos_segura()
             initial_setup()
 
             token = get_paypal_access_token()
             assert token is None
 
-    def test_get_paypal_access_token_missing_credentials(self, app_with_data):
+    def test_get_paypal_access_token_missing_credentials(self, app_with_paypal_data):
         """Test access token retrieval with missing credentials."""
         from now_lms.vistas.paypal import get_paypal_access_token
         from now_lms import database
         from now_lms.db import PaypalConfig
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             # Clear credentials
             config = database.session.execute(database.select(PaypalConfig)).first()[0]
             config.paypal_sandbox = None
@@ -338,13 +333,13 @@ class TestPayPalAccessToken:
             token = get_paypal_access_token()
             assert token is None
 
-    def test_get_paypal_access_token_decrypt_error(self, app_with_data):
+    def test_get_paypal_access_token_decrypt_error(self, app_with_paypal_data):
         """Test access token retrieval with decryption error."""
         from now_lms.vistas.paypal import get_paypal_access_token
         from now_lms import database
         from now_lms.db import PaypalConfig
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             # Set invalid encrypted secret
             config = database.session.execute(database.select(PaypalConfig)).first()[0]
             config.paypal_sandbox_secret = b"invalid_encrypted_data"
@@ -356,14 +351,14 @@ class TestPayPalAccessToken:
                 token = get_paypal_access_token()
                 assert token is None
 
-    def test_get_paypal_access_token_network_timeout(self, app_with_data):
+    def test_get_paypal_access_token_network_timeout(self, app_with_paypal_data):
         """Test access token retrieval with network timeout."""
         from now_lms.vistas.paypal import get_paypal_access_token
 
         with patch("requests.post") as mock_post:
             mock_post.side_effect = requests.exceptions.Timeout("Request timed out")
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 token = get_paypal_access_token()
                 assert token is None
 
@@ -371,7 +366,7 @@ class TestPayPalAccessToken:
 class TestPayPalPaymentVerification:
     """Test PayPal payment verification."""
 
-    def test_verify_paypal_payment_success(self, app_with_data):
+    def test_verify_paypal_payment_success(self, app_with_paypal_data):
         """Test successful PayPal payment verification."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
@@ -392,7 +387,7 @@ class TestPayPalPaymentVerification:
             }
             mock_get.return_value = mock_response
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 result = verify_paypal_payment("test_order_id", "mock_access_token")
 
                 assert result["verified"] is True
@@ -401,7 +396,7 @@ class TestPayPalPaymentVerification:
                 assert result["currency"] == "USD"
                 assert result["payer_id"] == "test_payer_id"
 
-    def test_verify_paypal_payment_failed(self, app_with_data):
+    def test_verify_paypal_payment_failed(self, app_with_paypal_data):
         """Test failed PayPal payment verification."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
@@ -412,26 +407,26 @@ class TestPayPalPaymentVerification:
             mock_response.text = "Order not found"
             mock_get.return_value = mock_response
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 result = verify_paypal_payment("invalid_order_id", "mock_access_token")
 
                 assert result["verified"] is False
                 assert "error" in result
 
-    def test_verify_paypal_payment_network_error(self, app_with_data):
+    def test_verify_paypal_payment_network_error(self, app_with_paypal_data):
         """Test PayPal payment verification with network error."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
         with patch("requests.get") as mock_get:
             mock_get.side_effect = requests.exceptions.ConnectionError("Network error")
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 result = verify_paypal_payment("test_order_id", "mock_access_token")
 
                 assert result["verified"] is False
                 assert "error" in result
 
-    def test_verify_paypal_payment_invalid_response(self, app_with_data):
+    def test_verify_paypal_payment_invalid_response(self, app_with_paypal_data):
         """Test PayPal payment verification with invalid response format."""
         from now_lms.vistas.paypal import verify_paypal_payment
 
@@ -445,7 +440,7 @@ class TestPayPalPaymentVerification:
             }
             mock_get.return_value = mock_response
 
-            with app_with_data.app_context():
+            with app_with_paypal_data.app_context():
                 result = verify_paypal_payment("test_order_id", "mock_access_token")
 
                 assert result["verified"] is True  # Still considers it verified if 200
@@ -456,12 +451,12 @@ class TestPayPalPaymentVerification:
 class TestPayPalPaymentConfirmation:
     """Test PayPal payment confirmation endpoint."""
 
-    def test_confirm_payment_success(self, app_with_data):
+    def test_confirm_payment_success(self, app_with_paypal_data):
         """Test successful payment confirmation."""
         from now_lms import database
         from now_lms.db import Usuario, Pago, EstudianteCurso
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Mock PayPal API calls
@@ -480,7 +475,7 @@ class TestPayPalPaymentConfirmation:
                     "payer_id": "test_payer_id",
                 }
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -525,15 +520,15 @@ class TestPayPalPaymentConfirmation:
                     enrollment = enrollment[0]
                     assert enrollment.vigente is True
 
-    def test_confirm_payment_missing_data(self, app_with_data):
+    def test_confirm_payment_missing_data(self, app_with_paypal_data):
         """Test payment confirmation with missing data."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -556,15 +551,15 @@ class TestPayPalPaymentConfirmation:
                 assert data["success"] is False
                 assert "Missing required payment data" in data["error"]
 
-    def test_confirm_payment_invalid_amount(self, app_with_data):
+    def test_confirm_payment_invalid_amount(self, app_with_paypal_data):
         """Test payment confirmation with invalid amount."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -590,12 +585,12 @@ class TestPayPalPaymentConfirmation:
                 assert data["success"] is False
                 assert "Invalid payment amount" in data["error"]
 
-    def test_confirm_payment_verification_failed(self, app_with_data):
+    def test_confirm_payment_verification_failed(self, app_with_paypal_data):
         """Test payment confirmation when PayPal verification fails."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Mock failed PayPal verification
@@ -610,7 +605,7 @@ class TestPayPalPaymentConfirmation:
                     "error": "Payment verification failed",
                 }
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -635,12 +630,12 @@ class TestPayPalPaymentConfirmation:
                     assert data["success"] is False
                     assert "Payment verification failed" in data["error"]
 
-    def test_confirm_payment_amount_mismatch(self, app_with_data):
+    def test_confirm_payment_amount_mismatch(self, app_with_paypal_data):
         """Test payment confirmation with amount mismatch."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Mock PayPal verification with different amount
@@ -658,7 +653,7 @@ class TestPayPalPaymentConfirmation:
                     "payer_id": "test_payer_id",
                 }
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -683,12 +678,12 @@ class TestPayPalPaymentConfirmation:
                     assert data["success"] is False
                     assert "Payment amount mismatch" in data["error"]
 
-    def test_confirm_payment_duplicate_payment(self, app_with_data):
+    def test_confirm_payment_duplicate_payment(self, app_with_paypal_data):
         """Test payment confirmation for already processed payment."""
         from now_lms import database
         from now_lms.db import Usuario, Pago
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Create existing completed payment
@@ -707,7 +702,7 @@ class TestPayPalPaymentConfirmation:
             database.session.add(existing_payment)
             database.session.commit()
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -732,19 +727,19 @@ class TestPayPalPaymentConfirmation:
                 assert data["success"] is True
                 assert "ya procesado" in data["message"]
 
-    def test_confirm_payment_no_access_token(self, app_with_data):
+    def test_confirm_payment_no_access_token(self, app_with_paypal_data):
         """Test payment confirmation when access token retrieval fails."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Mock failed access token retrieval
             with patch("now_lms.vistas.paypal.get_paypal_access_token") as mock_token:
                 mock_token.return_value = None
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -769,12 +764,12 @@ class TestPayPalPaymentConfirmation:
                     assert data["success"] is False
                     assert "PayPal configuration error" in data["error"]
 
-    def test_confirm_payment_course_not_found(self, app_with_data):
+    def test_confirm_payment_course_not_found(self, app_with_paypal_data):
         """Test payment confirmation for non-existent course."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Mock PayPal API calls
@@ -792,7 +787,7 @@ class TestPayPalPaymentConfirmation:
                     "payer_id": "test_payer_id",
                 }
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -821,15 +816,15 @@ class TestPayPalPaymentConfirmation:
 class TestPayPalUtilityEndpoints:
     """Test PayPal utility endpoints."""
 
-    def test_get_client_id_sandbox_mode(self, app_with_data):
+    def test_get_client_id_sandbox_mode(self, app_with_paypal_data):
         """Test getting client ID in sandbox mode."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -843,12 +838,12 @@ class TestPayPalUtilityEndpoints:
                 assert data["sandbox"] is True
                 assert data["currency"] == "USD"
 
-    def test_get_client_id_production_mode(self, app_with_data):
+    def test_get_client_id_production_mode(self, app_with_paypal_data):
         """Test getting client ID in production mode."""
         from now_lms import database
         from now_lms.db import Usuario, PaypalConfig
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             # Switch to production mode
             config = database.session.execute(database.select(PaypalConfig)).first()[0]
             config.sandbox = False
@@ -856,7 +851,7 @@ class TestPayPalUtilityEndpoints:
 
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -870,15 +865,15 @@ class TestPayPalUtilityEndpoints:
                 assert data["sandbox"] is False
                 assert data["currency"] == "USD"
 
-    def test_payment_status_endpoint(self, app_with_data):
+    def test_payment_status_endpoint(self, app_with_paypal_data):
         """Test payment status endpoint."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -895,15 +890,15 @@ class TestPayPalUtilityEndpoints:
                 assert data["enrolled"] is False
                 assert data["site_currency"] == "USD"
 
-    def test_debug_config_endpoint_admin(self, app_with_data):
+    def test_debug_config_endpoint_admin(self, app_with_paypal_data):
         """Test debug config endpoint as admin."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             admin = database.session.execute(database.select(Usuario).filter_by(usuario="admin_paypal")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as admin
                 with client.session_transaction() as sess:
                     sess["_user_id"] = admin.id
@@ -919,15 +914,15 @@ class TestPayPalUtilityEndpoints:
                 assert data["sandbox_client_id_configured"] is True
                 assert data["site_currency"] == "USD"
 
-    def test_debug_config_endpoint_non_admin(self, app_with_data):
+    def test_debug_config_endpoint_non_admin(self, app_with_paypal_data):
         """Test debug config endpoint as non-admin (should be forbidden)."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as regular user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -942,15 +937,15 @@ class TestPayPalUtilityEndpoints:
 class TestPayPalPaymentPage:
     """Test PayPal payment page functionality."""
 
-    def test_payment_page_valid_course(self, app_with_data):
+    def test_payment_page_valid_course(self, app_with_paypal_data):
         """Test PayPal payment page for valid paid course."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -962,12 +957,12 @@ class TestPayPalPaymentPage:
                 # Check that the payment template is rendered
                 assert b"Premium PayPal Course" in response.data or b"paypal" in response.data.lower()
 
-    def test_payment_page_free_course(self, app_with_data):
+    def test_payment_page_free_course(self, app_with_paypal_data):
         """Test PayPal payment page redirects for free course."""
         from now_lms import database
         from now_lms.db import Usuario, Curso
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             # Create a free course
             free_course = Curso(
                 nombre="Free Test Course",
@@ -984,7 +979,7 @@ class TestPayPalPaymentPage:
 
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -995,15 +990,15 @@ class TestPayPalPaymentPage:
                 # Should redirect away from PayPal payment page
                 assert response.status_code == 302
 
-    def test_payment_page_nonexistent_course(self, app_with_data):
+    def test_payment_page_nonexistent_course(self, app_with_paypal_data):
         """Test PayPal payment page for non-existent course."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1014,12 +1009,12 @@ class TestPayPalPaymentPage:
                 # Should redirect with error
                 assert response.status_code == 302
 
-    def test_payment_page_paypal_disabled(self, app_with_data):
+    def test_payment_page_paypal_disabled(self, app_with_paypal_data):
         """Test PayPal payment page when PayPal is disabled."""
         from now_lms import database
         from now_lms.db import Usuario, PaypalConfig
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             # Disable PayPal
             config = database.session.execute(database.select(PaypalConfig)).first()[0]
             config.enable = False
@@ -1027,7 +1022,7 @@ class TestPayPalPaymentPage:
 
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1042,15 +1037,15 @@ class TestPayPalPaymentPage:
 class TestPayPalEdgeCases:
     """Test PayPal edge cases and error scenarios."""
 
-    def test_confirm_payment_with_empty_request_body(self, app_with_data):
+    def test_confirm_payment_with_empty_request_body(self, app_with_paypal_data):
         """Test payment confirmation with empty request body."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1067,15 +1062,15 @@ class TestPayPalEdgeCases:
                 assert data["success"] is False
                 assert "No payment data received" in data["error"]
 
-    def test_confirm_payment_with_string_amount(self, app_with_data):
+    def test_confirm_payment_with_string_amount(self, app_with_paypal_data):
         """Test payment confirmation with string amount."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1100,12 +1095,12 @@ class TestPayPalEdgeCases:
                 assert data["success"] is False
                 assert "Invalid payment amount" in data["error"]
 
-    def test_resume_payment_valid(self, app_with_data):
+    def test_resume_payment_valid(self, app_with_paypal_data):
         """Test resuming a valid pending payment."""
         from now_lms import database
         from now_lms.db import Usuario, Pago
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Create pending payment
@@ -1123,7 +1118,7 @@ class TestPayPalEdgeCases:
             database.session.add(pending_payment)
             database.session.commit()
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1135,15 +1130,15 @@ class TestPayPalEdgeCases:
                 assert response.status_code == 302
                 assert f"/paypal_checkout/payment/{pending_payment.curso}" in response.location
 
-    def test_resume_payment_invalid(self, app_with_data):
+    def test_resume_payment_invalid(self, app_with_paypal_data):
         """Test resuming a non-existent payment."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1154,12 +1149,12 @@ class TestPayPalEdgeCases:
                 # Should redirect with error
                 assert response.status_code == 302
 
-    def test_payment_with_extreme_amounts(self, app_with_data):
+    def test_payment_with_extreme_amounts(self, app_with_paypal_data):
         """Test payment processing with extreme amounts."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Test with very large amount
@@ -1177,7 +1172,7 @@ class TestPayPalEdgeCases:
                     "payer_id": "test_payer_id",
                 }
 
-                with app_with_data.test_client() as client:
+                with app_with_paypal_data.test_client() as client:
                     # Login as test user
                     with client.session_transaction() as sess:
                         sess["_user_id"] = user.id
@@ -1201,12 +1196,12 @@ class TestPayPalEdgeCases:
                     data = json.loads(response.data)
                     assert data["success"] is True
 
-    def test_payment_status_with_multiple_payments(self, app_with_data):
+    def test_payment_status_with_multiple_payments(self, app_with_paypal_data):
         """Test payment status endpoint with multiple payment records."""
         from now_lms import database
         from now_lms.db import Usuario, Pago
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
             # Create multiple payment records
@@ -1240,7 +1235,7 @@ class TestPayPalEdgeCases:
             database.session.add(payment2)
             database.session.commit()
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
@@ -1258,9 +1253,9 @@ class TestPayPalEdgeCases:
 class TestPayPalSecurityAndValidation:
     """Test PayPal security features and validation."""
 
-    def test_payment_confirmation_requires_authentication(self, app_with_data):
+    def test_payment_confirmation_requires_authentication(self, app_with_paypal_data):
         """Test that payment confirmation requires user authentication."""
-        with app_with_data.test_client() as client:
+        with app_with_paypal_data.test_client() as client:
             # Don't login - test unauthenticated access
             response = client.post(
                 "/paypal_checkout/confirm_payment",
@@ -1279,33 +1274,33 @@ class TestPayPalSecurityAndValidation:
             # Should redirect to login or return 401/403
             assert response.status_code in [302, 401, 403]
 
-    def test_payment_page_requires_authentication(self, app_with_data):
+    def test_payment_page_requires_authentication(self, app_with_paypal_data):
         """Test that payment page requires user authentication."""
-        with app_with_data.test_client() as client:
+        with app_with_paypal_data.test_client() as client:
             # Don't login - test unauthenticated access
             response = client.get("/paypal_checkout/payment/PAYPAL001")
 
             # Should redirect to login
             assert response.status_code in [302, 401, 403]
 
-    def test_get_client_id_requires_authentication(self, app_with_data):
+    def test_get_client_id_requires_authentication(self, app_with_paypal_data):
         """Test that get_client_id endpoint requires authentication."""
-        with app_with_data.test_client() as client:
+        with app_with_paypal_data.test_client() as client:
             # Don't login - test unauthenticated access
             response = client.get("/paypal_checkout/get_client_id")
 
             # Should redirect to login or return 401/403
             assert response.status_code in [302, 401, 403]
 
-    def test_sql_injection_protection(self, app_with_data):
+    def test_sql_injection_protection(self, app_with_paypal_data):
         """Test protection against SQL injection in payment confirmation."""
         from now_lms import database
         from now_lms.db import Usuario
 
-        with app_with_data.app_context():
+        with app_with_paypal_data.app_context():
             user = database.session.execute(database.select(Usuario).filter_by(usuario="test_paypal_user")).first()[0]
 
-            with app_with_data.test_client() as client:
+            with app_with_paypal_data.test_client() as client:
                 # Login as test user
                 with client.session_transaction() as sess:
                     sess["_user_id"] = user.id
