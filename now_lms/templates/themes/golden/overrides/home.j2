@@ -6,116 +6,7 @@
         <title>Golden Learning - {{ site_config.nombre }}</title>
 
         <style>
-            /* Custom styles for golden theme hero */
-            :root {
-                --sun-orange: #f49640;
-            }
-
-            .hero-section {
-                position: relative;
-                background: linear-gradient(135deg, #f0b744 0%, #f49640 100%);
-                min-height: 70vh;
-                overflow: hidden;
-            }
-
-            .hero-inner {
-                display: flex;
-                align-items: center;
-                min-height: 70vh;
-                padding: 2rem 0;
-                position: relative;
-                z-index: 1;
-            }
-
-            .hero-copy {
-                flex: 1;
-                padding-right: 2rem;
-            }
-
-            .brand-line {
-                font-family: "Lato", sans-serif;
-                font-weight: 900;
-                font-size: 1.2rem;
-                color: #141411;
-                margin-bottom: 1rem;
-                letter-spacing: 2px;
-            }
-
-            .hero-title {
-                font-family: "Lato", sans-serif;
-                font-size: 3.5rem;
-                font-weight: 700;
-                color: #141411;
-                line-height: 1.2;
-                margin-bottom: 1.5rem;
-            }
-
-            .hero-sub {
-                font-size: 1.2rem;
-                color: #141411;
-                line-height: 1.6;
-                margin-bottom: 2rem;
-            }
-
-            .cta-row {
-                display: flex;
-                gap: 1rem;
-                flex-wrap: wrap;
-            }
-
-            .cta-primary {
-                background: #141411;
-                color: #f4f4f4;
-                border: none;
-                padding: 1rem 2rem;
-                font-size: 1.1rem;
-                font-weight: 600;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-decoration: none;
-                display: inline-block;
-            }
-
-            .cta-primary:hover {
-                background: #2a2a24;
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(20, 20, 17, 0.3);
-                color: #f4f4f4;
-            }
-
-            .cta-secondary {
-                background: transparent;
-                color: #141411;
-                border: 2px solid #141411;
-                padding: 1rem 2rem;
-                font-size: 1.1rem;
-                font-weight: 600;
-                border-radius: 8px;
-                text-decoration: none;
-                display: inline-block;
-                transition: all 0.3s ease;
-            }
-
-            .cta-secondary:hover {
-                background: #141411;
-                color: #f4f4f4;
-                transform: translateY(-2px);
-            }
-
-            .hero-art {
-                flex: 0 0 300px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .character {
-                width: 200px;
-                height: 200px;
-                animation: float 3s ease-in-out infinite;
-            }
-
+            /* Custom styles for golden theme */
             @keyframes float {
                 0%,
                 100% {
@@ -125,76 +16,93 @@
                     transform: translateY(-10px);
                 }
             }
-
-            @media (max-width: 768px) {
-                .hero-inner {
-                    flex-direction: column;
-                    text-align: center;
-                }
-
-                .hero-copy {
-                    padding-right: 0;
-                    margin-bottom: 2rem;
-                }
-
-                .hero-title {
-                    font-size: 2.5rem;
-                }
-
-                .cta-row {
-                    justify-content: center;
-                }
-
-                .hero-art {
-                    flex: none;
-                }
-            }
         </style>
     </head>
     <body>
         {{ current_theme.navbar() }}
 
-        <main style="position: relative; max-width: 1100px; margin: 0 auto; padding: 0 1rem">
-            <section class="hero-section">
-                <div class="hero-inner">
-                    <div class="hero-copy">
-                        <div class="brand-line">NOW-LMS</div>
-                        <h1 class="hero-title">
-                            Aprende inglés
-                            <span style="color: var(--sun-orange); font-family: &quot;Caveat&quot;, cursive">con confianza</span>
-                        </h1>
-                        <p class="hero-sub">
-                            Cursos dinámicos, prácticos y divertidos — Clases online en vivo, profesores nativos y material
-                            interactivo.
-                        </p>
-                        <div class="cta-row">
-                            {% if not current_user.is_authenticated %}
-                            <a
-                                href="{{ url_for('user.crear_cuenta') }}"
-                                class="cta-primary"
-                                aria-label="Reserva tu clase gratis en NOW-LMS"
-                                >Reserva tu clase gratis</a
-                            >
-                            <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
-                            {% else %}
-                            <a href="{{ url_for('home.panel') }}" class="cta-primary" aria-label="Ir a mi panel de usuario"
-                                >Mi Panel</a
-                            >
-                            <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
-                            {% endif %}
+        <!-- Hero Section -->
+        <section
+            class="hero-section py-5"
+            style="
+                background: linear-gradient(135deg, #F0B744 0%, #F49640 100%);
+                min-height: 60vh;
+                display: flex;
+                align-items: center;
+            "
+        >
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 text-white">
+                        <div class="hero-content">
+                            <div style="font-family: 'Lato', sans-serif; font-weight: 900; font-size: 1.2rem; color: #141411; margin-bottom: 1rem; letter-spacing: 2px;">
+                                NOW-LMS
+                            </div>
+                            <h1 class="display-4 fw-bold mb-4" style="color: #141411;">
+                                Aprende inglés
+                                <span style="color: #F49640; font-family: 'Caveat', cursive">con confianza</span>
+                            </h1>
+                            <p class="lead mb-4" style="font-size: 1.3rem; line-height: 1.6; color: #141411;">
+                                Cursos dinámicos, prácticos y divertidos — Clases online en vivo, profesores nativos y material
+                                interactivo.
+                            </p>
+                            <div class="d-flex gap-3 flex-wrap">
+                                {% if not current_user.is_authenticated %}
+                                <a href="{{ url_for('user.crear_cuenta') }}" class="btn btn-dark btn-lg px-4 py-2" style="background: #141411; border-color: #141411;">
+                                    <strong>Reserva tu clase gratis</strong>
+                                </a>
+                                <a
+                                    href="{{ url_for('course.lista_cursos', page=1) }}"
+                                    class="btn btn-outline-dark btn-lg px-4 py-2"
+                                    style="color: #141411; border-color: #141411;"
+                                >
+                                    Ver cursos
+                                </a>
+                                {% else %}
+                                <a href="{{ url_for('home.panel') }}" class="btn btn-dark btn-lg px-4 py-2" style="background: #141411; border-color: #141411;">
+                                    <strong>Mi Panel</strong>
+                                </a>
+                                <a
+                                    href="{{ url_for('course.lista_cursos', page=1) }}"
+                                    class="btn btn-outline-dark btn-lg px-4 py-2"
+                                    style="color: #141411; border-color: #141411;"
+                                >
+                                    Ver cursos
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    <div class="hero-art" aria-hidden="true">
-                        <!-- Personaje simple como en el diseño proporcionado -->
-                        <svg class="character" viewBox="0 0 200 200">
-                            <circle cx="100" cy="100" r="80" fill="#fff" stroke="#141411" stroke-width="4"></circle>
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#141411">
-                                😊
-                            </text>
-                        </svg>
+                    <div class="col-lg-4 text-center">
+                        <div class="hero-visual">
+                            <div
+                                class="learning-icon"
+                                style="
+                                    background: rgba(20, 20, 17, 0.1);
+                                    border-radius: 50%;
+                                    width: 250px;
+                                    height: 250px;
+                                    margin: 0 auto;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border: 4px solid rgba(20, 20, 17, 0.3);
+                                    animation: float 3s ease-in-out infinite;
+                                "
+                            >
+                                <div class="text-center" style="color: #141411;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem">😊</div>
+                                    <div style="font-size: 1.2rem; font-weight: 600">Aprendizaje</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8">Inglés</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
+
+        <main style="max-width: 1100px; margin: 0 auto; padding: 0 1rem">
 
             <!-- Contenido de cursos y características -->
             <section
