@@ -387,3 +387,34 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    /* Navbar Button Overrides for Better Contrast */
+    .navbar-golden .btn-dark {
+        background-color: var(--golden-deep-black) !important;
+        border-color: var(--golden-deep-black) !important;
+        color: white !important;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-golden .btn-dark:hover {
+        background-color: #000000 !important;
+        border-color: #000000 !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-golden .btn-light {
+        background-color: white !important;
+        border-color: white !important;
+        color: var(--golden-deep-black) !important;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-golden .btn-light:hover {
+        background-color: var(--golden-clear-white) !important;
+        border-color: var(--golden-clear-white) !important;
+        color: var(--golden-deep-black) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
