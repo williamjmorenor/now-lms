@@ -11,14 +11,11 @@
                 --sun-orange: #f49640;
             }
 
-            .hero-bg {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 70vh;
+            .hero-section {
+                position: relative;
                 background: linear-gradient(135deg, #f0b744 0%, #f49640 100%);
-                z-index: -1;
+                min-height: 70vh;
+                overflow: hidden;
             }
 
             .hero-inner {
@@ -26,6 +23,8 @@
                 align-items: center;
                 min-height: 70vh;
                 padding: 2rem 0;
+                position: relative;
+                z-index: 1;
             }
 
             .hero-copy {
@@ -155,58 +154,57 @@
     <body>
         {{ current_theme.navbar() }}
 
-        <!-- Hero Background -->
-        <div class="hero-bg" aria-hidden="true"></div>
-
-        <main style="position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 1rem">
-            <section class="hero-inner">
-                <div class="hero-copy">
-                    <div class="brand-line">NOW-LMS</div>
-                    <h1 class="hero-title">
-                        Aprende inglés
-                        <span style="color: var(--sun-orange); font-family: &quot;Caveat&quot;, cursive">con confianza</span>
-                    </h1>
-                    <p class="hero-sub">
-                        Cursos dinámicos, prácticos y divertidos — Clases online en vivo, profesores nativos y material
-                        interactivo.
-                    </p>
-                    <div class="cta-row">
-                        {% if not current_user.is_authenticated %}
-                        <a
-                            href="{{ url_for('user.crear_cuenta') }}"
-                            class="cta-primary"
-                            aria-label="Reserva tu clase gratis en NOW-LMS"
-                            >Reserva tu clase gratis</a
-                        >
-                        <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
-                        {% else %}
-                        <a href="{{ url_for('home.panel') }}" class="cta-primary" aria-label="Ir a mi panel de usuario"
-                            >Mi Panel</a
-                        >
-                        <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
-                        {% endif %}
+        <main style="position: relative; max-width: 1100px; margin: 0 auto; padding: 0 1rem">
+            <section class="hero-section">
+                <div class="hero-inner">
+                    <div class="hero-copy">
+                        <div class="brand-line">NOW-LMS</div>
+                        <h1 class="hero-title">
+                            Aprende inglés
+                            <span style="color: var(--sun-orange); font-family: &quot;Caveat&quot;, cursive">con confianza</span>
+                        </h1>
+                        <p class="hero-sub">
+                            Cursos dinámicos, prácticos y divertidos — Clases online en vivo, profesores nativos y material
+                            interactivo.
+                        </p>
+                        <div class="cta-row">
+                            {% if not current_user.is_authenticated %}
+                            <a
+                                href="{{ url_for('user.crear_cuenta') }}"
+                                class="cta-primary"
+                                aria-label="Reserva tu clase gratis en NOW-LMS"
+                                >Reserva tu clase gratis</a
+                            >
+                            <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
+                            {% else %}
+                            <a href="{{ url_for('home.panel') }}" class="cta-primary" aria-label="Ir a mi panel de usuario"
+                                >Mi Panel</a
+                            >
+                            <a href="{{ url_for('course.lista_cursos', page=1) }}" class="cta-secondary">Ver cursos</a>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                <div class="hero-art" aria-hidden="true">
-                    <!-- Personaje simple como en el diseño proporcionado -->
-                    <svg class="character" viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="80" fill="#fff" stroke="#141411" stroke-width="4"></circle>
-                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#141411">
-                            😊
-                        </text>
-                    </svg>
+                    <div class="hero-art" aria-hidden="true">
+                        <!-- Personaje simple como en el diseño proporcionado -->
+                        <svg class="character" viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="80" fill="#fff" stroke="#141411" stroke-width="4"></circle>
+                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#141411">
+                                😊
+                            </text>
+                        </svg>
+                    </div>
                 </div>
             </section>
 
             <!-- Contenido de cursos y características -->
             <section
                 style="
-                    margin-top: 70vh;
                     background: #fff;
                     padding: 32px;
                     border-radius: 12px;
                     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
                     margin-bottom: 2rem;
+                    margin-top: 2rem;
                 "
             >
                 <div class="row">
