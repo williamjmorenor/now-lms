@@ -39,7 +39,7 @@
 
     /* Golden Theme Styles */
     body {
-        background: linear-gradient(135deg, var(--golden-background) 0%, var(--golden-light) 100%);
+        background: var(--golden-clear-white);
         font-family: "Lato", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: var(--golden-text);
     }
