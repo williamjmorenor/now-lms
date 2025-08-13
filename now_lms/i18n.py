@@ -70,7 +70,11 @@ def get_locale():
     if hasattr(g, "configuracion") and g.configuracion:
         return getattr(g.configuracion, "lang", "en")
     # Fallback si no hay configuración disponible
-    return request.accept_languages.best_match(["es", "en"]) or "en"
+    try:
+        return request.accept_languages.best_match(["es", "en"]) or "en"
+    except RuntimeError:
+        # Working outside request context
+        return "es"  # Default to Spanish
 
 
 def get_timezone():
@@ -88,10 +92,11 @@ def invalidate_configuracion_cache():
 
 
 """Guia de uso:
+
 # Extraer textos a traducir
 pybabel extract -F babel.cfg -o now_lms/translations/messages.pot .
 
-# Crear archivo de traducción para español (si no existe)
+# Crear archivo de traducción para inglés (si no existe)
 pybabel init -i now_lms/translations/messages.pot -d now_lms/translations -l en
 
 # Compilar traducciones
@@ -106,4 +111,19 @@ pybabel update -i now_lms/translations/messages.pot -d now_lms/translations
 
 # Luego edita los .po y recompila
 pybabel compile -d now_lms/translations
+
+# Uso en código Python:
+from now_lms.i18n import _
+flash(_("Mensaje a traducir"), "success")
+
+# Uso en plantillas Jinja2:
+{{ _('Texto a traducir') }}
+
+# Para plurales:
+from now_lms.i18n import _n
+_n('%(num)d archivo', '%(num)d archivos', num, num=num)
+
+# Para traducciones perezosas (formularios):
+from now_lms.i18n import _l
+field = StringField(_l('Etiqueta del campo'))
 """
