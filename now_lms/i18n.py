@@ -24,12 +24,31 @@
 # Third-party libraries
 # ---------------------------------------------------------------------------------------
 from flask import g, request
+from flask_babel import gettext, ngettext, lazy_gettext
 
 # ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
 from now_lms.cache import cache
 from now_lms.logs import log
+
+
+# ---------------------------------------------------------------------------------------
+# Translation functions
+# ---------------------------------------------------------------------------------------
+def _(text):
+    """Mark text for translation."""
+    return gettext(text)
+
+
+def _n(singular, plural, n):
+    """Mark text for plural translation."""
+    return ngettext(singular, plural, n)
+
+
+def _l(text):
+    """Mark text for lazy translation (useful in forms)."""
+    return lazy_gettext(text)
 
 
 @cache.cached(key_prefix="configuracion_global")
