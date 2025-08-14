@@ -626,7 +626,7 @@ class Certificacion(database.Model, BaseTabla):
     master_class_id = database.Column(database.String(26), database.ForeignKey("master_classes.id"), nullable=True, index=True)
     certificado = database.Column(database.String(26), database.ForeignKey("certificado.code"), nullable=False, index=True)
     fecha = database.Column(database.Date, default=database.func.date(database.func.now()), nullable=False)
-    nota = database.Column(database.Numeric())
+    nota = database.Column(database.Numeric(precision=5, scale=2))
 
     # Relationships
     master_class_rel = database.relationship("MasterClass", foreign_keys=[master_class_id])
