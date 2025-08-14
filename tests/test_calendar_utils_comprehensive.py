@@ -529,6 +529,23 @@ class TestCalendarUtilsComprehensive:
             acceso=b"dummy_password_hash",
         )
         database.session.add(user)
+        
+        # Create the courses that the events will reference
+        course1 = Curso(
+            codigo="CLEANUP1",
+            nombre="Cleanup Course 1",
+            descripcion_corta="Course for cleanup testing",
+            descripcion="First course for testing cleanup functionality",
+            estado="open",
+        )
+        course2 = Curso(
+            codigo="CLEANUP2", 
+            nombre="Cleanup Course 2",
+            descripcion_corta="Second course for cleanup testing",
+            descripcion="Second course for testing cleanup functionality",
+            estado="open",
+        )
+        database.session.add_all([course1, course2])
         database.session.commit()
 
         # Create events for multiple courses
@@ -895,6 +912,9 @@ class TestCalendarUtilsComprehensive:
             fecha_fin=date(2025, 8, 31),
         )
         database.session.add(course)
+        
+        # Commit the instructor and course first so they exist when creating relationships
+        database.session.commit()
 
         # Assign instructor to course
         instructor_assignment = DocenteCurso(curso="INTEG001", usuario=instructor.usuario, vigente=True)
