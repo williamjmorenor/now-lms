@@ -238,7 +238,7 @@ class Curso(database.Model, BaseTabla):
     # Información de pago
     pagado = database.Column(database.Boolean())
     auditable = database.Column(database.Boolean())
-    precio = database.Column(database.Numeric())
+    precio = database.Column(database.Numeric(precision=10, scale=2))
     certificado = database.Column(database.Boolean())
     plantilla_certificado = database.Column(
         database.String(25), database.ForeignKey("certificado.code"), nullable=True, index=True
