@@ -29,6 +29,7 @@ Always follow these exact steps in order:
    python3 -m pip install -r development.txt
    ```
    **Timing**: Takes ~2 minutes. NEVER CANCEL. Set timeout to 5+ minutes.
+   **Note**: If network timeouts occur, retry the command. Some environments may have slower PyPI access.
 
 4. **Install frontend dependencies (root)**:
    ```bash
@@ -123,7 +124,23 @@ python -m mypy now_lms --install-types --non-interactive --ignore-missing-import
 
 ## Validation
 
-### Manual Testing After Changes
+### Quick Validation After Setup
+
+**Verify installation is working**:
+```bash
+# Test basic import and functionality
+python -m pytest tests/test_basicos.py::TestBasicos::test_importable -v
+```
+Should pass in ~1 second.
+
+```bash
+# Test application startup (production mode)
+python -m now_lms &
+sleep 3
+curl -I http://127.0.0.1:8080/
+pkill -f "python -m now_lms"
+```
+Should return HTTP 200 OK.
 
 **ALWAYS test these scenarios after making changes**:
 
@@ -229,6 +246,8 @@ now-lms/
 **Database Issues**: Delete `now_lms.db` and restart application to recreate fresh database.
 
 **Missing Dependencies**: Run `python -m pip install -r development.txt` again.
+
+**Network Timeouts During Install**: Retry pip install commands. Some environments have slower PyPI access.
 
 **Frontend Issues**: Run `npm install` in both repository root and `now_lms/static/`.
 
