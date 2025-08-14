@@ -479,6 +479,16 @@ class TestCalendarUtilsComprehensive:
             acceso=b"dummy_password_hash",
         )
         database.session.add(user)
+        
+        # Create the course that the events will reference
+        test_course = Curso(
+            codigo="TEST",
+            nombre="Test Course",
+            descripcion_corta="Course for testing upcoming events",
+            descripcion="Course for testing upcoming events functionality",
+            estado="open",
+        )
+        database.session.add(test_course)
         database.session.commit()
 
         # Create multiple events - some in the past, some in the future
