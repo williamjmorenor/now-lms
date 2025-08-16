@@ -34,6 +34,9 @@ class TestMasterClassBasic(TestCase):
 
         # Create tables
         database.create_all()
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
 
     def tearDown(self):
         from now_lms.db import eliminar_base_de_datos_segura
@@ -218,6 +221,9 @@ class TestMasterClassCertificates(TestCase):
 
         # Create tables
         database.create_all()
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
 
     def tearDown(self):
         from now_lms.db import eliminar_base_de_datos_segura

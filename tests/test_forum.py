@@ -30,6 +30,13 @@ class TestForum(TestCase):
         self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         self.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 
+    def setup_database_with_certificates(self):
+        """Helper method to set up database with required certificate templates."""
+        database.create_all()
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
+
     def tearDown(self):
         """Limpieza después de cada prueba."""
         with self.app.app_context():
@@ -54,7 +61,7 @@ class TestForum(TestCase):
     def test_curso_foro_habilitado_field_exists(self):
         """Verifica que el campo foro_habilitado existe en el modelo Curso."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
 
             curso = Curso(
                 nombre="Curso de Prueba",
@@ -76,7 +83,7 @@ class TestForum(TestCase):
     def test_curso_self_paced_no_puede_tener_foro(self):
         """Verifica que cursos self-paced no pueden tener foro habilitado."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
 
             curso = Curso(
                 nombre="Curso Self-Paced",
@@ -107,7 +114,7 @@ class TestForum(TestCase):
     def test_curso_time_based_puede_tener_foro(self):
         """Verifica que cursos time-based pueden tener foro habilitado."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
 
             curso = Curso(
                 nombre="Curso Time-Based",
@@ -132,7 +139,7 @@ class TestForum(TestCase):
     def test_foro_mensaje_model_exists(self):
         """Verifica que el modelo ForoMensaje funciona correctamente."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
             usuario = self.create_test_user()
 
             # Crear curso
@@ -168,7 +175,7 @@ class TestForum(TestCase):
     def test_foro_mensaje_reply_functionality(self):
         """Verifica la funcionalidad de respuestas en el foro."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
             usuario = self.create_test_user()
 
             # Crear curso
@@ -212,7 +219,7 @@ class TestForum(TestCase):
     def test_foro_mensaje_permissions(self):
         """Verifica los permisos y validaciones del foro."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
             usuario = self.create_test_user()
 
             # Crear curso con foro habilitado
@@ -248,7 +255,7 @@ class TestForum(TestCase):
     def test_close_forum_when_course_finalized(self):
         """Verifica que los mensajes se cierran cuando el curso se finaliza."""
         with self.app.app_context():
-            database.create_all()
+            self.setup_database_with_certificates()
             usuario = self.create_test_user()
 
             # Crear curso
