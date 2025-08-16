@@ -183,8 +183,17 @@ def lms_application(database_url):
 def minimal_db_setup(app, db_session):
     """
     Minimal database setup that only creates schema without full data population.
+    Includes essential certificate templates needed for course creation.
     Use this for tests that don't need the complete database setup.
     """
+    # Add essential certificate templates needed for course creation
+    with app.app_context():
+        try:
+            from now_lms.db.initial_data import crear_certificados
+            crear_certificados()
+        except Exception as e:
+            log.warning(f"Minimal setup certificate creation error: {e}")
+    
     # db_session already provides isolated session, just return the app
     yield app
 

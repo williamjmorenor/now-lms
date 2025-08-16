@@ -34,6 +34,10 @@ class TestAnnouncementsModel(TestCase):
         self.app.app_context().push()
         database.create_all()
 
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
+
         # Create test user
         self.test_user = Usuario(
             usuario="test_usera",
@@ -169,6 +173,10 @@ class TestAnnouncementsViews(TestCase):
 
         database.create_all()
 
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
+
         # Create test admin user
         self.admin_user = Usuario(
             usuario="admin",
@@ -253,6 +261,10 @@ class TestAnnouncementsIntegration(TestCase):
         self.app_context.push()
 
         database.create_all()
+
+        # Create certificate templates required by course model
+        from now_lms.db.initial_data import crear_certificados
+        crear_certificados()
 
         # Create test users and course
         self.admin_user = Usuario(

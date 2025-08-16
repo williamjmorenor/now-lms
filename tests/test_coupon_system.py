@@ -24,6 +24,10 @@ class TestCouponSystem(TestCase):
         with self.app.app_context():
             database.create_all()
 
+            # Create certificate templates required by course model
+            from now_lms.db.initial_data import crear_certificados
+            crear_certificados()
+
             # Create test instructor
             self.instructor = Usuario(
                 usuario="instructor_test",
