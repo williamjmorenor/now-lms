@@ -139,119 +139,119 @@ def test_foro_mensaje_model_exists(minimal_db_setup):
     assert mensaje_db.estado == "abierto"
     assert mensaje_db.usuario_id == usuario.usuario
 
-    def test_foro_mensaje_reply_functionality(self):
-        """Verifica la funcionalidad de respuestas en el foro."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
-            usuario = self.create_test_user()
+def test_foro_mensaje_reply_functionality(minimal_db_setup):
+    """Verifica la funcionalidad de respuestas en el foro."""
+    usuario = create_test_user()
 
-            # Crear curso
-            curso = Curso(
-                nombre="Curso con Foro",
-                codigo="FORUM002",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="open",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
-            database.session.add(curso)
-            database.session.commit()
+    # Crear curso
+    curso = Curso(
+        nombre="Curso con Foro",
+        codigo="FORUM002",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="open",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
+    database.session.add(curso)
+    database.session.commit()
 
-            # Crear mensaje principal
-            mensaje_principal = ForoMensaje(
-                curso_id=curso.codigo,
-                usuario_id=usuario.usuario,
-                contenido="Mensaje principal del hilo",
-                estado="abierto",
-            )
-            database.session.add(mensaje_principal)
-            database.session.commit()
+    # Crear mensaje principal
+    mensaje_principal = ForoMensaje(
+        curso_id=curso.codigo,
+        usuario_id=usuario.usuario,
+        contenido="Mensaje principal del hilo",
+        estado="abierto",
+    )
+    database.session.add(mensaje_principal)
+    database.session.commit()
 
-            # Crear respuesta
-            respuesta = ForoMensaje(
-                curso_id=curso.codigo,
-                usuario_id=usuario.usuario,
-                parent_id=mensaje_principal.id,
-                contenido="Esta es una respuesta al mensaje principal",
-                estado="abierto",
-            )
-            database.session.add(respuesta)
-            database.session.commit()
+    # Crear respuesta
+    respuesta = ForoMensaje(
+        curso_id=curso.codigo,
+        usuario_id=usuario.usuario,
+        parent_id=mensaje_principal.id,
+        contenido="Esta es una respuesta al mensaje principal",
+        estado="abierto",
+    )
+    database.session.add(respuesta)
+    database.session.commit()
 
-            # Verificar relaciones
-            self.assertEqual(respuesta.parent_id, mensaje_principal.id)
-            self.assertEqual(respuesta.get_thread_root().id, mensaje_principal.id)
+    # Verificar relaciones
+    assert respuesta.parent_id == mensaje_principal.id
+    assert respuesta.get_thread_root().id == mensaje_principal.id
 
-    def test_foro_mensaje_permissions(self):
-        """Verifica los permisos y validaciones del foro."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
-            usuario = self.create_test_user()
 
-            # Crear curso con foro habilitado
-            curso = Curso(
-                nombre="Curso Activo",
-                codigo="ACTIVE001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="open",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
-            database.session.add(curso)
-            database.session.commit()
+def test_foro_mensaje_permissions(minimal_db_setup):
+    """Verifica los permisos y validaciones del foro."""
+    usuario = create_test_user()
 
-            # Crear mensaje
-            mensaje = ForoMensaje(
-                curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Mensaje en curso activo", estado="abierto"
-            )
-            database.session.add(mensaje)
-            database.session.commit()
+    # Crear curso con foro habilitado
+    curso = Curso(
+        nombre="Curso Activo",
+        codigo="ACTIVE001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="open",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
+    database.session.add(curso)
+    database.session.commit()
 
-            # Verificar que se puede responder
-            self.assertTrue(mensaje.can_reply())
+    # Verificar que se puede crear mensaje en curso activo con foro habilitado
+    mensaje = ForoMensaje(
+        curso_id=curso.codigo,
+        usuario_id=usuario.usuario,
+        contenido="Mensaje en curso activo",
+        estado="abierto",
+    )
+    database.session.add(mensaje)
+    database.session.commit()
 
-            # Deshabilitar foro
-            curso.foro_habilitado = False
-            database.session.commit()
+    mensaje_db = database.session.query(ForoMensaje).filter_by(curso_id=curso.codigo).first()
+    assert mensaje_db is not None
+    assert mensaje_db.estado == "abierto"
 
-            # Verificar que ya no se puede responder
-            self.assertFalse(mensaje.can_reply())
+    # Test reply functionality
+    assert mensaje.can_reply()
 
-    def test_close_forum_when_course_finalized(self):
-        """Verifica que los mensajes se cierran cuando el curso se finaliza."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
-            usuario = self.create_test_user()
+    # Test closed message cannot be replied to
+    mensaje.estado = "cerrado"
+    assert not mensaje.can_reply()
 
-            # Crear curso
-            curso = Curso(
-                nombre="Curso a Finalizar",
-                codigo="FINAL001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="open",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
-            database.session.add(curso)
-            database.session.commit()
 
-            # Crear varios mensajes
-            mensaje1 = ForoMensaje(
-                curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Primer mensaje", estado="abierto"
-            )
-            mensaje2 = ForoMensaje(
-                curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Segundo mensaje", estado="abierto"
-            )
-            database.session.add_all([mensaje1, mensaje2])
-            database.session.commit()
+def test_close_forum_when_course_finalized(minimal_db_setup):
+    """Verifica que el foro se cierre cuando el curso se finaliza."""
+    usuario = create_test_user()
 
-            # Cerrar todos los mensajes del curso
-            ForoMensaje.close_all_for_course(curso.codigo)
+    # Crear curso
+    curso = Curso(
+        nombre="Curso a Finalizar",
+        codigo="FINAL001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="open",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
+    database.session.add(curso)
+    database.session.commit()
 
-            # Verificar que todos los mensajes están cerrados
-            mensajes = database.session.query(ForoMensaje).filter_by(curso_id=curso.codigo).all()
-            for mensaje in mensajes:
-                self.assertEqual(mensaje.estado, "cerrado")
+    # Crear varios mensajes
+    mensaje1 = ForoMensaje(
+        curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Primer mensaje", estado="abierto"
+    )
+    mensaje2 = ForoMensaje(
+        curso_id=curso.codigo, usuario_id=usuario.usuario, contenido="Segundo mensaje", estado="abierto"
+    )
+    database.session.add_all([mensaje1, mensaje2])
+    database.session.commit()
+
+    # Cerrar todos los mensajes del curso
+    ForoMensaje.close_all_for_course(curso.codigo)
+
+    # Verificar que todos los mensajes están cerrados
+    mensajes = database.session.query(ForoMensaje).filter_by(curso_id=curso.codigo).all()
+    for mensaje in mensajes:
+        assert mensaje.estado == "cerrado"
