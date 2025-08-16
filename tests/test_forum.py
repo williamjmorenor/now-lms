@@ -15,162 +15,129 @@
 
 """Pruebas para la funcionalidad del foro."""
 
-from unittest import TestCase
-from now_lms import app
-from now_lms.db import eliminar_base_de_datos_segura
 from now_lms.db import database, Curso, ForoMensaje, Usuario
 
 
-class TestForum(TestCase):
-    """Pruebas para la funcionalidad del foro."""
+def create_test_user():
+    """Crea un usuario de prueba para los tests."""
+    usuario = Usuario(
+        usuario="test_user",
+        acceso=b"test_password",
+        nombre="Test",
+        apellido="User",
+        correo_electronico="test@example.com",
+        tipo="student",
+        activo=True,
+    )
+    database.session.add(usuario)
+    database.session.commit()
+    return usuario
 
-    def setUp(self):
-        """Configuración inicial para cada prueba."""
-        self.app = app
-        self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-        self.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+def test_curso_foro_habilitado_field_exists(minimal_db_setup):
+    """Verifica que el campo foro_habilitado existe en el modelo Curso."""
+    curso = Curso(
+        nombre="Curso de Prueba",
+        codigo="TEST001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="draft",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
+    database.session.add(curso)
+    database.session.commit()
 
-    def setup_database_with_certificates(self):
-        """Helper method to set up database with required certificate templates."""
-        database.create_all()
-        # Create certificate templates required by course model
-        from now_lms.db.initial_data import crear_certificados
-        crear_certificados()
+    # Verificar que el curso se guardó correctamente
+    curso_db = database.session.query(Curso).filter_by(codigo="TEST001").first()
+    assert curso_db is not None
+    assert curso_db.foro_habilitado
 
-    def tearDown(self):
-        """Limpieza después de cada prueba."""
-        with self.app.app_context():
-            database.session.remove()
-            eliminar_base_de_datos_segura()
 
-    def create_test_user(self):
-        """Crea un usuario de prueba para los tests."""
-        usuario = Usuario(
-            usuario="test_user",
-            acceso=b"test_password",
-            nombre="Test",
-            apellido="User",
-            correo_electronico="test@example.com",
-            tipo="student",
-            activo=True,
-        )
-        database.session.add(usuario)
-        database.session.commit()
-        return usuario
+def test_curso_self_paced_no_puede_tener_foro(minimal_db_setup):
+    """Verifica que cursos self-paced no pueden tener foro habilitado."""
+    curso = Curso(
+        nombre="Curso Self-Paced",
+        codigo="SELF001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="draft",
+        modalidad="self_paced",
+        foro_habilitado=False,
+    )
 
-    def test_curso_foro_habilitado_field_exists(self):
-        """Verifica que el campo foro_habilitado existe en el modelo Curso."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
+    # Verificar que puede_habilitar_foro retorna False
+    assert not curso.puede_habilitar_foro()
 
-            curso = Curso(
-                nombre="Curso de Prueba",
-                codigo="TEST001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="draft",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
-            database.session.add(curso)
-            database.session.commit()
+    # Verificar que is_self_paced retorna True
+    assert curso.is_self_paced()
 
-            # Verificar que el curso se guardó correctamente
-            curso_db = database.session.query(Curso).filter_by(codigo="TEST001").first()
-            self.assertIsNotNone(curso_db)
-            self.assertTrue(curso_db.foro_habilitado)
+    # Verificar validación
+    valid, message = curso.validar_foro_habilitado()
+    assert valid  # Debería ser válido cuando foro_habilitado=False
 
-    def test_curso_self_paced_no_puede_tener_foro(self):
-        """Verifica que cursos self-paced no pueden tener foro habilitado."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
+    # Intentar habilitar foro en curso self-paced debería lanzar error
+    try:
+        curso.foro_habilitado = True
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "self-paced" in str(e)
 
-            curso = Curso(
-                nombre="Curso Self-Paced",
-                codigo="SELF001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="draft",
-                modalidad="self_paced",
-                foro_habilitado=False,
-            )
 
-            # Verificar que puede_habilitar_foro retorna False
-            self.assertFalse(curso.puede_habilitar_foro())
+def test_curso_time_based_puede_tener_foro(minimal_db_setup):
+    """Verifica que cursos time-based pueden tener foro habilitado."""
+    curso = Curso(
+        nombre="Curso Time-Based",
+        codigo="TIME001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="draft",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
 
-            # Verificar que is_self_paced retorna True
-            self.assertTrue(curso.is_self_paced())
+    # Verificar que puede_habilitar_foro retorna True
+    assert curso.puede_habilitar_foro()
 
-            # Verificar validación
-            valid, message = curso.validar_foro_habilitado()
-            self.assertTrue(valid)  # Debería ser válido cuando foro_habilitado=False
+    # Verificar que is_self_paced retorna False
+    assert not curso.is_self_paced()
 
-            # Intentar habilitar foro en curso self-paced debería lanzar error
-            with self.assertRaises(ValueError) as context:
-                curso.foro_habilitado = True
+    # Verificar validación
+    valid, message = curso.validar_foro_habilitado()
+    assert valid
 
-            self.assertIn("self-paced", str(context.exception))
+def test_foro_mensaje_model_exists(minimal_db_setup):
+    """Verifica que el modelo ForoMensaje funciona correctamente."""
+    usuario = create_test_user()
 
-    def test_curso_time_based_puede_tener_foro(self):
-        """Verifica que cursos time-based pueden tener foro habilitado."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
+    # Crear curso
+    curso = Curso(
+        nombre="Curso con Foro",
+        codigo="FORUM001",
+        descripcion_corta="Descripción corta",
+        descripcion="Descripción completa",
+        estado="open",
+        modalidad="time_based",
+        foro_habilitado=True,
+    )
+    database.session.add(curso)
+    database.session.commit()
 
-            curso = Curso(
-                nombre="Curso Time-Based",
-                codigo="TIME001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="draft",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
+    # Crear mensaje del foro
+    mensaje = ForoMensaje(
+        curso_id=curso.codigo,
+        usuario_id=usuario.usuario,
+        contenido="Este es un mensaje de prueba en markdown",
+        estado="abierto",
+    )
+    database.session.add(mensaje)
+    database.session.commit()
 
-            # Verificar que puede_habilitar_foro retorna True
-            self.assertTrue(curso.puede_habilitar_foro())
-
-            # Verificar que is_self_paced retorna False
-            self.assertFalse(curso.is_self_paced())
-
-            # Verificar validación
-            valid, message = curso.validar_foro_habilitado()
-            self.assertTrue(valid)
-
-    def test_foro_mensaje_model_exists(self):
-        """Verifica que el modelo ForoMensaje funciona correctamente."""
-        with self.app.app_context():
-            self.setup_database_with_certificates()
-            usuario = self.create_test_user()
-
-            # Crear curso
-            curso = Curso(
-                nombre="Curso con Foro",
-                codigo="FORUM001",
-                descripcion_corta="Descripción corta",
-                descripcion="Descripción completa",
-                estado="open",
-                modalidad="time_based",
-                foro_habilitado=True,
-            )
-            database.session.add(curso)
-            database.session.commit()
-
-            # Crear mensaje del foro
-            mensaje = ForoMensaje(
-                curso_id=curso.codigo,
-                usuario_id=usuario.usuario,
-                contenido="Este es un mensaje de prueba en markdown",
-                estado="abierto",
-            )
-            database.session.add(mensaje)
-            database.session.commit()
-
-            # Verificar que el mensaje se guardó correctamente
-            mensaje_db = database.session.query(ForoMensaje).filter_by(curso_id=curso.codigo).first()
-            self.assertIsNotNone(mensaje_db)
-            self.assertEqual(mensaje_db.contenido, "Este es un mensaje de prueba en markdown")
-            self.assertEqual(mensaje_db.estado, "abierto")
-            self.assertEqual(mensaje_db.usuario_id, usuario.usuario)
+    # Verificar que el mensaje se guardó correctamente
+    mensaje_db = database.session.query(ForoMensaje).filter_by(curso_id=curso.codigo).first()
+    assert mensaje_db is not None
+    assert mensaje_db.contenido == "Este es un mensaje de prueba en markdown"
+    assert mensaje_db.estado == "abierto"
+    assert mensaje_db.usuario_id == usuario.usuario
 
     def test_foro_mensaje_reply_functionality(self):
         """Verifica la funcionalidad de respuestas en el foro."""
