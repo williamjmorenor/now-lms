@@ -87,7 +87,7 @@ The release has been validated through:
 ### System Requirements
 
 - Python 3.11 or higher
-- Compatible with Linux, macOS, and Windows
+- Compatible with Linux
 - Supported databases: SQLite (included), PostgreSQL, MySQL, or MariaDB
 
 ### Known Limitations
