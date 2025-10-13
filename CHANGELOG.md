@@ -94,6 +94,7 @@ The release has been validated through:
 
 - Audit mode for paid courses is partially implemented
 - Some advanced reporting features are planned for future releases
+- There is a problem handling the user session witg gunicorn, use waitress as WSGI server until the issue is fixed.
 
 ### Deployment
 
