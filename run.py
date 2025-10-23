@@ -19,27 +19,23 @@
 from os import environ
 
 # ---------------------------------------------------------------------------------------
-# Third-party libraries
-# ---------------------------------------------------------------------------------------
-from loguru import logger
-
-# ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
 from now_lms import lms_app, init_app
+from now_lms.logs import log
 from now_lms.worker_config import get_worker_config_from_env
 
 PORT = environ.get("PORT") or 8080
 
 if init_app():
-    logger.info("Iniciando NOW Learning Management System")
+    log.info("Iniciando NOW Learning Management System")
     try:
         from waitress import serve
 
         # Get optimal worker and thread configuration
         workers, threads = get_worker_config_from_env()
 
-        logger.info(f"Starting Waitress WSGI server on port {PORT} with {threads} threads")
+        log.info(f"Starting Waitress WSGI server on port {PORT} with {threads} threads")
         serve(
             lms_app,
             host="0.0.0.0",
@@ -50,7 +46,7 @@ if init_app():
             _quiet=False,
         )
     except ImportError:
-        logger.error("Waitress no está instalado. Por favor instálalo con: pip install waitress")
-        logger.error("No se pudo iniciar NOW Learning Management System.")
+        log.error("Waitress no está instalado. Por favor instálalo con: pip install waitress")
+        log.error("No se pudo iniciar NOW Learning Management System.")
 else:
-    logger.error("No se pudo iniciar NOW Learning Management System.")
+    log.error("No se pudo iniciar NOW Learning Management System.")
