@@ -43,7 +43,7 @@ def test_session_redis_url_documented():
 
 def test_config_file_example_does_not_include_directory_paths():
     """Verify that config file examples don't incorrectly show directory paths.
-    
+
     Directory paths like NOW_LMS_DATA_DIR and NOW_LMS_THEMES_DIR must be
     environment variables because they're read during early module initialization,
     before config files are loaded.
