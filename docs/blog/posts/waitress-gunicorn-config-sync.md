@@ -172,6 +172,6 @@ Added comprehensive tests to verify configuration synchronization:
 With this update, NOW LMS treats Waitress and Gunicorn as equal first-class WSGI servers. Choose the one that best fits your deployment environment, knowing that configuration, session storage, and resource optimization work identically.
 
 For detailed configuration options, see:
-- [WSGI Server Session Storage Configuration](wsgi-session-storage.md)
-- [RAM Optimization Guide](ram-optimization.md)
+- [WSGI Server Session Storage Configuration](wsgi-session-storage)
+- [RAM Optimization Guide](ram-optimization-guide)
 - [Setup Configuration Guide](../../setup-conf.md)
