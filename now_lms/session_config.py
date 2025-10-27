@@ -162,7 +162,9 @@ def init_session(app: Flask) -> None:
             case "redis":
                 log.info("Using Redis for session storage - optimal for multi-worker WSGI servers")
             case "cachelib":
-                log.info("Using CacheLib FileSystemCache for session storage - works with multi-worker/multi-threaded WSGI servers")
+                log.info(
+                    "Using CacheLib FileSystemCache for session storage - works with multi-worker/multi-threaded WSGI servers"
+                )
                 cache_backend = session_config.get("SESSION_CACHELIB")
                 if hasattr(cache_backend, "_path"):
                     log.info(f"Session cache directory: {cache_backend._path}")
