@@ -277,7 +277,7 @@ Potential improvements (not required for this issue):
 
 ## References
 
-- Issue: "fix session issues with flask-session and flask-login with multi thread WSGI server like gunicorn"
+- Issue: "fix session issues with flask-session and flask-login with multi-worker WSGI server like gunicorn"
 - [Flask-Session Documentation](https://flask-session.readthedocs.io/)
 - [Gunicorn Documentation](https://docs.gunicorn.org/)
 - [Redis Documentation](https://redis.io/docs/)
