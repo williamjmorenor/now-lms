@@ -127,12 +127,12 @@ def init_session(app: Flask) -> None:
         by using shared storage (Redis or database) instead of in-memory sessions.
     """
     global _session_model_created
-    
+
     # Check if session is already initialized for this app
-    if hasattr(app, '_session_initialized'):
+    if hasattr(app, "_session_initialized"):
         log.debug("Session already initialized for this app, skipping")
         return
-    
+
     try:
         # Get the session configuration
         session_config = get_session_config()
@@ -148,8 +148,9 @@ def init_session(app: Flask) -> None:
         # For SQLAlchemy backend, inject the app's database instance
         if session_config.get("SESSION_TYPE") == "sqlalchemy":
             from now_lms.db import database
+
             session_config["SESSION_SQLALCHEMY"] = database
-            
+
             # If the model has already been created (e.g., by another app instance),
             # we need to skip re-creating it to avoid metadata conflicts
             if _session_model_created:
@@ -172,7 +173,7 @@ def init_session(app: Flask) -> None:
                 log.debug(f"Session model already defined, continuing: {e}")
             else:
                 raise
-        
+
         # Mark as initialized
         app._session_initialized = True
 
@@ -183,9 +184,7 @@ def init_session(app: Flask) -> None:
             case "redis":
                 log.info("Using Redis for session storage - optimal for multi-worker WSGI servers")
             case "sqlalchemy":
-                log.info(
-                    "Using SQLAlchemy database for session storage - works with multi-worker/multi-threaded WSGI servers"
-                )
+                log.info("Using SQLAlchemy database for session storage - works with multi-worker/multi-threaded WSGI servers")
                 table_name = session_config.get("SESSION_SQLALCHEMY_TABLE", "flask_sessions")
                 log.info(f"Session table: {table_name}")
             case _:
