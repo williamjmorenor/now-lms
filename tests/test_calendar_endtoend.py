@@ -393,7 +393,7 @@ class TestCalendarEndToEnd:
                 nombre="Export Meeting",
                 descripcion="Meeting for export test",
                 tipo="meet",
-                fecha=date(2025, 11, 15),
+                fecha=date(2025, 12, 15),
                 hora_inicio=time_obj(9, 0),
                 hora_fin=time_obj(10, 0),
                 publico=True,
@@ -406,7 +406,7 @@ class TestCalendarEndToEnd:
                 description="Evaluation for export test",
                 is_exam=False,
                 passing_score=60.0,
-                available_until=datetime(2025, 11, 20, 23, 59, 59),
+                available_until=datetime(2025, 12, 20, 23, 59, 59),
             )
 
             database.session.add_all([meet_resource, evaluation])
