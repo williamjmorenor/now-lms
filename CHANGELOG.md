@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Changed
+ - Updated default waitress setup.
+ 
+ 
 ## [1.0.3] - 2025-10-29
 
 ### Changed
