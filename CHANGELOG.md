@@ -11,6 +11,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
  - Updated default waitress setup.
+ 
+ 
+## [1.0.3] - 2025-10-29
+
+### Changed
+ - Updated default waitress setup.
+ - Move to SQLAlchemy as flask-session backend.
 
 ## [1.0.2] - 2025-10-23
 
