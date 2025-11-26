@@ -361,6 +361,7 @@ class ThemeForm(FlaskForm):
     style = SelectField(
         "Estilo",
         choices=[],
+        validators=[Optional()],
     )
 
 
@@ -380,7 +381,7 @@ class MailForm(FlaskForm):
     MAIL_DEFAULT_SENDER_NAME = StringField(validators=[Optional()])
     MAIL_PORT = StringField(validators=[DataRequired()])
     MAIL_USERNAME = StringField(validators=[DataRequired()])
-    MAIL_PASSWORD = PasswordField()
+    MAIL_PASSWORD = PasswordField(validators=[Optional()])
     MAIL_USE_TLS = BooleanField(validators=[])
     MAIL_USE_SSL = BooleanField(validators=[])
 
@@ -438,17 +439,20 @@ class CurseForm(BaseForm):
         _("Plantilla de certificado"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
     precio = DecimalField(validators=[Optional()])
     categoria = SelectField(
         _("Categoría"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
     etiquetas = SelectMultipleField(
         _("Etiquetas"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
 
     def __init__(self, *args, **kwargs):
@@ -519,7 +523,7 @@ class CursoLibraryFileForm(BaseForm):
 class CursoRecursoArchivoText(CursoRecursoForm):
     """Formulario para un nuevo recurso de audio."""
 
-    editor = MdeField()
+    editor = MdeField(validators=[Optional()])
 
 
 class CursoRecursoExternalCode(CursoRecursoForm):
@@ -597,14 +601,14 @@ class CategoriaForm(BaseForm):
 class EtiquetaForm(BaseForm):
     """Formulario para crear una etiqueta."""
 
-    color = StringField(widget=ColorInput())
+    color = StringField(widget=ColorInput(), validators=[Optional()])
 
 
 class ProgramaForm(BaseForm):
     """Formulario para crear un programa."""
 
     codigo = StringField(validators=[DataRequired()])
-    precio = DecimalField()
+    precio = DecimalField(validators=[Optional()])
     publico = BooleanField(validators=[])
     estado = SelectField(_("Estado"), choices=[], validators=[Optional()])
     promocionado = BooleanField(validators=[])
@@ -614,16 +618,19 @@ class ProgramaForm(BaseForm):
         _("Plantilla de certificado"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
     categoria = SelectField(
         _("Categoría"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
     etiquetas = SelectMultipleField(
         _("Etiquetas"),
         choices=[],
         validate_choice=False,
+        validators=[Optional()],
     )
 
     def __init__(self, *args, **kwargs):
@@ -636,7 +643,7 @@ class RecursoForm(BaseForm):
     """Formulario para crear un recurso."""
 
     codigo = StringField(validators=[DataRequired()])
-    precio = DecimalField()
+    precio = DecimalField(validators=[Optional()])
     publico = BooleanField(validators=[])
     promocionado = BooleanField(validators=[])
     tipo = SelectField(_("Tipo"), choices=[], validators=[Optional()])
@@ -662,8 +669,8 @@ class UserForm(FlaskForm):
     youtube = StringField(validators=[Optional()])
     genero = SelectField(_("Genero"), choices=[], validators=[Optional()])
     titulo = SelectField(_("Titulo"), choices=[], validators=[Optional()])
-    nacimiento = DateField()
-    bio = TextAreaField()
+    nacimiento = DateField(validators=[Optional()])
+    bio = TextAreaField(validators=[Optional()])
 
     def __init__(self, *args, **kwargs):
         """Initialize form with translated choices."""
@@ -676,7 +683,7 @@ class MsgForm(FlaskForm):
     """Formulario para crear un mensaje en el sistema - DEPRECATED."""
 
     titulo = StringField(validators=[Optional()])
-    editor = MdeField()
+    editor = MdeField(validators=[Optional()])
     parent = HiddenField(validators=[])
 
 
@@ -818,7 +825,7 @@ class PagoForm(FlaskForm):
     apellido = StringField(validators=[DataRequired()])
     correo_electronico = StringField(validators=[DataRequired()])
     direccion1 = StringField(validators=[DataRequired()])
-    direccion2 = StringField()
+    direccion2 = StringField(validators=[Optional()])
     pais = StringField(validators=[DataRequired()])
     provincia = StringField(validators=[DataRequired()])
     codigo_postal = StringField(validators=[DataRequired()])
@@ -833,10 +840,10 @@ class EvaluationForm(FlaskForm):
     """Formulario para crear/editar una evaluación."""
 
     title = StringField(LABEL_TITULO, validators=[DataRequired()])
-    description = TextAreaField(_("Descripción"))
+    description = TextAreaField(_("Descripción"), validators=[Optional()])
     is_exam = BooleanField(_("Es un examen"))
     passing_score = DecimalField(_("Puntuación mínima para aprobar"), default=70.0, validators=[DataRequired()])
-    max_attempts = IntegerField(_("Máximo número de intentos (vacío = ilimitado)"))
+    max_attempts = IntegerField(_("Máximo número de intentos (vacío = ilimitado)"), validators=[Optional()])
 
 
 class QuestionForm(FlaskForm):
@@ -844,7 +851,7 @@ class QuestionForm(FlaskForm):
 
     text = TextAreaField(_("Texto de la pregunta"), validators=[DataRequired()])
     type = SelectField(_("Tipo"), choices=[], validators=[DataRequired()])
-    explanation = TextAreaField(_("Explicación (opcional)"))
+    explanation = TextAreaField(_("Explicación (opcional)"), validators=[Optional()])
 
     def __init__(self, *args, **kwargs):
         """Initialize form with translated choices."""
@@ -931,8 +938,12 @@ class CouponForm(BaseForm):
         validators=[DataRequired()],
     )
     discount_value = DecimalField(_("Valor del Descuento"), validators=[DataRequired()], render_kw={"min": "0"})
-    max_uses = IntegerField(_("Máximo de Usos"), render_kw={"min": "1", "placeholder": _("Dejar vacío para ilimitado")})
-    expires_at = DateField(_("Fecha de Expiración"), render_kw={"placeholder": _("Dejar vacío si no expira")})
+    max_uses = IntegerField(
+        _("Máximo de Usos"), validators=[Optional()], render_kw={"min": "1", "placeholder": _("Dejar vacío para ilimitado")}
+    )
+    expires_at = DateField(
+        _("Fecha de Expiración"), validators=[Optional()], render_kw={"placeholder": _("Dejar vacío si no expira")}
+    )
 
     def __init__(self, *args, **kwargs):
         """Initialize form with translated choices."""
@@ -943,7 +954,9 @@ class CouponForm(BaseForm):
 class CouponApplicationForm(FlaskForm):
     """Formulario para aplicar un cupón durante la inscripción."""
 
-    coupon_code = StringField(_("Código de Cupón"), render_kw={"placeholder": _("Código de cupón (opcional)")})
+    coupon_code = StringField(
+        _("Código de Cupón"), validators=[Optional()], render_kw={"placeholder": _("Código de cupón (opcional)")}
+    )
 
 
 # Blog forms
@@ -953,7 +966,7 @@ class BlogPostForm(BaseForm):
     title = StringField(LABEL_TITULO, validators=[DataRequired()])
     content = MdeField(_("Contenido"), validators=[DataRequired()])
     allow_comments = BooleanField(_("Permitir comentarios"), default=True)
-    tags = StringField(_("Etiquetas (separadas por comas)"))
+    tags = StringField(_("Etiquetas (separadas por comas)"), validators=[Optional()])
     status = SelectField(_("Estado"), choices=[], validators=[Optional()])
 
     def __init__(self, *args, **kwargs):
@@ -993,7 +1006,9 @@ class AdminCourseEnrollmentForm(FlaskForm):
         render_kw={"title": _("Si está marcado, el estudiante tendrá acceso completo sin importar si el curso es pagado")},
     )
     notes = TextAreaField(
-        _("Notas (opcional)"), render_kw={"rows": 3, "placeholder": _("Notas adicionales sobre la inscripción")}
+        _("Notas (opcional)"),
+        validators=[Optional()],
+        render_kw={"rows": 3, "placeholder": _("Notas adicionales sobre la inscripción")},
     )
 
 
@@ -1013,5 +1028,7 @@ class AdminProgramEnrollmentForm(FlaskForm):
         },
     )
     notes = TextAreaField(
-        _("Notas (opcional)"), render_kw={"rows": 3, "placeholder": _("Notas adicionales sobre la inscripción")}
+        _("Notas (opcional)"),
+        validators=[Optional()],
+        render_kw={"rows": 3, "placeholder": _("Notas adicionales sobre la inscripción")},
     )
