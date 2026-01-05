@@ -74,18 +74,18 @@ def inicio_sesion() -> str | Response:
             identidad = database.session.execute(
                 database.select(Usuario).filter_by(usuario=form.usuario.data)
             ).scalar_one_or_none()
-            
+
             # Check if user exists (might be using email to login)
             if not identidad:
                 identidad = database.session.execute(
                     database.select(Usuario).filter_by(correo_electronico=form.usuario.data)
                 ).scalar_one_or_none()
-            
+
             if identidad:
                 # Get system configuration
                 config_result = database.session.execute(database.select(Configuracion)).first()
                 config = config_result[0] if config_result else None
-                
+
                 # Check if user account is active
                 if not identidad.activo:
                     # If allow_unverified_email_login is enabled and email is not verified,
@@ -97,25 +97,25 @@ def inicio_sesion() -> str | Response:
                         flash(
                             "Su correo electrónico no ha sido verificado. Su acceso a la plataforma está limitado. "
                             "Por favor, verifique su correo electrónico para acceder a todas las funcionalidades.",
-                            "warning"
+                            "warning",
                         )
                         return PANEL_DE_USUARIO
                     else:
                         flash("Su cuenta esta inactiva.", "info")
                         return INICIO_SESION
-                
+
                 # Account is active, allow login
                 login_user(identidad)
-                
+
                 # Show warning if email is not verified
                 if not identidad.correo_electronico_verificado and config and config.verify_user_by_email:
                     flash(
                         "Su correo electrónico no ha sido verificado. Su acceso a algunas funcionalidades está limitado.",
-                        "warning"
+                        "warning",
                     )
-                
+
                 return PANEL_DE_USUARIO
-            
+
         flash("Inicio de Sesion Incorrecto.", "warning")
         return INICIO_SESION
     return render_template(

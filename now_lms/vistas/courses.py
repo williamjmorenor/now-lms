@@ -446,16 +446,16 @@ def course_enroll(course_code: str) -> str | Response:
     original_price = _curso.precio if _curso.pagado else 0
     final_price = original_price
     discount_amount = 0
-    
+
     # Check if user has unverified email and is trying to enroll in paid course or use coupon
     from now_lms.auth import usuario_requiere_verificacion_email
-    
+
     if _curso.pagado and usuario_requiere_verificacion_email():
         # User has unverified email - only allow free enrollment without coupons
         flash(
             "Debe verificar su correo electrónico para inscribirse en cursos de pago o usar cupones. "
             "Los cursos gratuitos están disponibles sin verificación.",
-            "warning"
+            "warning",
         )
         return redirect(url_for(VISTA_CURSOS, course_code=course_code))
 
@@ -2893,7 +2893,7 @@ def _validate_coupon_for_enrollment(
     is_valid, error_message = coupon.is_valid()
     if not is_valid:
         return None, None, error_message
-    
+
     # Check if coupon gives 100% discount and user has unverified email
     # Get course to calculate final price
     curso = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalar_one_or_none()
@@ -2903,8 +2903,9 @@ def _validate_coupon_for_enrollment(
             # 100% discount coupon - check email verification
             from now_lms.auth import usuario_requiere_verificacion_email
             from flask_login import current_user as temp_user
+
             # Temporarily set current_user for the check
-            if hasattr(temp_user, '_get_current_object'):
+            if hasattr(temp_user, "_get_current_object"):
                 actual_user = temp_user._get_current_object()
                 if actual_user.usuario == user.usuario and usuario_requiere_verificacion_email():
                     return None, None, "Debe verificar su correo electrónico antes de usar cupones de descuento"
