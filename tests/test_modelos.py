@@ -25,7 +25,7 @@ def test_crear_usuario(app, db_session):
     """Se debe poder crear un usuario en la base de datos."""
     from now_lms.auth import proteger_passwd
     from now_lms.db import Usuario
-    
+
     # Crear usuario con campos mínimos
     user = Usuario(
         usuario="testuser",
@@ -35,10 +35,10 @@ def test_crear_usuario(app, db_session):
         tipo="student",
         activo=True,
     )
-    
+
     db_session.add(user)
     db_session.commit()
-    
+
     # Verificar que se creó
     found = db_session.query(Usuario).filter_by(usuario="testuser").first()
     assert found is not None
@@ -48,7 +48,7 @@ def test_crear_usuario(app, db_session):
 def test_crear_curso(app, db_session):
     """Se debe poder crear un curso en la base de datos."""
     from now_lms.db import Curso
-    
+
     # Crear curso
     curso = Curso(
         nombre="Curso de Prueba",
@@ -65,10 +65,10 @@ def test_crear_curso(app, db_session):
         fecha_inicio=datetime.now() + timedelta(days=7),
         fecha_fin=datetime.now() + timedelta(days=14),
     )
-    
+
     db_session.add(curso)
     db_session.commit()
-    
+
     # Verificar que se creó
     found = db_session.query(Curso).filter_by(codigo="TEST001").first()
     assert found is not None
@@ -78,16 +78,16 @@ def test_crear_curso(app, db_session):
 def test_crear_categoria(app, db_session):
     """Se debe poder crear una categoría en la base de datos."""
     from now_lms.db import Categoria
-    
+
     # Crear categoría
     categoria = Categoria(
         nombre="Categoría de Prueba",
         descripcion="Una categoría de prueba",
     )
-    
+
     db_session.add(categoria)
     db_session.commit()
-    
+
     # Verificar que se creó
     found = db_session.query(Categoria).filter_by(nombre="Categoría de Prueba").first()
     assert found is not None
