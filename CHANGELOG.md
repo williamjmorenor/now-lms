@@ -9,6 +9,31 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Added
+- Configurable restricted access for users with unverified email addresses
+  - New configuration option `allow_unverified_email_login` that allows administrators to enable limited access for users who have not verified their email
+  - Users with unverified email can access free content but cannot:
+    - Make purchases or access payment features
+    - Post in forums or send private messages
+  - Administrators can manually verify user emails from the inactive users list (`/admin/users/list_inactive`)
+  - Flash messages inform users when their access is limited due to unverified email
+
+### Changed
+- Login flow now checks the new configuration option to allow or block unverified users
+- Default behavior remains unchanged (unverified users are blocked) to maintain backward compatibility
+
+### Database Migration Required
+⚠️ **IMPORTANT**: This version introduces database schema changes. After updating, you must run database migrations:
+```bash
+# Using lmsctl
+lmsctl database upgrade
+
+# Or using Flask-Alembic directly
+flask db upgrade
+```
+
+Migration file: `now_lms/migrations/20260105_145517_add_allow_unverified_email_login.py`
+
 ## [1.0.4] - 2025-11-23
 
 ### Changed:
