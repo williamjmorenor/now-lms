@@ -10,17 +10,19 @@ All notable changes to this project will be documented in this file.
 ## [unreleased]
 
 ### Added
-- Configurable restricted access for users with unverified email addresses
-  - New configuration option `allow_unverified_email_login` that allows administrators to enable limited access for users who have not verified their email
-  - Users with unverified email can access free content but cannot:
-    - Make purchases or access payment features
-    - Post in forums or send private messages
-  - Administrators can manually verify user emails from the inactive users list (`/admin/users/list_inactive`)
-  - Flash messages inform users when their access is limited due to unverified email
-
+- **Configurable Restricted Access for Unverified Email Users**
+  - New administrator configuration option `allow_unverified_email_login` enables controlled access for users with unverified email addresses
+  - When enabled, users can log in without email verification but with the following restrictions:
+    - ✅ **Allowed**: Enroll in free courses, access course resources, complete evaluations, and earn certificates
+    - ❌ **Restricted**: Enroll in paid courses, use discount coupons (including 100% off), post in forums, or send private messages
+  - Flash messages inform users about their limited access status during login
+  - Administrators can manually verify user emails from `/admin/users/list_inactive` via the new verification button
+  - Manual verification by admin immediately activates the account and grants full access
+  - Default behavior unchanged: unverified users are blocked by default (backward compatible, non-breaking change)
+  
 ### Changed
-- Login flow now checks the new configuration option to allow or block unverified users
-- Default behavior remains unchanged (unverified users are blocked) to maintain backward compatibility
+- Login flow enhanced to support conditional access for unverified users based on system configuration
+- Admin inactive users list now includes email verification functionality
 
 ### Database Migration Required
 ⚠️ **IMPORTANT**: This version introduces database schema changes. After updating, you must run database migrations:
@@ -33,6 +35,8 @@ flask db upgrade
 ```
 
 Migration file: `now_lms/migrations/20260105_145517_add_allow_unverified_email_login.py`
+
+The migration adds the `allow_unverified_email_login` column to the `configuracion` table with a default value of `False` to maintain backward compatibility.
 
 ## [1.0.4] - 2025-11-23
 

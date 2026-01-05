@@ -56,7 +56,7 @@ from werkzeug.wrappers import Response
 # ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
-from now_lms.auth import perfil_requerido
+from now_lms.auth import perfil_requerido, usuario_requiere_verificacion_email
 from now_lms.bi import (
     asignar_curso_a_instructor,
     cambia_curso_publico,
@@ -448,8 +448,6 @@ def course_enroll(course_code: str) -> str | Response:
     discount_amount = 0
 
     # Check if user has unverified email and is trying to enroll in paid course or use coupon
-    from now_lms.auth import usuario_requiere_verificacion_email
-
     if _curso.pagado and usuario_requiere_verificacion_email():
         # User has unverified email - only allow free enrollment without coupons
         flash(
@@ -2900,14 +2898,12 @@ def _validate_coupon_for_enrollment(
     if curso and curso.pagado:
         final_price = coupon.calculate_final_price(curso.precio)
         if final_price == 0 and not user.correo_electronico_verificado:
-            # 100% discount coupon - check email verification
-            from now_lms.auth import usuario_requiere_verificacion_email
-            from flask_login import current_user as temp_user
-
-            # Temporarily set current_user for the check
-            if hasattr(temp_user, "_get_current_object"):
-                actual_user = temp_user._get_current_object()
-                if actual_user.usuario == user.usuario and usuario_requiere_verificacion_email():
+            # 100% discount coupon requires email verification
+            # Check if system has email verification requirements
+            config_result = database.session.execute(database.select(Configuracion)).first()
+            if config_result:
+                config = config_result[0]
+                if config.verify_user_by_email or config.allow_unverified_email_login:
                     return None, None, "Debe verificar su correo electrónico antes de usar cupones de descuento"
 
     return coupon, None, None

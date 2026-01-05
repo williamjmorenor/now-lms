@@ -42,7 +42,7 @@ from flask_login import current_user
 # ---------------------------------------------------------------------------------------
 # Local resources
 # ---------------------------------------------------------------------------------------
-from now_lms.db import MailConfig, Usuario, database
+from now_lms.db import Configuracion, MailConfig, Usuario, database
 from now_lms.logs import log
 
 ph = PasswordHasher()
@@ -104,8 +104,6 @@ def usuario_requiere_verificacion_email() -> bool:
         return False
 
     # Check system configuration
-    from now_lms.db import Configuracion
-
     config_result = database.session.execute(database.select(Configuracion)).first()
     if not config_result:
         return False

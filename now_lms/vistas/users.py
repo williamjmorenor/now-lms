@@ -66,8 +66,8 @@ def inicio_sesion() -> str | Response:
     form = LoginForm()
 
     # Check if password recovery is available
-    mail_config = database.session.execute(database.select(MailConfig)).first()
-    show_forgot_password = mail_config and mail_config[0].email_verificado
+    mail_config = database.session.execute(database.select(MailConfig)).scalar_one_or_none()
+    show_forgot_password = mail_config and mail_config.email_verificado
 
     if form.validate_on_submit():
         if validar_acceso(form.usuario.data, form.acceso.data):
@@ -83,8 +83,7 @@ def inicio_sesion() -> str | Response:
 
             if identidad:
                 # Get system configuration
-                config_result = database.session.execute(database.select(Configuracion)).first()
-                config = config_result[0] if config_result else None
+                config = database.session.execute(database.select(Configuracion)).scalar_one_or_none()
 
                 # Check if user account is active
                 if not identidad.activo:
