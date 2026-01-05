@@ -2900,11 +2900,9 @@ def _validate_coupon_for_enrollment(
         if final_price == 0 and not user.correo_electronico_verificado:
             # 100% discount coupon requires email verification
             # Check if system has email verification requirements
-            config_result = database.session.execute(database.select(Configuracion)).first()
-            if config_result:
-                config = config_result[0]
-                if config.verify_user_by_email or config.allow_unverified_email_login:
-                    return None, None, "Debe verificar su correo electrónico antes de usar cupones de descuento"
+            config = database.session.execute(database.select(Configuracion)).scalar_one_or_none()
+            if config and (config.verify_user_by_email or config.allow_unverified_email_login):
+                return None, None, "Debe verificar su correo electrónico antes de usar cupones de descuento"
 
     return coupon, None, None
 

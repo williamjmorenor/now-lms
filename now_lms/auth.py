@@ -104,11 +104,9 @@ def usuario_requiere_verificacion_email() -> bool:
         return False
 
     # Check system configuration
-    config_result = database.session.execute(database.select(Configuracion)).first()
-    if not config_result:
+    config = database.session.execute(database.select(Configuracion)).scalar_one_or_none()
+    if not config:
         return False
-
-    config = config_result[0]
 
     # If system requires email verification OR allows restricted access for unverified users
     # then the user has restrictions
