@@ -27,12 +27,16 @@
                             </div>
                             <div class="col-auto">
                                 <select name="status" id="status" class="form-select" onchange="this.form.submit()">
-                                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{{ _("Todos") }}</option>
-                                    <option value="not_seen" {% if status_filter == 'not_seen' %}selected{% endif %}>
+                                    <option value="all" {% if status_filter="" ="all" %}selected{% endif %}>
+                                        {{ _("Todos") }}
+                                    </option>
+                                    <option value="not_seen" {% if status_filter="" ="not_seen" %}selected{% endif %}>
                                         {{ _("No Vistos") }}
                                     </option>
-                                    <option value="seen" {% if status_filter == 'seen' %}selected{% endif %}>{{ _("Vistos") }}</option>
-                                    <option value="answered" {% if status_filter == 'answered' %}selected{% endif %}>
+                                    <option value="seen" {% if status_filter="" ="seen" %}selected{% endif %}>
+                                        {{ _("Vistos") }}
+                                    </option>
+                                    <option value="answered" {% if status_filter="" ="answered" %}selected{% endif %}>
                                         {{ _("Contestados") }}
                                     </option>
                                 </select>
@@ -44,51 +48,51 @@
                 <div class="card">
                     <div class="card-body">
                         {% if messages %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ _("Estado") }}</th>
-                                            <th>{{ _("Nombre") }}</th>
-                                            <th>{{ _("Email") }}</th>
-                                            <th>{{ _("Asunto") }}</th>
-                                            <th>{{ _("Fecha") }}</th>
-                                            <th>{{ _("Acciones") }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for message in messages %}
-                                            <tr {% if message.status == 'not_seen' %}class="table-warning"{% endif %}>
-                                                <td>
-                                                    {% if message.status == 'not_seen' %}
-                                                        <span class="badge bg-warning text-dark">{{ _("No Visto") }}</span>
-                                                    {% elif message.status == 'seen' %}
-                                                        <span class="badge bg-info">{{ _("Visto") }}</span>
-                                                    {% elif message.status == 'answered' %}
-                                                        <span class="badge bg-success">{{ _("Contestado") }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>{{ message.name }}</td>
-                                                <td>{{ message.email }}</td>
-                                                <td>{{ message.subject }}</td>
-                                                <td>{{ message.creado.strftime('%Y-%m-%d %H:%M') }}</td>
-                                                <td>
-                                                    <a
-                                                        href="{{ url_for('static_pages.view_contact_message', message_id=message.id) }}"
-                                                        class="btn btn-sm btn-primary"
-                                                    >
-                                                        <i class="bi bi-eye"></i> {{ _("Ver") }}
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _("Estado") }}</th>
+                                        <th>{{ _("Nombre") }}</th>
+                                        <th>{{ _("Email") }}</th>
+                                        <th>{{ _("Asunto") }}</th>
+                                        <th>{{ _("Fecha") }}</th>
+                                        <th>{{ _("Acciones") }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for message in messages %}
+                                    <tr {% if message.status="" ="not_seen" %}class="table-warning" {% endif %}>
+                                        <td>
+                                            {% if message.status == 'not_seen' %}
+                                            <span class="badge bg-warning text-dark">{{ _("No Visto") }}</span>
+                                            {% elif message.status == 'seen' %}
+                                            <span class="badge bg-info">{{ _("Visto") }}</span>
+                                            {% elif message.status == 'answered' %}
+                                            <span class="badge bg-success">{{ _("Contestado") }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ message.name }}</td>
+                                        <td>{{ message.email }}</td>
+                                        <td>{{ message.subject }}</td>
+                                        <td>{{ message.creado.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <a
+                                                href="{{ url_for('static_pages.view_contact_message', message_id=message.id) }}"
+                                                class="btn btn-sm btn-primary"
+                                            >
+                                                <i class="bi bi-eye"></i> {{ _("Ver") }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         {% else %}
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle"></i> {{ _("No hay mensajes de contacto.") }}
-                            </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> {{ _("No hay mensajes de contacto.") }}
+                        </div>
                         {% endif %}
                     </div>
                 </div>

@@ -58,7 +58,12 @@
                                     class="form-check-input"
                                     id="is_active"
                                     name="is_active"
-                                    {% if page.is_active %}checked{% endif %}
+                                    {%
+                                    if
+                                    page.is_active
+                                    %}checked{%
+                                    endif
+                                    %}
                                 />
                                 <label class="form-check-label" for="is_active"
                                     >{{ _("Página activa (visible públicamente)") }}</label

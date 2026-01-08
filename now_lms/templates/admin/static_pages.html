@@ -34,36 +34,36 @@
                                 </thead>
                                 <tbody>
                                     {% for page in pages %}
-                                        <tr>
-                                            <td>{{ page.title }}</td>
-                                            <td><code>{{ page.slug }}</code></td>
-                                            <td>
-                                                {% if page.is_active %}
-                                                    <span class="badge bg-success">{{ _("Activa") }}</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">{{ _("Inactiva") }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {{ page.modificado.strftime('%Y-%m-%d %H:%M') if page.modificado else
-                                                page.creado.strftime('%Y-%m-%d') }}
-                                            </td>
-                                            <td>
-                                                <a
-                                                    href="{{ url_for('static_pages.edit_page', page_id=page.id) }}"
-                                                    class="btn btn-sm btn-primary"
-                                                >
-                                                    <i class="bi bi-pencil"></i> {{ _("Editar") }}
-                                                </a>
-                                                <a
-                                                    href="{{ url_for('static_pages.view_page', slug=page.slug) }}"
-                                                    class="btn btn-sm btn-outline-secondary"
-                                                    target="_blank"
-                                                >
-                                                    <i class="bi bi-eye"></i> {{ _("Ver") }}
-                                                </a>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>{{ page.title }}</td>
+                                        <td><code>{{ page.slug }}</code></td>
+                                        <td>
+                                            {% if page.is_active %}
+                                            <span class="badge bg-success">{{ _("Activa") }}</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ _("Inactiva") }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ page.modificado.strftime('%Y-%m-%d %H:%M') if page.modificado else
+                                            page.creado.strftime('%Y-%m-%d') }}
+                                        </td>
+                                        <td>
+                                            <a
+                                                href="{{ url_for('static_pages.edit_page', page_id=page.id) }}"
+                                                class="btn btn-sm btn-primary"
+                                            >
+                                                <i class="bi bi-pencil"></i> {{ _("Editar") }}
+                                            </a>
+                                            <a
+                                                href="{{ url_for('static_pages.view_page', slug=page.slug) }}"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                target="_blank"
+                                            >
+                                                <i class="bi bi-eye"></i> {{ _("Ver") }}
+                                            </a>
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>

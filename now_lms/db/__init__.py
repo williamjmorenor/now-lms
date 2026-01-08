@@ -32,7 +32,16 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event, select
 from sqlalchemy.exc import SQLAlchemyError
 
-__all__ = ["select", "database", "UserMixin", "eliminar_base_de_datos_segura", "UserEvent", "CourseLibrary", "StaticPage", "ContactMessage"]
+__all__ = [
+    "select",
+    "database",
+    "UserMixin",
+    "eliminar_base_de_datos_segura",
+    "UserEvent",
+    "CourseLibrary",
+    "StaticPage",
+    "ContactMessage",
+]
 
 # ---------------------------------------------------------------------------------------
 # Local resources
