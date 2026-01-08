@@ -142,7 +142,7 @@ def current_theme() -> SimpleNamespace:
     # Check if theme has footer macro, otherwise use default
     theme_path = dir_ + theme()
     footer_path = theme_path + "/footer.j2"
-    
+
     # Try to load theme-specific footer, fall back to default
     try:
         footer_macro = get_macro(footer_path, "footer")

@@ -1,9 +1,23 @@
-{% extends "admin/base.html" %}
+{% set current_theme = current_theme() %}
+<!doctype html>
+<html lang="{{ get_locale() }}" class="h-100">
+    <head>
+        {{ current_theme.headertags() }}
+        <title>{{ _("Mensaje de Contacto") }}</title>
 
-{% block admin_content %}
-    <div class="mb-4">
-        <h1>{{ _("Mensaje de Contacto") }}</h1>
-    </div>
+        {{ current_theme.local_style() }}
+    </head>
+
+    <body>
+        {{ current_theme.navbar() }}
+
+        <main>
+            {{ current_theme.notify() }}
+
+            <div class="container px-4 py-5">
+                <div class="mb-4">
+                    <h1>{{ _("Mensaje de Contacto") }}</h1>
+                </div>
 
     <div class="card mb-3">
         <div class="card-header">
@@ -102,4 +116,7 @@
             </form>
         </div>
     </div>
-{% endblock %}
+            </div>
+        </main>
+    </body>
+</html>

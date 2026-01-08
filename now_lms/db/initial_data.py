@@ -2034,11 +2034,11 @@ def crear_paginas_estaticas_predeterminadas() -> None:
     from now_lms.i18n import get_configuracion
 
     log.trace("Creating default static pages.")
-    
+
     # Get system language from configuration
     config = get_configuracion()
     lang = config.lang if config else "en"
-    
+
     # Define content in different languages
     about_us_content = {
         "en": """<h2>About Us</h2>
@@ -2084,7 +2084,7 @@ def crear_paginas_estaticas_predeterminadas() -> None:
 <h3>Nossos Valores</h3>
 <p>Estamos comprometidos com a excelência, inovação e acessibilidade na educação. Nossa plataforma é projetada para apoiar os alunos em cada etapa de sua jornada educacional.</p>""",
     }
-    
+
     privacy_policy_content = {
         "en": """<h2>Privacy Policy</h2>
 <p><strong>Last Updated:</strong> January 2026</p>
@@ -2192,32 +2192,32 @@ def crear_paginas_estaticas_predeterminadas() -> None:
 <h3>Entre em Contato</h3>
 <p>Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco através do nosso formulário de contato.</p>""",
     }
-    
+
     about_us_titles = {
         "en": "About Us",
         "es": "Sobre Nosotros",
         "pt_BR": "Sobre Nós",
     }
-    
+
     privacy_policy_titles = {
         "en": "Privacy Policy",
         "es": "Política de Privacidad",
         "pt_BR": "Política de Privacidade",
     }
-    
+
     # Get content based on system language, fallback to English
     about_content = about_us_content.get(lang, about_us_content["en"])
     privacy_content = privacy_policy_content.get(lang, privacy_policy_content["en"])
     about_title = about_us_titles.get(lang, about_us_titles["en"])
     privacy_title = privacy_policy_titles.get(lang, privacy_policy_titles["en"])
-    
+
     # Check if pages already exist
     from now_lms.db import StaticPage
-    
+
     existing_about = database.session.execute(
         database.select(StaticPage).filter(StaticPage.slug == "about-us")
     ).scalar_one_or_none()
-    
+
     if not existing_about:
         about_page = StaticPage(
             slug="about-us",
@@ -2229,11 +2229,11 @@ def crear_paginas_estaticas_predeterminadas() -> None:
         log.debug("About Us page created.")
     else:
         log.debug("About Us page already exists.")
-    
+
     existing_privacy = database.session.execute(
         database.select(StaticPage).filter(StaticPage.slug == "privacy-policy")
     ).scalar_one_or_none()
-    
+
     if not existing_privacy:
         privacy_page = StaticPage(
             slug="privacy-policy",
@@ -2245,6 +2245,6 @@ def crear_paginas_estaticas_predeterminadas() -> None:
         log.debug("Privacy Policy page created.")
     else:
         log.debug("Privacy Policy page already exists.")
-    
+
     database.session.commit()
     log.debug("Default static pages created successfully.")
