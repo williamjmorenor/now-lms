@@ -9,13 +9,13 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
-## [1.1.2] - 2026-01-09
+
+## [1.1.3] - 2026-01-09
 
 ### Fixed
  - Add missing database migration for `configuracion` table columns: `enable_file_uploads`, `max_file_size`, `enable_html_preformatted_descriptions`, and `enable_footer`
 
-### Database Migration Required
-**IMPORTANT**: This version includes a critical database migration fix. After updating, you must run database migrations:
+**IMPORTANT**: This version includes a migration fix. After updating, you must run database migrations:
 ```bash
 # Using lmsctl
 lmsctl database upgrade
@@ -24,9 +24,18 @@ lmsctl database upgrade
 flask db upgrade
 ```
 
-Migration file: `now_lms/migrations/20260109_205100_add_missing_configuracion_columns.py`
+## [1.1.2] - 2025-01-09
 
-This migration adds columns that were introduced in the model but were missing from the migration chain, causing PostgreSQL errors when upgrading from v1.1.0.
+### Added
+ - Configurable social media links
+ - Footer with static pages
+
+### Changed
+ - Improved admin menu
+
+### Fixes
+ - HTML errores
+
 
 ## [1.1.1] - 2025-01-05
 
