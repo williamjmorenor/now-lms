@@ -323,8 +323,7 @@
                                                         href="{{ url_for('admin_profile.usuarios_sin_verificar') }}"
                                                         class="btn btn-sm btn-outline-danger"
                                                     >
-                                                        {{ _('Usuarios sin Verificar') }}
-                                                        {% if unverified_users > 0 %}
+                                                        {{ _('Usuarios sin Verificar') }} {% if unverified_users > 0 %}
                                                         <span class="badge bg-danger ms-1">{{ unverified_users }}</span>
                                                         {% endif %}
                                                     </a>

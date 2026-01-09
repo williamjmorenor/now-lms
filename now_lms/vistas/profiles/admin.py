@@ -40,8 +40,9 @@ def pagina_admin() -> str:
     total_users = database.session.execute(database.select(func.count(Usuario.id))).scalar() or 0
     inactive_users = database.session.execute(database.select(func.count(Usuario.id)).filter_by(activo=False)).scalar() or 0
     unverified_users = (
-        database.session.execute(database.select(func.count(Usuario.id)).filter_by(correo_electronico_verificado=False))
-        .scalar()
+        database.session.execute(
+            database.select(func.count(Usuario.id)).filter_by(correo_electronico_verificado=False)
+        ).scalar()
         or 0
     )
     total_courses = database.session.execute(database.select(func.count(Curso.id))).scalar() or 0
