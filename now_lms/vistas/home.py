@@ -66,11 +66,11 @@ def pagina_de_inicio() -> str:
     config_row = database.session.execute(database.select(Configuracion)).first()
     show_blog_posts = False
     latest_blog_posts = []
-    
+
     if config_row:
         config = config_row[0]
         show_blog_posts = config.show_latest_blog_posts_on_home and config.enable_blog
-        
+
         if show_blog_posts:
             # Query latest 3 published blog posts
             latest_blog_posts = (
@@ -85,10 +85,7 @@ def pagina_de_inicio() -> str:
             )
 
     return render_template(
-        get_home_template(), 
-        cursos=CURSOS, 
-        show_blog_posts=show_blog_posts,
-        latest_blog_posts=latest_blog_posts
+        get_home_template(), cursos=CURSOS, show_blog_posts=show_blog_posts, latest_blog_posts=latest_blog_posts
     )
 
 
