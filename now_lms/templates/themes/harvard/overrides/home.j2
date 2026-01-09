@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+    {% from 'macros/blog_section.j2' import render_blog_section %}
     {% set current_theme = current_theme() %}{% set site_config = config() %}
     <head>
         {{ current_theme.headertags() }} {{ current_theme.local_style() }}
@@ -560,6 +561,11 @@
                 </div>
             </div>
         </footer>
+
+        <!-- Blog Posts Section -->
+        {% if show_blog_posts %}
+        {{ render_blog_section(latest_blog_posts, 'white') }}
+        {% endif %}
 
         {{ current_theme.jslibs() }}
     </body>
