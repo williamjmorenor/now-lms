@@ -8,6 +8,28 @@
         <title>{{ curso.nombre | title }}</title>
 
         {{ current_theme.local_style() }}
+        
+        <!-- Course Description Collapse Styles -->
+        <style>
+            .course-description-content {
+                max-height: 150px;
+                overflow: hidden;
+                position: relative;
+                transition: max-height 0.3s ease;
+            }
+            .course-description-content.expanded {
+                max-height: none;
+            }
+            .course-description-content:not(.expanded)::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: linear-gradient(to bottom, transparent, white);
+            }
+        </style>
     </head>
 
     <body>
@@ -89,45 +111,6 @@
                                             <span id="courseDescBtnText">{{ _('Ver más') }}</span>
                                         </button>
                                     </div>
-                                    <style>
-                                        .course-description-content {
-                                            max-height: 150px;
-                                            overflow: hidden;
-                                            position: relative;
-                                            transition: max-height 0.3s ease;
-                                        }
-                                        .course-description-content.expanded {
-                                            max-height: none;
-                                        }
-                                        .course-description-content:not(.expanded)::after {
-                                            content: '';
-                                            position: absolute;
-                                            bottom: 0;
-                                            left: 0;
-                                            right: 0;
-                                            height: 60px;
-                                            background: linear-gradient(to bottom, transparent, white);
-                                        }
-                                    </style>
-                                    <script>
-                                        function toggleCourseDescription() {
-                                            const content = document.getElementById('courseDescContent');
-                                            const icon = document.getElementById('courseDescIcon');
-                                            const btnText = document.getElementById('courseDescBtnText');
-                                            
-                                            if (content.classList.contains('expanded')) {
-                                                content.classList.remove('expanded');
-                                                icon.classList.remove('bi-chevron-up');
-                                                icon.classList.add('bi-chevron-down');
-                                                btnText.textContent = '{{ _("Ver más") }}';
-                                            } else {
-                                                content.classList.add('expanded');
-                                                icon.classList.remove('bi-chevron-down');
-                                                icon.classList.add('bi-chevron-up');
-                                                btnText.textContent = '{{ _("Ver menos") }}';
-                                            }
-                                        }
-                                    </script>
                                     {% else %}
                                     <!-- Short description, show in full -->
                                     {{ markdown2html(curso.descripcion) | safe }}
@@ -331,5 +314,32 @@
                 </div>
             </div>
         </main>
+        
+        <!-- Course Description Toggle Script -->
+        <script>
+            function toggleCourseDescription() {
+                const content = document.getElementById('courseDescContent');
+                const icon = document.getElementById('courseDescIcon');
+                const btnText = document.getElementById('courseDescBtnText');
+                
+                // Check if elements exist
+                if (!content || !icon || !btnText) {
+                    console.error('Course description elements not found');
+                    return;
+                }
+                
+                if (content.classList.contains('expanded')) {
+                    content.classList.remove('expanded');
+                    icon.classList.remove('bi-chevron-up');
+                    icon.classList.add('bi-chevron-down');
+                    btnText.textContent = '{{ _("Ver más") }}';
+                } else {
+                    content.classList.add('expanded');
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-up');
+                    btnText.textContent = '{{ _("Ver menos") }}';
+                }
+            }
+        </script>
     </body>
 </html>
