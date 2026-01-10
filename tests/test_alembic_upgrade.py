@@ -42,8 +42,8 @@ def test_alembic_upgrade_app_context(monkeypatch):
         db.session.commit()
 
         # Paso 2.1: Marcar la base de datos como actualizada (stamp head)
-        # Esto crea la tabla alembic_version y la marca con la versión actual
-        alembic.stamp()
+        # Esto crea la tabla alembic_version y la marca con la versión actual (head)
+        alembic.stamp("head")
         db.session.commit()
 
         # Verificar que stamp creó la tabla alembic_version
@@ -66,11 +66,13 @@ def test_alembic_upgrade_app_context(monkeypatch):
 
         # Verificar que no hay versión en alembic_version o la tabla fue eliminada
         # (dependiendo de la implementación de las migraciones)
+        from sqlalchemy.exc import OperationalError, ProgrammingError
+
         try:
             version_after_downgrade = db.session.execute(db.text("SELECT version_num FROM alembic_version")).scalar()
             assert version_after_downgrade is None, "Después de downgrade('base'), no debe haber versión"
-        except Exception:
-            # Es posible que la tabla alembic_version no exista después del downgrade
+        except (OperationalError, ProgrammingError):
+            # La tabla alembic_version no existe después del downgrade, lo cual es válido
             pass
 
         # Paso 5: Hacer upgrade de nuevo hasta head
@@ -80,7 +82,12 @@ def test_alembic_upgrade_app_context(monkeypatch):
         # Verificar que ahora sí hay una versión válida
         version_after_final_upgrade = db.session.execute(db.text("SELECT version_num FROM alembic_version")).scalar()
         assert version_after_final_upgrade is not None, "Después de upgrade(), debe haber una versión válida"
-        assert version_after_final_upgrade == version_after_stamp, "Después del ciclo completo, debe volver a la misma versión"
+        # Verificar que volvió a una versión head válida (puede ser diferente si se agregaron migraciones)
+        # pero debe ser una versión no nula
+        assert version_after_final_upgrade == version_after_stamp, (
+            "Después del ciclo completo, debe volver a la versión head. "
+            f"Esperado: {version_after_stamp}, Obtenido: {version_after_final_upgrade}"
+        )
 
         # Cerrar sesión de forma explícita
         db.session.close()
