@@ -1,7 +1,7 @@
 """Add footer customization features
 
 Revision ID: 20260110_150324
-Revises: 20260110_035505
+Revises: add_blog_cover_image
 Create Date: 2026-01-10 15:03:24
 
 This migration adds:
@@ -20,7 +20,7 @@ from datetime import date
 
 # revision identifiers, used by Alembic.
 revision = "20260110_150324"
-down_revision = "20260110_035505"
+down_revision = "add_blog_cover_image"
 branch_labels = None
 depends_on = None
 
