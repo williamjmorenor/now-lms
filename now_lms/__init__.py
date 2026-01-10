@@ -209,9 +209,6 @@ def inicializa_extenciones_terceros(flask_app: Flask) -> None:
 
         database.init_app(flask_app)
         alembic.init_app(flask_app)
-        # Remove alembic "db" command from flask cli if it exists
-        if "db" in flask_app.cli.commands:
-            flask_app.cli.commands.pop("db")
 
         # Initialize session storage for Gunicorn multi-worker support
         from now_lms.session_config import init_session
