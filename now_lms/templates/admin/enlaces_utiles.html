@@ -46,7 +46,13 @@
                                     <tr>
                                         <td>{{ enlace.titulo }}</td>
                                         <td>
-                                            <a href="{{ enlace.url }}" target="_blank" rel="noopener noreferrer" class="text-truncate d-inline-block" style="max-width: 300px;">
+                                            <a
+                                                href="{{ enlace.url }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="text-truncate d-inline-block"
+                                                style="max-width: 300px"
+                                            >
                                                 {{ enlace.url }}
                                             </a>
                                         </td>
@@ -73,7 +79,11 @@
                                                     style="display: inline"
                                                     onsubmit="return confirm('{{ _('¿Está seguro de eliminar este enlace?') }}')"
                                                 >
-                                                    <button type="submit" class="btn btn-outline-danger" title="{{ _('Eliminar') }}">
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-outline-danger"
+                                                        title="{{ _('Eliminar') }}"
+                                                    >
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
