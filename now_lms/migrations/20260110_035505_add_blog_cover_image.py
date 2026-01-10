@@ -14,8 +14,8 @@
 
 """Add cover image fields to blog_post table.
 
-Revision ID: add_blog_cover_image
-Revises:
+Revision ID: 20260110_035505
+Revises: 20260109_205100
 Create Date: 2026-01-10 03:55:05.000000
 
 """
