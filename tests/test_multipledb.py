@@ -115,7 +115,7 @@ class TestMultipleDatabaseSupport:
 
         # Crear usuario
         user = Usuario(
-            id="multidb-test-user-001",
+            id="mdb-test-user-001",
             usuario="multidb-testuser",
             acceso=proteger_passwd("test123"),
             nombre="MultiDB",
@@ -147,7 +147,7 @@ class TestMultipleDatabaseSupport:
 
         # Crear curso
         course = Curso(
-            id="multidb-test-course-001",
+            id="mdb-test-course-001",
             nombre="Test Course MultiDB",
             codigo="TESTMULTIDB",
             descripcion_corta="Test course for multiple databases",
@@ -182,7 +182,7 @@ class TestMultipleDatabaseSupport:
 
         # Crear usuario
         user = Usuario(
-            id="multidb-transaction-test-001",
+            id="mdb-txn-test-001",
             usuario="transaction-test",
             acceso=proteger_passwd("test123"),
             nombre="Transaction",
@@ -220,7 +220,7 @@ class TestMultipleDatabaseSupport:
         # Crear múltiples usuarios
         users = [
             Usuario(
-                id=f"multidb-filter-test-{i:03d}",
+                id=f"mdb-filter-{i:03d}",
                 usuario=f"filtertest{i}",
                 acceso=proteger_passwd("test123"),
                 nombre=f"User{i}",
@@ -259,7 +259,7 @@ class TestMultipleDatabaseSupport:
 
         # Crear usuario
         user1 = Usuario(
-            id="multidb-constraint-test-001",
+            id="mdb-constraint-001",
             usuario="constraint-test",
             acceso=proteger_passwd("test123"),
             nombre="Constraint",
@@ -276,7 +276,7 @@ class TestMultipleDatabaseSupport:
 
         # Intentar crear usuario con mismo ID (debe fallar)
         user2 = Usuario(
-            id="multidb-constraint-test-001",  # Mismo ID
+            id="mdb-constraint-001",  # Mismo ID
             usuario="constraint-test-2",
             acceso=proteger_passwd("test123"),
             nombre="Constraint2",
