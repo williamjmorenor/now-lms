@@ -1363,7 +1363,7 @@ def marcar_recurso_completado(curso_id: str, resource_type: str, codigo: str) ->
                 indice = crear_indice_recurso(codigo)
 
                 # If there's a next resource, redirect to it
-                if indice.has_next and indice.next_resource:
+                if indice.next_resource:
                     if indice.next_is_alternative:
                         # Redirect to alternative resource page
                         return redirect(
