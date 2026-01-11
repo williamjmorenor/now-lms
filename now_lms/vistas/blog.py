@@ -39,6 +39,7 @@ from werkzeug.wrappers import Response
 # Local resources
 # ---------------------------------------------------------------------------------------
 from now_lms.auth import perfil_requerido
+from now_lms.cache import cache
 from now_lms.config import DIRECTORIO_PLANTILLAS, images
 from now_lms.db import MAXIMO_RESULTADOS_EN_CONSULTA_PAGINADA, BlogComment, BlogPost, BlogTag, database, select
 from now_lms.forms import BlogCommentForm, BlogPostForm, BlogTagForm
@@ -80,6 +81,7 @@ def ensure_unique_slug(title: str, post_id: int | None = None) -> str:
 
 # Public blog routes
 @blog.route("/blog")
+@cache.cached(timeout=60)
 def blog_index() -> str:
     """Public blog index page."""
     page = request.args.get("page", 1, type=int)
@@ -119,6 +121,7 @@ def blog_index() -> str:
 
 
 @blog.route("/blog/<slug>")
+@cache.cached(timeout=60)
 def blog_post(slug: str) -> str:
     """Display a single blog post."""
     post = database.session.execute(
