@@ -12,12 +12,15 @@ All notable changes to this project will be documented in this file.
 ## [1.2.1]
 
 ### Fixed:
+ - Fixed Alembic migrations not being loaded due to incorrect relative path configuration.
  - Fixed missing `mostrar_en_footer` field in default static pages creation.
+ - Fixed `/admin/pages` route failing when database schema is outdated.
 
 ### Changed:
+ - Updated Alembic configuration to use absolute path for migrations directory.
  - Updated CHANGELOG to document database schema changes introduced in v1.2.0.
 
-**IMPORTANT**: This version includes a fix for users upgrading to v1.2.0. If you upgraded to v1.2.0 and encountered errors accessing `/admin/pages`, you must run database migrations:
+**IMPORTANT**: This version fixes a critical bug where `alembic.upgrade()` would not execute migrations. If you upgraded to v1.2.0 and encountered errors accessing `/admin/pages`, upgrade to v1.2.1 and the migrations will run automatically if you have `NOW_LMS_AUTO_MIGRATE=1` set, or run:
 
 ```bash
 # Using lmsctl (recommended)
