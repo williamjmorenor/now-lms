@@ -66,9 +66,9 @@ def test_e2e_settings_configuration_update(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Actualizar configuración via POST
+    # 3) Actualizar configuración via POST (usando la ruta correcta /setting/general)
     resp_update = client.post(
-        "/setting/config",
+        "/setting/general",
         data={
             "site_name": "NOW LMS Test",
             "site_description": "Sistema de gestión de aprendizaje",
@@ -100,9 +100,9 @@ def test_e2e_settings_theme_customization(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Actualizar tema via POST
+    # 3) Actualizar tema via POST (usando la ruta correcta /setting/theming)
     resp_theme = client.post(
-        "/setting/theme",
+        "/setting/theming",
         data={
             "primary_color": "#007bff",
             "secondary_color": "#6c757d",
@@ -110,12 +110,11 @@ def test_e2e_settings_theme_customization(app, db_session):
         },
         follow_redirects=False,
     )
-    assert resp_theme.status_code in REDIRECT_STATUS_CODES | {200, 404}
+    assert resp_theme.status_code in REDIRECT_STATUS_CODES | {200}
 
-    # 4) Si la ruta existe, verificar en base de datos
-    if resp_theme.status_code != 404:
-        style_actualizado = db_session.execute(database.select(Style)).scalars().first()
-        assert style_actualizado is not None
+    # 4) Verificar en base de datos
+    style_actualizado = db_session.execute(database.select(Style)).scalars().first()
+    assert style_actualizado is not None
 
 
 def test_e2e_settings_mail_configuration(app, db_session):
@@ -131,7 +130,7 @@ def test_e2e_settings_mail_configuration(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Actualizar configuración de correo via POST
+    # 3) Actualizar configuración de correo via POST (ruta correcta /setting/mail)
     resp_mail = client.post(
         "/setting/mail",
         data={
@@ -142,12 +141,11 @@ def test_e2e_settings_mail_configuration(app, db_session):
         },
         follow_redirects=False,
     )
-    assert resp_mail.status_code in REDIRECT_STATUS_CODES | {200, 404}
+    assert resp_mail.status_code in REDIRECT_STATUS_CODES | {200}
 
-    # 4) Si la ruta existe, verificar en base de datos
-    if resp_mail.status_code != 404:
-        mail_actualizado = db_session.execute(database.select(MailConfig)).scalars().first()
-        assert mail_actualizado is not None
+    # 4) Verificar en base de datos
+    mail_actualizado = db_session.execute(database.select(MailConfig)).scalars().first()
+    assert mail_actualizado is not None
 
 
 def test_e2e_settings_paypal_configuration(app, db_session):
@@ -163,7 +161,7 @@ def test_e2e_settings_paypal_configuration(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Actualizar configuración de PayPal via POST
+    # 3) Actualizar configuración de PayPal via POST (ruta correcta /setting/paypal)
     resp_paypal = client.post(
         "/setting/paypal",
         data={
@@ -172,12 +170,11 @@ def test_e2e_settings_paypal_configuration(app, db_session):
         },
         follow_redirects=False,
     )
-    assert resp_paypal.status_code in REDIRECT_STATUS_CODES | {200, 404}
+    assert resp_paypal.status_code in REDIRECT_STATUS_CODES | {200}
 
-    # 4) Si la ruta existe, verificar en base de datos
-    if resp_paypal.status_code != 404:
-        paypal_actualizado = db_session.execute(database.select(PaypalConfig)).scalars().first()
-        assert paypal_actualizado is not None
+    # 4) Verificar en base de datos
+    paypal_actualizado = db_session.execute(database.select(PaypalConfig)).scalars().first()
+    assert paypal_actualizado is not None
 
 
 def test_e2e_settings_view_configuration(app, db_session):
@@ -186,13 +183,12 @@ def test_e2e_settings_view_configuration(app, db_session):
     _crear_admin(db_session)
     client = _login_admin(app)
 
-    # 2) Acceder a la página de configuración
-    resp_view = client.get("/setting/config")
-    assert resp_view.status_code in {200, 404}
+    # 2) Acceder a la página de configuración (ruta correcta /setting/general)
+    resp_view = client.get("/setting/general")
+    assert resp_view.status_code == 200
 
-    # 3) Si existe, verificar que muestra el formulario
-    if resp_view.status_code == 200:
-        assert b"config" in resp_view.data.lower() or b"setting" in resp_view.data.lower()
+    # 3) Verificar que muestra el formulario
+    assert b"config" in resp_view.data.lower() or b"setting" in resp_view.data.lower()
 
 
 def test_e2e_settings_personalization_view(app, db_session):
@@ -201,9 +197,9 @@ def test_e2e_settings_personalization_view(app, db_session):
     _crear_admin(db_session)
     client = _login_admin(app)
 
-    # 2) Acceder a la página de personalización
-    resp_view = client.get("/setting/personalizacion")
-    assert resp_view.status_code in {200, 404}
+    # 2) Acceder a la página de personalización (ruta correcta /setting/theming)
+    resp_view = client.get("/setting/theming")
+    assert resp_view.status_code == 200
 
 
 def test_e2e_settings_adsense_configuration(app, db_session):
@@ -219,7 +215,7 @@ def test_e2e_settings_adsense_configuration(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Actualizar configuración de AdSense via POST
+    # 3) Actualizar configuración de AdSense via POST (ruta correcta /setting/adsense)
     resp_adsense = client.post(
         "/setting/adsense",
         data={
@@ -228,12 +224,11 @@ def test_e2e_settings_adsense_configuration(app, db_session):
         },
         follow_redirects=False,
     )
-    assert resp_adsense.status_code in REDIRECT_STATUS_CODES | {200, 404}
+    assert resp_adsense.status_code in REDIRECT_STATUS_CODES | {200}
 
-    # 4) Si la ruta existe, verificar en base de datos
-    if resp_adsense.status_code != 404:
-        adsense_actualizado = db_session.execute(database.select(AdSense)).scalars().first()
-        assert adsense_actualizado is not None
+    # 4) Verificar en base de datos
+    adsense_actualizado = db_session.execute(database.select(AdSense)).scalars().first()
+    assert adsense_actualizado is not None
 
 
 def test_e2e_settings_non_admin_access(app, db_session):
@@ -256,10 +251,10 @@ def test_e2e_settings_non_admin_access(app, db_session):
         "/user/login", data={"usuario": "estudiante", "acceso": "estudiante"}, follow_redirects=False
     )
 
-    # 3) Intentar acceder a configuración
-    resp_config = client.get("/setting/config", follow_redirects=False)
+    # 3) Intentar acceder a configuración (ruta correcta /setting/general)
+    resp_config = client.get("/setting/general", follow_redirects=False)
     # Debe denegar acceso o redirigir
-    assert resp_config.status_code in REDIRECT_STATUS_CODES | {403, 404}
+    assert resp_config.status_code in REDIRECT_STATUS_CODES | {403}
 
 
 def test_e2e_settings_cache_invalidation(app, db_session):
@@ -277,7 +272,7 @@ def test_e2e_settings_cache_invalidation(app, db_session):
 
     # 3) Actualizar configuración (esto debe invalidar cache)
     resp_update = client.post(
-        "/setting/config",
+        "/setting/general",
         data={
             "site_name": "NOW LMS Updated",
         },

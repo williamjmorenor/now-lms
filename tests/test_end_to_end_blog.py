@@ -62,11 +62,10 @@ def test_e2e_blog_post_creation_and_viewing(app, db_session):
 
     # 2) Crear post de blog via POST
     resp_new = client.post(
-        "/blog/admin/new",
+        "/admin/blog/posts/new",
         data={
             "title": "Mi Primer Post",
             "content": "Este es el contenido del post",
-            "excerpt": "Resumen corto",
             "status": "published",
         },
         follow_redirects=False,
@@ -102,7 +101,6 @@ def test_e2e_blog_post_editing(app, db_session):
     post = BlogPost(
         title="Post Original",
         content="Contenido original",
-        excerpt="Resumen original",
         status="published",
         slug="post-original",
         author_id=admin.id,
@@ -113,11 +111,10 @@ def test_e2e_blog_post_editing(app, db_session):
 
     # 3) Editar el post via POST
     resp_edit = client.post(
-        f"/blog/admin/{post_id}/edit",
+        f"/admin/blog/posts/{post_id}/edit",
         data={
             "title": "Post Editado",
             "content": "Contenido editado",
-            "excerpt": "Resumen editado",
             "status": "published",
         },
         follow_redirects=False,
@@ -129,7 +126,6 @@ def test_e2e_blog_post_editing(app, db_session):
     assert post_editado is not None
     assert post_editado.title == "Post Editado"
     assert post_editado.content == "Contenido editado"
-    assert post_editado.excerpt == "Resumen editado"
 
 
 def test_e2e_blog_comments(app, db_session):
@@ -139,7 +135,6 @@ def test_e2e_blog_comments(app, db_session):
     post = BlogPost(
         title="Post con Comentarios",
         content="Contenido del post",
-        excerpt="Resumen",
         status="published",
         slug="post-con-comentarios",
         author_id=admin.id,
@@ -151,9 +146,9 @@ def test_e2e_blog_comments(app, db_session):
     # 2) Login como admin
     client = _login_admin(app)
 
-    # 3) Agregar comentario via POST
+    # 3) Agregar comentario via POST (ruta correcta es /blog/<slug>/comments)
     resp_comment = client.post(
-        f"/blog/{post.slug}/comment",
+        f"/blog/{post.slug}/comments",
         data={
             "content": "Este es un comentario de prueba",
         },
@@ -178,7 +173,7 @@ def test_e2e_blog_tags(app, db_session):
 
     # 2) Crear tag de blog via POST
     resp_new_tag = client.post(
-        "/blog/admin/tag/new",
+        "/admin/blog/tags",
         data={
             "name": "Python",
             "description": "Posts sobre Python",
@@ -194,11 +189,10 @@ def test_e2e_blog_tags(app, db_session):
 
     # 4) Crear post con el tag
     resp_new_post = client.post(
-        "/blog/admin/new",
+        "/admin/blog/posts/new",
         data={
             "title": "Post sobre Python",
             "content": "Contenido sobre Python",
-            "excerpt": "Resumen",
             "status": "published",
             "tags": [str(tag.id)],
         },
@@ -224,11 +218,10 @@ def test_e2e_blog_draft_post(app, db_session):
 
     # 2) Crear post como draft
     resp_new = client.post(
-        "/blog/admin/new",
+        "/admin/blog/posts/new",
         data={
             "title": "Post Draft",
             "content": "Este post es un borrador",
-            "excerpt": "Resumen",
             "status": "draft",
         },
         follow_redirects=False,
@@ -258,7 +251,6 @@ def test_e2e_blog_post_list_admin(app, db_session):
         post = BlogPost(
             title=f"Post {i}",
             content=f"Contenido {i}",
-            excerpt=f"Resumen {i}",
             status="published",
             slug=f"post-{i}",
             author_id=admin.id,
@@ -267,7 +259,7 @@ def test_e2e_blog_post_list_admin(app, db_session):
     db_session.commit()
 
     # 3) Ver lista de posts en admin
-    resp_list = client.get("/blog/admin")
+    resp_list = client.get("/admin/blog")
     assert resp_list.status_code == 200
     assert b"Post 0" in resp_list.data
     assert b"Post 1" in resp_list.data
