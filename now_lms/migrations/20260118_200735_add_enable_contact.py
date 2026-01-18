@@ -13,7 +13,6 @@ The column defaults to False to maintain backward compatibility.
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
 revision = "20260118_200735"
 down_revision = "20260118_185502"
@@ -29,7 +28,7 @@ def upgrade():
 
     if "configuracion" in existing_tables:
         columns = [col["name"] for col in inspector.get_columns("configuracion")]
-        
+
         if "enable_contact" not in columns:
             op.add_column(
                 "configuracion",
@@ -45,6 +44,6 @@ def downgrade():
 
     if "configuracion" in existing_tables:
         columns = [col["name"] for col in inspector.get_columns("configuracion")]
-        
+
         if "enable_contact" in columns:
             op.drop_column("configuracion", "enable_contact")
