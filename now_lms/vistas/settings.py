@@ -87,6 +87,7 @@ def invalidar_cache() -> bool:
         cache.delete("nav_masterclass_enabled")
         cache.delete("nav_resources_enabled")
         cache.delete("nav_blog_enabled")
+        cache.delete("nav_contact_enabled")
 
         # Invalidate appearance caches
         cache.delete("cached_style")
@@ -201,6 +202,7 @@ def configuracion() -> str | Response:
         enable_masterclass=config.enable_masterclass,
         enable_resources=config.enable_resources,
         enable_blog=config.enable_blog,
+        enable_contact=config.enable_contact,
         show_latest_blog_posts_on_home=config.show_latest_blog_posts_on_home,
         enable_file_uploads=config.enable_file_uploads,
         max_file_size=config.max_file_size,
@@ -234,6 +236,7 @@ def configuracion() -> str | Response:
         config.enable_masterclass = form.enable_masterclass.data
         config.enable_resources = form.enable_resources.data
         config.enable_blog = form.enable_blog.data
+        config.enable_contact = form.enable_contact.data
         config.show_latest_blog_posts_on_home = form.show_latest_blog_posts_on_home.data
         config.enable_file_uploads = form.enable_file_uploads.data
         config.max_file_size = form.max_file_size.data

@@ -998,6 +998,14 @@ def is_blog_enabled():
     return False
 
 
+@cache.cached(timeout=300, key_prefix="nav_contact_enabled")
+def is_contact_enabled():
+    """Check if contact page is enabled in navigation."""
+    if config := _get_global_config():
+        return config.enable_contact
+    return False
+
+
 def get_course_sections(course_code: str):
     """Get all sections for a given course code.
 

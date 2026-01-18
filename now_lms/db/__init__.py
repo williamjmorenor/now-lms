@@ -577,6 +577,7 @@ class Configuracion(database.Model, BaseTabla):
     enable_masterclass = database.Column(database.Boolean(), default=False, nullable=False)
     enable_resources = database.Column(database.Boolean(), default=False, nullable=False)
     enable_blog = database.Column(database.Boolean(), default=False, nullable=False)
+    enable_contact = database.Column(database.Boolean(), default=False, nullable=False)
 
     # Blog display configuration
     show_latest_blog_posts_on_home = database.Column(database.Boolean(), default=False, nullable=False)

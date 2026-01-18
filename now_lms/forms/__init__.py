@@ -392,6 +392,7 @@ class ConfigForm(FlaskForm):
     enable_masterclass = BooleanField(_("Habilitar Master Class"), default=False, validators=[])
     enable_resources = BooleanField(_("Habilitar Recursos descargables"), default=False, validators=[])
     enable_blog = BooleanField(_("Habilitar Blog"), default=False, validators=[])
+    enable_contact = BooleanField(_("Habilitar Contacto"), default=False, validators=[])
 
     # Blog display configuration
     show_latest_blog_posts_on_home = BooleanField(

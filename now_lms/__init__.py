@@ -116,6 +116,7 @@ from now_lms.db.tools import (
     get_paypal_id,
     get_slideshowid,
     is_blog_enabled,
+    is_contact_enabled,
     is_masterclass_enabled,
     is_programs_enabled,
     is_resources_enabled,
@@ -373,6 +374,7 @@ def define_variables_globales_jinja2(flask_app: Flask):
     flask_app.jinja_env.globals["is_programs_enabled"] = is_programs_enabled
     flask_app.jinja_env.globals["is_resources_enabled"] = is_resources_enabled
     flask_app.jinja_env.globals["is_blog_enabled"] = is_blog_enabled
+    flask_app.jinja_env.globals["is_contact_enabled"] = is_contact_enabled
     flask_app.jinja_env.globals["limpiar_html"] = limpiar_html
     flask_app.jinja_env.globals["lms_info"] = lms_info
     flask_app.jinja_env.globals["logo_perzonalizado"] = logo_perzonalizado
