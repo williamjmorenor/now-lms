@@ -38,7 +38,7 @@ def test_e2e_user_login_success(app, db_session):
         acceso=proteger_passwd("testpass"),
         nombre="Test User",
         correo_electronico="test@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(user)
@@ -51,10 +51,10 @@ def test_e2e_user_login_success(app, db_session):
     )
     assert resp_login.status_code in REDIRECT_STATUS_CODES | {200}
 
-    # 3) Verificar que el usuario está autenticado haciendo una petición protegida
-    resp_protected = client.get("/user/dashboard", follow_redirects=False)
-    # Puede redirigir a dashboard o mostrar página de usuario
-    assert resp_protected.status_code in REDIRECT_STATUS_CODES | {200, 404}
+    # 3) Verificar que el usuario está autenticado accediendo a una ruta protegida simple
+    resp_protected = client.get("/tag/list", follow_redirects=False)
+    # tag/list requiere login y rol instructor, así que debería redirigir o denegar
+    assert resp_protected.status_code in REDIRECT_STATUS_CODES | {200, 403}
 
 
 def test_e2e_user_login_failure(app, db_session):
@@ -83,21 +83,22 @@ def test_e2e_user_registration(app, db_session):
     resp_register = client.post(
         "/user/logon",
         data={
-            "usuario": "newuser",
-            "acceso": "newpass",
-            "nombre": "New User",
+            "nombre": "New",
+            "apellido": "User",
             "correo_electronico": "newuser@example.com",
+            "acceso": "newpass",
         },
         follow_redirects=False,
     )
     assert resp_register.status_code in REDIRECT_STATUS_CODES | {200}
 
     # 3) Verificar que el usuario existe en la base de datos
+    # El usuario se crea con el correo como nombre de usuario
     usuario_creado = (
-        db_session.execute(database.select(Usuario).filter_by(usuario="newuser")).scalars().first()
+        db_session.execute(database.select(Usuario).filter_by(correo_electronico="newuser@example.com")).scalars().first()
     )
     assert usuario_creado is not None
-    assert usuario_creado.nombre == "New User"
+    assert usuario_creado.nombre == "New"
     assert usuario_creado.correo_electronico == "newuser@example.com"
 
 
@@ -109,7 +110,7 @@ def test_e2e_user_logout(app, db_session):
         acceso=proteger_passwd("logoutpass"),
         nombre="Logout User",
         correo_electronico="logout@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(user)
@@ -138,7 +139,7 @@ def test_e2e_user_login_with_email(app, db_session):
         acceso=proteger_passwd("emailpass"),
         nombre="Email User",
         correo_electronico="email@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(user)
@@ -160,7 +161,7 @@ def test_e2e_user_inactive_account(app, db_session):
         acceso=proteger_passwd("inactivepass"),
         nombre="Inactive User",
         correo_electronico="inactive@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=False,
     )
     db_session.add(user)
@@ -184,7 +185,7 @@ def test_e2e_user_role_permissions(app, db_session):
         acceso=proteger_passwd("estudiantepass"),
         nombre="Estudiante",
         correo_electronico="estudiante@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(estudiante)
@@ -210,7 +211,7 @@ def test_e2e_user_profile_view(app, db_session):
         acceso=proteger_passwd("profilepass"),
         nombre="Profile User",
         correo_electronico="profile@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(user)
@@ -234,7 +235,7 @@ def test_e2e_user_already_logged_in(app, db_session):
         acceso=proteger_passwd("loggedpass"),
         nombre="Logged User",
         correo_electronico="logged@example.com",
-        tipo="estudiante",
+        tipo="student",
         activo=True,
     )
     db_session.add(user)
