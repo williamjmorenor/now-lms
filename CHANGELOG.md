@@ -11,8 +11,25 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2.0]
 
+### Added:
+ - Footer customization: Static pages can now be marked to appear in footer via `mostrar_en_footer` field.
+ - Customizable footer links via "Enlaces Útiles" (Useful Links) admin interface.
+
 ### Changed:
  - Refactor course module (no changes to user experience).
+
+**IMPORTANT**: This version includes database schema changes. After updating, you must run database migrations:
+
+```bash
+# Using lmsctl (recommended)
+lmsctl database migrate
+
+# Or enable automatic migrations on startup
+NOW_LMS_AUTO_MIGRATE=1 lmsctl serve
+
+# Or using Flask-Alembic directly
+flask db upgrade
+```
 
 ## [1.1.8] - 2026-01-16
 
