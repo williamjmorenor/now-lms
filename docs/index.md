@@ -8,7 +8,11 @@ mantain} learning management system (LMS).
 Online education can be used as a primary source of knowledge or as a reinforcement method.
 
 !!! info
-NOW LMS version 1.0.0 is the first stable release, ready for production use.
+    NOW LMS version 1.0.0 is the first stable release, ready for production use.
+
+## Feature Comparison
+
+**Evaluating NOW-LMS?** See our comprehensive [Feature Comparison with Teachable and Thinkific](feature-comparison.md) for a technical assessment of NOW-LMS capabilities, viability as a commercial platform alternative, cost analysis, and recommended use cases.
 
 ## First Steps
 
