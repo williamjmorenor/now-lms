@@ -288,8 +288,9 @@
                             {{ _('Únete a nuestra plataforma educativa y comienza tu viaje de aprendizaje hoy mismo.') }}
                         </p>
                         <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            {% if is_contact_enabled() %}
                             <a
-                                href="{{ url_for('user.crear_cuenta') }}"
+                                href="{{ url_for('static_pages.contact') }}"
                                 class="btn btn-lg px-5 py-3"
                                 style="
                                     background: #a3c6e4;
@@ -300,17 +301,16 @@
                                     text-decoration: none;
                                 "
                             >
-                                {{ _('Registrarse Gratis') }}
-                            </a>
-                            {% if is_contact_enabled() %}
-                            <a
-                                href="{{ url_for('static_pages.contact') }}"
-                                class="btn btn-lg btn-outline-dark px-5 py-3"
-                                style="border-radius: 10px; font-weight: 600"
-                            >
                                 {{ _('Contáctanos') }}
                             </a>
                             {% endif %}
+                            <a
+                                href="{{ url_for('user.crear_cuenta') }}"
+                                class="btn btn-lg btn-outline-dark px-5 py-3"
+                                style="border-radius: 10px; font-weight: 600"
+                            >
+                                {{ _('Registrarse Gratis') }}
+                            </a>
                         </div>
                         {% else %}
                         <h3 class="mb-4">{{ _('Bienvenido de vuelta') }}, {{ current_user.nombre }}</h3>
