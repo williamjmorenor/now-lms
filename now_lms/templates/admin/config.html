@@ -725,7 +725,8 @@
                             >
                                 <div class="accordion-body">
                                     <p class="text-muted">
-                                        {{_("Configure la información de contacto del negocio que se mostrará en la página de contacto")}}.
+                                        {{_("Configure la información de contacto del negocio que se mostrará en la página de
+                                        contacto")}}.
                                     </p>
                                     <div class="row mb-3">
                                         <div class="col-sm-12">
@@ -735,7 +736,9 @@
                                             {{ form.contact_address(class="form-control", id="contact_address",
                                             value=config.contact_address, placeholder=_("Calle, ciudad, país")) }} {{
                                             render_field_errors(form.contact_address) }}
-                                            <div class="form-text">{{_("Dirección física del negocio u oficina principal")}}.</div>
+                                            <div class="form-text">
+                                                {{_("Dirección física del negocio u oficina principal")}}.
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
