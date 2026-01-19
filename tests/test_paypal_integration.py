@@ -420,9 +420,7 @@ class TestPaymentConfirmation:
 
         # Verify enrollment created
         enrollment = (
-            db_session.execute(
-                database.select(EstudianteCurso).filter_by(usuario=student.usuario, curso=curso.codigo)
-            )
+            db_session.execute(database.select(EstudianteCurso).filter_by(usuario=student.usuario, curso=curso.codigo))
             .scalars()
             .first()
         )
