@@ -11,11 +11,13 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2.2] - 2026-01-18
 
+### Fixed:
+ - Jinja2 errors in templates related to contac messages.
+
 ### Added:
  - Configuration toggle for Contact page in navbar: Admins can now enable/disable the Contact link in the navigation menu via System Configuration.
  - New `enable_contact` boolean field in `Configuracion` model (defaults to `False` for backward compatibility).
  - Cached helper function `is_contact_enabled()` to check Contact page visibility status.
- - Translation support for Contact configuration option (Spanish, English, Portuguese).
 
 ### Changed:
  - Updated navbar template to conditionally render Contact link based on configuration setting.
