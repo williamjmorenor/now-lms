@@ -31,6 +31,7 @@ With flexible configuration options, role-based access control, support for mult
 
 ## Documentation
 
+-   **Feature Comparison:** [NOW-LMS vs Teachable vs Thinkific](https://bmosoluciones.github.io/now-lms/feature-comparison/) - Technical assessment of NOW-LMS viability
 -   Course Creators, refer to the [course creation doc](https://bmosoluciones.github.io/now-lms/course-creator/).
 -   System Administrators, refer to the [system administration documentation](https://bmosoluciones.github.io/now-lms/setup/).
 -   Contributors, refer to the [development guide](

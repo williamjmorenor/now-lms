@@ -62,6 +62,7 @@ nav:
     - Home:
           - Home: index.md
           - References: references.md
+          - Feature Comparison: feature-comparison.md
     - System Administrator Guide:
           - Setup: setup.md
           - Configuration: setup-conf.md
@@ -89,7 +90,7 @@ nav:
           - Certificates: course-creator/certificate-customization.md
           - Forums and Messaging: course-creator/forum-messaging.md
           - Moderator Management: course-creator/moderator-management.md
-          - Master Classes: master-class-organizer-guide.md
+          - Master Classes: course-creator/master-class-organizer-guide.md
           - Blog: blog.md
     - Development Docs:
           - Contributing: CONTRIBUTING.md
