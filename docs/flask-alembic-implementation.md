@@ -4,16 +4,16 @@ Este documento proporciona un resumen completo de cómo se implementó `flask-al
 
 ## Tabla de Contenidos
 
-1. [Descripción General](#descripción-general)
+1. [Descripción General](#descripcion-general)
 2. [Dependencias y Requisitos](#dependencias-y-requisitos)
 3. [Estructura de Archivos](#estructura-de-archivos)
-4. [Configuración de la Aplicación](#configuración-de-la-aplicación)
+4. [Configuración de la Aplicación](#configuracion-de-la-aplicacion)
 5. [Estructura de las Migraciones](#estructura-de-las-migraciones)
 6. [Comandos CLI](#comandos-cli)
-7. [Automatización de Migraciones](#automatización-de-migraciones)
+7. [Automatización de Migraciones](#automatizacion-de-migraciones)
 8. [Testing](#testing)
-9. [Mejores Prácticas](#mejores-prácticas)
-10. [Guía Paso a Paso para Replicar](#guía-paso-a-paso-para-replicar)
+9. [Mejores Prácticas](#mejores-practicas)
+10. [Guía Paso a Paso para Replicar](#guia-paso-a-paso-para-replicar)
 
 ---
 
