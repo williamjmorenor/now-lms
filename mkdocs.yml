@@ -97,6 +97,10 @@ nav:
           - Database Queries Help: development/query_guide.md
           - Session Scoped Tests Fixtures: development/session_fixtures_guide.md
           - Python Features: development/python-features.md
+          - flask-alembic:
+                - Quick Reference: flask-alembic-quick-reference.md
+                - Full Guide (Español): flask-alembic-implementation.md
+                - Full Guide (English): flask-alembic-implementation-en.md
     - About:
           - About: faq.md
           - Releases: release.md
