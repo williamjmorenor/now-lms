@@ -66,6 +66,42 @@ def get_site_currency() -> str:
             return "USD"
 
 
+def get_pending_payment_for_course(course_code: str) -> Pago | None:
+    """Return the current user's pending payment for a course, if any."""
+    return (
+        database.session.execute(
+            database.select(Pago).filter_by(usuario=current_user.usuario, curso=course_code, estado="pending")
+        )
+        .scalars()
+        .first()
+    )
+
+
+def build_payment_context(curso: Curso, site_currency: str, pending_payment: Pago | None = None) -> dict[str, object]:
+    """Build the template context for the PayPal payment page."""
+    payment_amount = (
+        float(pending_payment.monto) if pending_payment and pending_payment.monto is not None else float(curso.precio)
+    )
+    payment_currency = pending_payment.moneda or site_currency if pending_payment else site_currency
+    payment_description = (
+        pending_payment.descripcion if pending_payment and pending_payment.descripcion else curso.descripcion_corta
+    )
+
+    return {
+        "curso": curso,
+        "site_currency": payment_currency,
+        "payment_amount": payment_amount,
+        "payment_description": payment_description,
+        "pending_payment": pending_payment,
+        "payment_payload": {
+            "courseCode": curso.codigo,
+            "amount": f"{payment_amount:.2f}",
+            "currency": payment_currency,
+            "paymentId": str(pending_payment.id) if pending_payment else "",
+        },
+    }
+
+
 def validate_paypal_configuration(client_id: str, client_secret: str, sandbox: bool = False) -> dict[str, object]:
     """Validate PayPal configuration by attempting to get an access token."""
     try:
@@ -245,20 +281,18 @@ def confirm_payment() -> tuple[FlaskResponse, int]:
             logging.error(f"PayPal payment verification failed for order {order_id}, user {current_user.usuario}: {error_msg}")
             return jsonify({"success": False, "error": f"Payment verification failed: {error_msg}"}), 400
 
+        if verification.get("status") != "COMPLETED":
+            payment_status = verification.get("status") or "UNKNOWN"
+            logging.warning(f"PayPal payment {order_id} for user {current_user.usuario} not completed yet: {payment_status}")
+            return jsonify({"success": False, "error": f"Payment not completed: {payment_status}"}), 400
+
         # Check if payment amount matches expected amount (considering coupons)
         curso = database.session.execute(database.select(Curso).filter_by(codigo=course_code)).scalars().first()
         if not curso:
             logging.warning(f"Course {course_code} not found for payment confirmation by user {current_user.usuario}")
             return jsonify({"success": False, "error": "Course not found"}), 404
 
-        # First check if there's a pending payment record for this user/course with coupon discount applied
-        pending_payment = (
-            database.session.execute(
-                database.select(Pago).filter_by(usuario=current_user.usuario, curso=course_code, estado="pending")
-            )
-            .scalars()
-            .first()
-        )
+        pending_payment = get_pending_payment_for_course(course_code)
 
         # Determine expected amount - either from pending payment (with coupon) or course price
         if pending_payment:
@@ -303,9 +337,9 @@ def confirm_payment() -> tuple[FlaskResponse, int]:
                     ),
                     200,
                 )
-            # Update existing payment
-            existing_payment.estado = "completed"
             pago = existing_payment
+        elif pending_payment:
+            pago = pending_payment
         else:
             # Create new payment record
             pago = Pago()
@@ -314,16 +348,16 @@ def confirm_payment() -> tuple[FlaskResponse, int]:
             pago.nombre = current_user.nombre
             pago.apellido = current_user.apellido
             pago.correo_electronico = current_user.correo_electronico
-            pago.referencia = order_id
 
         # Update payment details
+        pago.referencia = order_id
         pago.monto = verified_amount
-        pago.moneda = currency
+        pago.moneda = verification.get("currency") or currency
         pago.metodo = "paypal"
         pago.estado = "completed"
 
         try:
-            if not existing_payment:
+            if not existing_payment and not pending_payment:
                 database.session.add(pago)
             database.session.flush()
 
@@ -449,10 +483,11 @@ def payment_page(course_code: str) -> str | Response | tuple[FlaskResponse, int]
         flash("Los pagos con PayPal no están habilitados.", "error")
         return redirect(url_for("course.curso", course_code=course_code))
 
-    # Get site currency
+    # Build payment context (uses pending payment amount when a discounted payment already exists)
     site_currency = get_site_currency()
+    pending_payment = get_pending_payment_for_course(course_code)
 
-    return render_template("learning/paypal_payment.html", curso=curso, site_currency=site_currency)
+    return render_template("learning/paypal_payment.html", **build_payment_context(curso, site_currency, pending_payment))
 
 
 @paypal.route("/get_client_id")

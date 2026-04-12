@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Fixed:
+ - Corrected the PayPal checkout flow to reuse pending payments, honor discounted amounts, and reject non-completed PayPal orders.
+ - Updated the PayPal checkout template to render the actual payable amount and safely serialize payment data for JavaScript without breaking special characters.
+
 ## [1.2.3] - 2026-01-19
 
 ### Changed:

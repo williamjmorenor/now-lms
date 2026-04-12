@@ -270,10 +270,11 @@ function loadPayPalSDKWithRetry(clientId, currency, maxRetries = 3) {
 document.addEventListener('DOMContentLoaded', function() {
     const paypalContainer = document.getElementById('paypal-button-container');
     if (paypalContainer) {
-        const courseCode = paypalContainer.dataset.courseCode;
-        const amount = parseFloat(paypalContainer.dataset.amount);
-        const currency = paypalContainer.dataset.currency || 'USD';
-        
+        const configuredPayment = window.paymentConfig || {};
+        const courseCode = configuredPayment.courseCode || '';
+        const amount = parseFloat(configuredPayment.amount || 0);
+        const currency = configuredPayment.currency || 'USD';
+
         if (courseCode && amount && amount > 0) {
             // Wait for PayPal loaded event before initializing buttons
             document.addEventListener('paypal-loaded', function() {

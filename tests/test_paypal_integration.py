@@ -279,6 +279,50 @@ class TestPayPalEndpoints:
         _login(client, "student", "student")
 
         resp = client.get("/paypal_checkout/payment/PAID001", follow_redirects=True)
+        assert resp.status_code in {200, 403}
+
+    def test_payment_page_uses_pending_payment_amount_and_escaped_json(self, app, client, db_session):
+        """Test that the payment page renders pending payment amounts and safely serializes special characters."""
+        student = _crear_estudiante(db_session)
+        curso = Curso(
+            codigo="PAID001",
+            nombre="Curso pago ñ & símbolos",
+            descripcion_corta="Descripción corta con ñ y símbolos <>&",
+            descripcion="Curso con caracteres especiales para PayPal",
+            pagado=True,
+            precio=99.99,
+            portada=False,
+            estado="open",
+        )
+        db_session.add(curso)
+        db_session.commit()
+        _configurar_paypal(db_session, habilitado=True)
+
+        pago = Pago(
+            usuario=student.usuario,
+            curso=curso.codigo,
+            nombre=student.nombre,
+            apellido=student.apellido,
+            correo_electronico=student.correo_electronico,
+            monto=49.99,
+            moneda="EUR",
+            metodo="paypal",
+            estado="pending",
+            descripcion="Cupón aplicado: PROMO-Ñ <Especial>",
+        )
+        db_session.add(pago)
+        db_session.commit()
+
+        _login(client, "student", "student")
+
+        resp = client.get(f"/paypal_checkout/payment/{curso.codigo}")
+        assert resp.status_code == 200
+        page = resp.get_data(as_text=True)
+        assert "49.99 EUR" in page
+        assert "window.paymentConfig =" in page
+        assert '"amount": "49.99"' in page
+        assert "PROMO-Ñ" in page
+        assert "Cupón aplicado: PROMO-Ñ &lt;Especial&gt;" in page
 
     def test_get_client_id_success(self, app, client, db_session):
         """Test successful client ID retrieval."""
@@ -493,6 +537,91 @@ class TestPaymentConfirmation:
         data = resp.get_json()
         assert data["success"] is False
         assert "mismatch" in data["error"].lower()
+
+    @patch("now_lms.vistas.paypal.verify_paypal_payment")
+    @patch("now_lms.vistas.paypal.get_paypal_access_token")
+    def test_confirm_payment_completes_existing_pending_payment(self, mock_get_token, mock_verify, app, client, db_session):
+        """Test that PayPal confirmation updates the original pending payment record."""
+        student = _crear_estudiante(db_session)
+        curso = _crear_curso_pagado(db_session)
+        _configurar_paypal(db_session)
+
+        pending_payment = Pago(
+            usuario=student.usuario,
+            curso=curso.codigo,
+            nombre=student.nombre,
+            apellido=student.apellido,
+            correo_electronico=student.correo_electronico,
+            monto=49.99,
+            moneda="USD",
+            metodo="paypal",
+            estado="pending",
+            descripcion="Cupón aplicado: PROMO10 (Descuento: 50.0)",
+        )
+        db_session.add(pending_payment)
+        db_session.commit()
+
+        _login(client, "student", "student")
+
+        mock_get_token.return_value = "test_access_token"
+        mock_verify.return_value = {
+            "verified": True,
+            "status": "COMPLETED",
+            "amount": "49.99",
+            "currency": "USD",
+            "payer_id": "test_payer_123",
+        }
+
+        payment_data = {
+            "orderID": "test_order_pending",
+            "payerID": "test_payer_123",
+            "courseCode": curso.codigo,
+            "amount": "49.99",
+            "currency": "USD",
+        }
+
+        resp = client.post("/paypal_checkout/confirm_payment", json=payment_data)
+        assert resp.status_code == 200
+
+        db_session.refresh(pending_payment)
+        assert pending_payment.estado == "completed"
+        assert pending_payment.referencia == "test_order_pending"
+
+        pagos = (
+            db_session.execute(database.select(Pago).filter_by(usuario=student.usuario, curso=curso.codigo)).scalars().all()
+        )
+        assert len(pagos) == 1
+
+    @patch("now_lms.vistas.paypal.verify_paypal_payment")
+    @patch("now_lms.vistas.paypal.get_paypal_access_token")
+    def test_confirm_payment_requires_completed_status(self, mock_get_token, mock_verify, app, client, db_session):
+        """Test that only COMPLETED PayPal orders are accepted."""
+        _crear_estudiante(db_session)
+        _crear_curso_pagado(db_session)
+        _configurar_paypal(db_session)
+        _login(client, "student", "student")
+
+        mock_get_token.return_value = "test_access_token"
+        mock_verify.return_value = {
+            "verified": True,
+            "status": "APPROVED",
+            "amount": "99.99",
+            "currency": "USD",
+            "payer_id": "test_payer_123",
+        }
+
+        payment_data = {
+            "orderID": "test_order_approved",
+            "payerID": "test_payer_123",
+            "courseCode": "PAID001",
+            "amount": "99.99",
+            "currency": "USD",
+        }
+
+        resp = client.post("/paypal_checkout/confirm_payment", json=payment_data)
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert "not completed" in data["error"].lower()
 
     @patch("now_lms.vistas.paypal.verify_paypal_payment")
     @patch("now_lms.vistas.paypal.get_paypal_access_token")
